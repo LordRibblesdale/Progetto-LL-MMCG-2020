@@ -10,9 +10,9 @@
 public class Point3D {
 	//ha come parametri soltanto le tre componenti di un 
 	//float in uno spazio a 3 dimensioni
-	private float x;
-	private float y;
-	private float z;
+	public float x;
+	public float y;
+	public float z;
 	
 	//costruttori
 	public Point3D() {
@@ -186,7 +186,7 @@ public class Point3D {
     
 	//radice del vettore in R3 passato come parametro
 	//(fa la radice di ogni componente)
-	public Point3D getSquareCompPoint(Point3D b) {
+	public static Point3D getSquareCompPoint(Point3D b) {
 		Point3D a=new Point3D();
 		a.x=(float) Math.sqrt(b.x);
 		a.y=(float) Math.sqrt(b.y);
@@ -197,7 +197,7 @@ public class Point3D {
     
 	// riflessione di un vettore i rispetto alla normale
 	//n: R=2<N,I>N-I
-	Point3D reflect(Point3D i, Point3D n){
+	static Point3D reflect(Point3D i, Point3D n){
 		return n.multiplyScalar(n.dotProduct(i))
 						.multiplyScalar(2.0f)
 						.subtract(i);
@@ -208,7 +208,7 @@ public class Point3D {
   // in questa funzione la rifrazione non varia con la
   //lunghezza d'onda
 
-  Point3D getRefraction(Point3D direction, Point3D normal, float refractionIndex){
+  static Point3D getRefraction(Point3D direction, Point3D normal, float refractionIndex){
 		// direction definito come "i" nei commenti
 		// normal definito come "n" nei commenti
 
@@ -261,6 +261,15 @@ public class Point3D {
 							.subtract(direction.multiplyScalar(eta));
   	}
   }
+
+  public static Point3D exponent(Point3D point) {
+		//TODO check here
+		return new Point3D(
+						(float) Math.exp(point.getX()),
+						(float) Math.exp(point.getY()),
+						(float) Math.exp(point.getZ())
+		);
+	}
 
   // rifrazione di un vettore i rispetto ad una normale
   //n: T=N(ior<N,I>-sqrt(1-(ior)^2(1-(<N,I>)^2)))-ior*I

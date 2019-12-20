@@ -21,8 +21,47 @@ public class Sphere {
 		rad=nrad;
 		p=np;
 	}
-		
-	//funzione di intersezione con un raggio: Return 
+
+  //metodo che imposta, a seconda della scelta
+  //effettuata dall'utente, la posizione
+  //appropriata alle prime tre sfere
+  //Prende come parametro l'indice dell'array
+  //spheres di cui si deve settare la posizione
+  static Point3D setSpheresPosition(int index) {
+    Point3D ret;
+    if(Main.aligned) {
+      switch(index) {
+        case 0:
+          ret=new Point3D(-1.0f,0.0f,0.0f);
+          break;
+        case 1:
+          ret=new Point3D(-5.0f,0.3f,0.8f);
+          break;
+        case 2:
+          ret=new Point3D(3.5f,0.5f,3.3f);
+          break;
+        default:
+          ret=new Point3D(0.0f);
+      }
+    } else {
+      switch(index) {
+        case 0:
+          ret=new Point3D(-4.0f,0.0f,0.0f);
+          break;
+        case 1:
+          ret=new Point3D(-7.0f,0.0f,0.0f);
+          break;
+        case 2:
+          ret=new Point3D(-4.0f,0.0f,5.3f);
+          break;
+        default: ret=new Point3D(0.0f);
+      }
+    }
+
+    return ret;
+  }
+
+  //funzione di intersezione con un raggio: Return
 	//distanza o -1.0f se non c'e' intersezione
 	float intersect(Ray r){
 		//sostituendo il raggio o+td all'equazione della 

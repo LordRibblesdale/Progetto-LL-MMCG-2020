@@ -1,5 +1,5 @@
 //classe che definisce una fotocamera e i suoi parametri
-class camera {
+class Camera {
 
 	// Posizione della fotocamera
 	public Point3D eye;
@@ -24,7 +24,7 @@ class camera {
 	//costruttore di default imposta la fotocamera 
 	//nell'origine che guarda l'origine con distanza 
 	//focale 35 
-	public camera() {
+	public Camera() {
 
 		eye = new Point3D();
 		lookAt= new Point3D();
@@ -43,9 +43,9 @@ class camera {
 	//per essere poi calcolato basandosi sulla posizione
 	//della fotocamera eye (come centro) e sulla 
 	//direzione in cui si guarda lookAt (come assi)
-	public camera(Point3D neye, Point3D nlookAt,
-                Point3D nup, int nwidth, int nheight,
-                float nd) {
+	public Camera(Point3D neye, Point3D nlookAt,
+								Point3D nup, int nwidth, int nheight,
+								float nd) {
 		eye=neye;
 		lookAt=nlookAt;
 		up=nup;
@@ -80,9 +80,4 @@ class camera {
 		//direzione dello sguardo) 
 		V=U.crossProduct(W);
 	}
-
-	public static void main(String[] args) {
-
-	}
-
 }

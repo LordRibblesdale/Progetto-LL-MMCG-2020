@@ -1,8 +1,4 @@
-//questa classe "di appoggio" contiene alcune variabili 
-//utilizzate nel main (da non modificare) e alcune funzioni 
-//matematiche
 public class Utilities {
-
 	//DEFINIZIONE DI VARIABILI
 	
 	static final float EPSILON = 1.e-2f;
@@ -20,7 +16,99 @@ public class Utilities {
 	//massima ricorsivita' del ray tracing
 	static int MAX_DEPTH_CAUSTIC=100;
 
-	//DEFINIZIONE DI FUNZIONI MATEMATICHE
+  //Intersezione con i box della ripartizione spaziale.
+  //Controllando in modo ricorsivo, cerso l'intersezione
+  //piu' vicina nei 2 figli di ogni box che stiamo
+  //considerando, fino a trovare il punto di intersezione
+  //b: box da intersecare con il raggio,
+  //r: raggio considerato
+  static boolean intersectBSP(Box b,Ray r){
+      if(b.intersect(r)) {  //controllo che i figli non siano nulli (ovvero che abbia figli)
+        if((b.leaf1 != null) && (b.leaf2 != null)) { //se non e' nullo ricomincia con i figli
+          intersectBSP(b.leaf1,r);
+          intersectBSP(b.leaf2,r);
+        } else { //altrimenti se non ha figli:
+          //vengono salvati nell'array objects tutti
+          //gli oggetti contenuti nel box che stiamo
+          //considerando
+          Obj[] objects= b.objects;
+          //salviamo nella variabile nO il numero di
+          //oggetti contenuti nel box che stiamo
+          //considerando
+          int nO= b.nObj;
+          //inizializziamo il punto di intersezione
+          //con il raggio
+          float d=0;
+
+          for(int i=0; i<nO; i++) {  //per ogni oggetto
+             //nell'if si richiama il metodo intersect()
+              //dell'oggetto in questione: ricordiamo che
+              //questo metodo restituisce il valore della
+              //distanza o -1.0f se non c'e' intersezione,
+              //quindi nella prima condizione dell'if
+              //controlliamo che effetticamente ci sia un'
+              //intersezione e assegnamo questo valore a d.
+              //nella seconda condizione controlliamo pero'
+              //che questo valore di d appena calcolato
+              //sia < del valore gia' memorizzato nella
+              //variabile inters (dal momento che dobbiamo
+              //salvare l'intersezione piu' vicina)
+            if((d=objects[i].intersect(r))>=0.0f && d< Main.inters) {
+              //salviamo quindi il valore di d nella
+              //variabile globale inters
+              Main.inters=d;
+              //e salviamo l'oggetto intersecato nella
+              //variabile globale intersObj
+              Main.intersObj=objects[i];
+             }
+          }
+        }
+      } else {  //altrimenti se non si interseca il  box
+        return false;
+      }
+
+      //dobbiamo anche controllare che il valore inters sia
+      //rimasto minore della distanza massima del raggio inf
+    //altrimenti l'intersezione e' troppo lontana quindi
+    //non la consideriamo
+    return Main.inters < Main.inf;
+  }
+
+  //metodo che serve a calcolare l'intersezione tra un
+  //oggetto e un raggio, che richiama la funzione
+  //inersectBSP
+  static boolean intersect(Ray r, Obj oi) {
+    if((oi)==null) {
+        //se l'oggetto e' nullo si richiama semplicemente
+        //il metodo intersectBSP
+        return intersectBSP(Main.bound,r);
+    } else {
+      //se l'oggetto non e' nullo, si salva in un'altra
+      //variabile o1 e poi si rende nullo, per poter
+      //richiamare il metodo intersectBSP
+      Obj o1=oi;
+      oi=null;
+
+      if(intersectBSP(Main.bound,r)) {
+        oi = Main.intersObj;
+
+        return (o1) == (oi);
+      } else {
+        return false;
+      }
+    }
+  }
+
+  //metodo che genera randomicamente un valore in [0,1]
+  //utilizzando x come seme
+  static float generateRandom(int x) {
+    double a = Math.floor(Math.random() * (x+1));
+    return (float)(a/x);  //normalizzazione per riportare il valore in [0,1]
+  }
+
+
+
+  //DEFINIZIONE DI FUNZIONI MATEMATICHE
 	
 	//funzione da gradi a radianti
 	public float degreesToRadiants(float deg) {
