@@ -106,10 +106,4 @@ public class Sphere {
         //vettore dal centro all'intersezione normalizzato
         return (iP.subtract(p)).getNormalizedPoint();
     }
-    
-    
-	public static void main(String[] args) {
-		
-	}
-
 }

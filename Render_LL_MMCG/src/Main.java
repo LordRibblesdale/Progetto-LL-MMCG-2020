@@ -488,10 +488,6 @@ public static void main(String[] args) {
 
   	  	tf.setText("Creazione immagine in corso");
 
-  	  	//jacob=true;
-  	  	//Fg=true;
-  	  	//glass=true;
-  	  	//capire perche se li lascio funziona e se li tolgo fa tutto nero (non ha senso)
   	  	int mIS=setMatIdSphere();
   	  	for(int sph=0; sph<nSphere; sph++)
   	  		matIdSphere[sph]=mIS;
@@ -579,10 +575,8 @@ public static void main(String[] args) {
   	  //metodi getBoundMin e getBoundMax.
   	  oldMax=max;
   	  oldMin=min;
-  	  max=Obj.getBoundMax(m[nMesh].objects,oldMax,m[nMesh].
-  	  		nObj);
-  	  min=Obj.getBoundMin(m[nMesh].objects,oldMin,m[nMesh].
-  	  		nObj);
+  	  max=Obj.getBoundMax(m[nMesh].objects,oldMax,m[nMesh].nObj);
+  	  min=Obj.getBoundMin(m[nMesh].objects,oldMin,m[nMesh].nObj);
 
   	  //numero di oggetti nella scena
   	  int nO=0;
@@ -737,14 +731,13 @@ public static void main(String[] args) {
 		matrix +="P3\n" + w + "\n" + h + "\n255\n";
 
   	  //per tutte le righe
-		for(int y = 0; y <= h; y++)
-		{
+			for(int y = 0; y <= h; y++)
+			{
 
 		  //stampiamo la percentuale di completamento per
 		  //monitorare l'avanzamento del rendering
 		  double percentY = ((float)y / (float)h) * 100;
-		  System.out.println("percentuale di completamento "
-		  		+ "radianza:	 "+percentY);
+		  System.out.println("percentuale di completamento " + "radianza:	 "+percentY);
 
 		  //per tutte le colonne
   	    for(int x = 0; x <= w; x++)
@@ -755,7 +748,6 @@ public static void main(String[] args) {
 
 			// Loop per ogni campione
 			for (int s = 0; s < samps; s++) {
-
 				//inizializiamo un raggio per la camera
 				Ray cameraRay;
 

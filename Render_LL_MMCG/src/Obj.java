@@ -264,10 +264,4 @@ public class Obj {
         }
 		return min;
     }
-    
-    public static void main(String[] args) {
-
-	}
-	  
-
 }

@@ -122,10 +122,4 @@ public class Triangle {
     Point3D normal(){
         return n;
     }
-    
-		
-	public static void main(String[] args) {
-		 
-	}
-		
 }

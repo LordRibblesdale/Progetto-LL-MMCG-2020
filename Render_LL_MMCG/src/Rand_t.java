@@ -5,7 +5,8 @@
 //sempre e solo RND
 public class Rand_t {
 
-	public char type; 
+	public char type;
+
 	public Rand_t() {
 		//Nel progetto di Forti puo' essere r per RND, 
 		//l per LCG, s per SOB (in questo progetto si 
@@ -47,7 +48,7 @@ public class Rand_t {
 	            //in questo modo quelli lontani dal centro 
 				//tenderanno a restare lontani , difatti i 
 				//problemi sorgono all'avvicinarsi dei 
-				//punti alle rette a 45° poiche' la loro
+				//punti alle rette a 45ï¿½ poiche' la loro
 	            //posizione viene variata di molto 
 				//(compressa) infatti passiamo da 
 				//r^2= a^2+b^2 a r^2= a^2
@@ -111,10 +112,4 @@ public class Rand_t {
 		double a=Math.floor(Math.random() * (x-0+1)) + 0;
 		return (float)(a/x);
 	}
-		
-
-	public static void main(String[] args) {
-		
-	}
-
 }

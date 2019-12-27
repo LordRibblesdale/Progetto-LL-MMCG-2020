@@ -911,8 +911,7 @@ return radianceRefl.add(radianceRefr);
   //conservare i valori aggiornati delle potenze dei vari
   //oggetti
   void jacobiStoc(int nObj) {
-    ArrayList<ParallelProcessJacobi> parallelisation = null;
-    //TODO parallelizzare i calcoli su R, G, B, poichè Jacobi è un processo iterativo
+    ArrayList<ParallelProcessRadiance> parallelisation = null;
     //TODO controllare probabili ottimizzazioni
 
     //definizco la potenza residua totale delle patch:
@@ -943,42 +942,40 @@ return radianceRefl.add(radianceRefr);
     //Vengono caricati i valori iniziali di Luminosita'
     //Emessa per ogni patch della scena (Pe)
     for(int i=0;i<nObj;i++) {
+      //viene caricata l'area dell'oggetto i-esimo
+      float area= Main.GlobalObjects[i].areaObj;
+      //se l'area e' piu' piccola della precisione di
+      //calcolo allora impostiamo l'area a 0
+      if(area<Utilities.EPSILON) {area=0;}
 
-    //viene caricata l'area dell'oggetto i-esimo
-    float area= Main.GlobalObjects[i].areaObj;
-    //se l'area e' piu' piccola della precisione di
-    //calcolo allora impostiamo l'area a 0
-    if(area<Utilities.EPSILON) {area=0;}
+      //potenza della luce
+      //Potenza emessa dalla patch i:
+      //(potenza emessa)*(pi greco)*(area)
+      Point3D LP= Main.material[Main.GlobalObjects[i].matId].emittedLight.
+                      multiplyScalar(Utilities.MATH_PI).
+                      multiplyScalar(area);
 
-    //potenza della luce
-    //Potenza emessa dalla patch i:
-    //(potenza emessa)*(pi greco)*(area)
-    Point3D LP= Main.material[Main.GlobalObjects[i].matId].emittedLight.
-                    multiplyScalar(Utilities.MATH_PI).
-                    multiplyScalar(area);
+      //viene calcolata la potenza totale iniziale:
+      //(potenza residua della patch)+
+      //+(potenza emessa dalla patch)
+      Prtot=Prtot.add(LP);
 
-    //viene calcolata la potenza totale iniziale:
-    //(potenza residua della patch)+
-    //+(potenza emessa dalla patch)
-    Prtot=Prtot.add(LP);
+      //viene salvata nell'array P la potenza dell'
+      //elemento i
+      P[i].copy(LP);
 
-    //viene salvata nell'array P la potenza dell'
-    //elemento i
-    P[i].copy(LP);
+      //viene salvata nell'array Pr la potenza residua
+      //dell'elemento i
+      Pr[i].copy(LP);
 
-    //viene salvata nell'array Pr la potenza residua
-    //dell'elemento i
-    Pr[i].copy(LP);
-
-    //viene calcolato l'errore di approssimazione
-    //(con cui e' possibile fermare il metodo)
-    Main.err=(float) (Main.err+Math.pow(LP.average(),2));
-
+      //viene calcolato l'errore di approssimazione
+      //(con cui e' possibile fermare il metodo)
+      Main.err=(float) (Main.err+Math.pow(LP.average(),2));
     }//fine for
 
     //dopo aver aggiunto dei quadrati dobbiamo fare la
     //radice del risultato finale
-    Main.err=(float) Math.sqrt(Main.err);
+    Main.err= (float) Math.sqrt(Main.err);
 
     //iterazioni del metodo di Jacobi:
     //Si continuano le iterazioni finche' l'energia
@@ -991,52 +988,6 @@ return radianceRefl.add(radianceRefr);
     Main.steps = 0;
 
     while ((Main.err > Main.maxerr) && (Main.steps < Main.maxsteps)) {
-      /*
-      if (parallelisation == null) {
-        parallelisation = new ArrayList<>();
-
-        for (int c = 0; c < Runtime.getRuntime().availableProcessors(); c++) {
-          parallelisation.add(new ParallelProcessJacobi(Prtot, nObj, Pr, P, objX));
-        }
-      }
-
-      for (int l = 0; l < parallelisation.size(); l++) {
-        if (!parallelisation.get(l).getStatus()) {
-          try {
-            synchronized (Renderer.this) {
-              parallelisation.get(l).interrupt();
-
-              Prtot=new Point3D(0);
-
-              for(int i=0;i<nObj;i++) {
-                //aggiornamento delle Potenze (vengono aggiunte le potenze residue totali immagazzinate dalle patch durante
-                //il processo)
-                P[i]=P[i].add(Main.GlobalObjects[i].P);
-                Pr[i].copy(Main.GlobalObjects[i].P);  //aggiornamento delle potenze residue totali
-                Main.err=(float) (Main.err+Math.pow(Pr[i].average(),2));  //calcolo dell'errore
-                Prtot=Prtot.add(Pr[i]); //calcolo dell'energia residua totale
-                Main.GlobalObjects[i].P.copy(new Point3D());  //azzeramento della potenza residua parziale contenuta nella patch
-              }
-
-              //nel for abbiamo elevato al quadrato le
-              //componenti aggiunte all'errore, ora ne
-              //facciamo la radice
-              Main.err=(float) Math.sqrt(Main.err);
-
-              parallelisation.set(l, new ParallelProcessJacobi(Prtot, nObj, Pr, P, objX));
-
-              Main.steps++;
-
-              parallelisation.get(l).start();
-            }
-          } catch (IllegalThreadStateException e) {
-
-          }
-        }
-      }
-
-       */
-
       //percentuale di completamento
       System.out.println("completamento jacobi "+(Main.steps/(float) Main.maxsteps)*100);
       //viene inizializzato un seme iniziale casuale
@@ -1346,6 +1297,8 @@ return radianceRefl.add(radianceRefr);
         Prtot=Prtot.add(Pr[i]); //calcolo dell'energia residua totale
         Main.GlobalObjects[i].P.copy(new Point3D());  //azzeramento della potenza residua parziale contenuta nella patch
       }
+
+      Main.steps++;
     }
 
     //I valori ottenuti vengono salvati su ciascuna

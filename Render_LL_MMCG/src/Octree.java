@@ -274,55 +274,5 @@ public class Octree {
                 }
             }
         }
-        
     }
-    
-public static void main(String[] args) {
-    	
-        /*
-	Octree b=new Octree(new float3(-1.0f), new float3(1.0f));
-	float3 v0=new float3(1.0f,0.0f,0.0f);
-	float3 v1=new float3(0.0f,1.0f,0.0f);
-	float3 v2= new float3(0.0f,0.0f,1.0f);
-	Triangle t=new Triangle(v0, v1,v2);
-	Obj oT=new Obj(t, 2);
-	Sphere s=new Sphere(0.5f, new float3(0.0f,0.0f, 0.0f));
-	//float3 ip=new float3(5.0f,0.0f,0.0f);
-	Obj oS=new Obj(s, 2);
-	Obj[] obb= {oT,oS};
-	b.setObjects(obb, 2);
-	
-	float3 min= b.V[0];
-    float3 max=b.V[1];
-    float3 c= b.center;
-    b.leaf=new Octree[8];
-    
-    //il box viene diviso in otto parti
-    b.leaf[0]= new Octree(min,c);
-    b.leaf[1]= new Octree(new float3(min.x,min.y,c.z),new float3(c.x,c.y,max.z));
-    b.leaf[2]= new Octree(new float3(min.x,c.y,min.z),new float3(c.x,max.y,c.z));
-    b.leaf[3]= new Octree(new float3(min.x,c.y,c.z),new float3(c.x,max.y,max.z));
-    b.leaf[4]= new Octree(new float3(c.x,min.y,min.z),new float3(max.x,c.y,c.z));
-    b.leaf[5]= new Octree(new float3(c.x,min.y,c.z),new float3(max.x,c.y,max.z));
-    b.leaf[6]= new Octree(new float3(c.x,c.y,min.z),new float3(max.x,max.y,c.z));
-    b.leaf[7]= new Octree(c,max);
-    
-    
-    
-		//Octree b=new Octree(new float3(-1.0f), new float3(1.0f));
-		Ray rag=new Ray(new float3(0.0f,0.0f,0.0f),new float3(1.0f,1.1f,0.0f));
-		
-		
-		
-	    b.setLeafObj();
-		
-		if(b.intersect(rag))
-				System.out.println("il raggio interseca");
-		else
-			System.out.println("il raggio non interseca");
-		//System.out.println("max: "+ma.x+" y: "+ma.y+" z: "+ma.z);
-		//System.out.println("x: "+mi);*/
-
-	}
-
 }
