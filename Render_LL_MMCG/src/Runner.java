@@ -25,7 +25,7 @@ public class Runner {
       }
     }
 
-    while (y < Main.w*Main.h){
+    while (y < RenderAction.w*RenderAction.h){
       for (int i = 0; i < parallelisation.size(); i++) {
         if (!parallelisation.get(i).getStatus()) {
           y++;

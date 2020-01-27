@@ -29,7 +29,7 @@ public class Sphere {
   //spheres di cui si deve settare la posizione
   static Point3D setSpheresPosition(int index) {
     Point3D ret;
-    if(Main.aligned) {
+    if(RenderAction.aligned) {
       switch(index) {
         case 0:
           ret=new Point3D(-1.0f,0.0f,0.0f);

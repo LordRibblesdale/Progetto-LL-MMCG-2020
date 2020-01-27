@@ -32,11 +32,11 @@ public class Material {
 	
 	//slope: coefficente di rogusita' della superficie: 
 	//scarto quadratico medio della pendenza delle 
-	//microsfaccettature. Se m e' piccolo allora
+	//microsfaccettature. Se meshes e' piccolo allora
 	//l'inclinazione delle microsfaccettature varia poco 
 	//rispetto alla normale della superficie e quindi la 
 	//riflessione e' molto a fuoco sulla direzione 
-	//speculare. Se m e' grande l'inclinazione e' elevata 
+	//speculare. Se meshes e' grande l'inclinazione e' elevata
 	//e la superficie e' ruvida
 	public static float slope=0;
 	    

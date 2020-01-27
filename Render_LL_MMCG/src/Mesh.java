@@ -18,21 +18,30 @@ public class Mesh {
   String nome;
   
   //array di puntatori ad oggetti
-  public Obj[] objects;
-  
-  //numero di oggetti presenti nella mesh
-  public int nObj=0;
-  
-  
+  public ArrayList<Obj> objects;
+
+  int[] matIdRoom = {	//vettore per gli indici dei materiali delle pareti della stanza
+      3, //sinistra
+      4, //inferiore
+      13, //posteriore
+      3, //destra
+      4, //superiore
+      4  //frontale
+  };
+
+  Mesh(int nSpheres, Sphere[] spheres, int[] matIdSphere) {
+    loadSphere(nSpheres, spheres, matIdSphere);
+  }
+
+  Mesh(Point3D max, Point3D min) {
+    createScene(max, min);
+  }
+
   // costruttore Mesh
-  public Mesh(String n, Obj[] o,int nO){
+  Mesh(RenderAction renderAction, String n, ArrayList<Obj> o){
     nome= n;
     //array di oggetti contenuti nella mesh 
     objects=o;
-    if(objects.length!=nO)
-      nO=objects.length;
-    //numero di oggetti
-    nObj=nO;
   }
 
   //si crea la stanza con grandezza dipendente da max e min
@@ -41,8 +50,7 @@ public class Mesh {
   //parete) di un materiale scelto tra quelli presenti
   //nell'array dei materiali, una luce nel nostro caso
   //collocata sul soffitto
-  static Mesh createScene(Point3D max, Point3D min){
-  
+  void createScene(Point3D max, Point3D min){
     //uso le variabili maxx e minn che hanno i valori di 
     //max e min per non aggiornarli dopo l'utilizzo del 
     //metodo
@@ -51,8 +59,8 @@ public class Mesh {
     Point3D minn=new Point3D();
     minn.copy(min);
     
-    float maxhroom=maxx.y+ Main.hroom;
-    maxx.y=max.y;
+    float maxhroom = maxx.y + RenderAction.hroom;
+    maxx.y = max.y;
     
     //definisco un array per gli 8 vertici della stanza
     //a max y aggiungo sempre hroom 
@@ -84,7 +92,7 @@ public class Mesh {
     //parallela al soffitto (perche' frontL=false)
     ArrayList<Triangle> Troom=new ArrayList<Triangle>();
     //array per gli oggetti che compongono la stanza
-    Obj[] Oroom=new Obj[12];
+    objects = new ArrayList<>(12);
     
     //inseriamo la luce
     //c e' la posizione centrale della stanza
@@ -130,7 +138,7 @@ public class Mesh {
     Point3D Lv6=new Point3D();
     Lv6.copy(Lv[6]);
   
-    if(!Main.frontL){
+    if(!RenderAction.frontL){
       //definisco i vertici dei triagoli della stanza, 
       //traslandoli sulla y del valore 
       //Utilities.EPS=0.01f per evitare di avere 
@@ -155,8 +163,8 @@ public class Mesh {
   
     //dilatazione delle pareti
     for(int i=0; i<8; i++) {
-      v[i].x=v[i].x+(v[i].x-c.x)* Main.scaleX;
-      v[i].z=v[i].z+(v[i].z-c.z)*(Main.scaleZ);
+      v[i].x=v[i].x+(v[i].x-c.x)* RenderAction.scaleX;
+      v[i].z=v[i].z+(v[i].z-c.z)*(RenderAction.scaleZ);
     }
   
     //si creano e si aggiungono i triangoli per le 
@@ -188,48 +196,47 @@ public class Mesh {
     Troom.add(11,Tr11);
   
     //imposto i materiali della stanza
-    Oroom[0]=new Obj(Troom.get(0), Main.matIdL);
-    Oroom[1]=new Obj(Troom.get(1), Main.matIdL);
-    Oroom[2]=new Obj(Troom.get(2), Main.matIdRoom[0]);
-    Oroom[3]=new Obj(Troom.get(3), Main.matIdRoom[0]);
-    Oroom[4]=new Obj(Troom.get(4), Main.matIdRoom[1]);
-    Oroom[5]=new Obj(Troom.get(5), Main.matIdRoom[1]);
-    Oroom[6]=new Obj(Troom.get(6), Main.matIdRoom[2]);
-    Oroom[7]=new Obj(Troom.get(7), Main.matIdRoom[2]);
-    Oroom[8]=new Obj(Troom.get(8), Main.matIdRoom[3]);
-    Oroom[9]=new Obj(Troom.get(9), Main.matIdRoom[3]);
-    Oroom[10]=new Obj(Troom.get(10), Main.matIdRoom[4]);
-    Oroom[11]=new Obj(Troom.get(11), Main.matIdRoom[4]);
-  
-    String str="room";
+    objects.add(new Obj(Troom.get(0), RenderAction.matIdL));
+    objects.add(new Obj(Troom.get(1), RenderAction.matIdL));
+    objects.add(new Obj(Troom.get(2), matIdRoom[0]));
+    objects.add(new Obj(Troom.get(3), matIdRoom[0]));
+    objects.add(new Obj(Troom.get(4), matIdRoom[1]));
+    objects.add(new Obj(Troom.get(5), matIdRoom[1]));
+    objects.add(new Obj(Troom.get(6), matIdRoom[2]));
+    objects.add(new Obj(Troom.get(7), matIdRoom[2]));
+    objects.add(new Obj(Troom.get(8), matIdRoom[3]));
+    objects.add(new Obj(Troom.get(9), matIdRoom[3]));
+    objects.add(new Obj(Troom.get(10), matIdRoom[4]));
+    objects.add(new Obj(Troom.get(11), matIdRoom[4]));
+
+    nome ="room";
     //viene resituita una mesh che contiene i triangoli 
     //che costituiscono la stanza e la luce
-    return new Mesh(str,Oroom,12);
+
   }
 
-  static Mesh loadSphere(int n) {
+  void loadSphere(int n, Sphere[] spheres, int[] matIdSphere) {
     //crea una mesh costituita da n sfere
     //creo un array di Obj di n elementi
-      Obj[] oSphere= new Obj[n];
+      objects = new ArrayList<>(n);
 
       //per ogni elemento creo un oggetto che ha l'elemento
       //i-esimo dell'array di Sphere[] spheres e l'elemento
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
-      for(int i=0; i<n; i++){
-          oSphere[i]=new Obj(Main.spheres[i], Main.matIdSphere[i]);
+      for(int i=0; i < n; i++){
+          objects.add(new Obj(spheres[i], matIdSphere[i]));
       }
-      String str= "sfere";
+      nome = "sfere";
       //viene restituita una mesh delle sfere create
-      return new Mesh(str,oSphere,n);
   }
 
   //metodo per impostare il materiale degli oggetti 
   //presenti nella mesh
   
   void setMaterial(int m){
-    for(int i=0; i<nObj;i++){
-      objects[i].setMaterial(m);
+    for(int i=0; i< objects.size(); i++){
+      objects.get(i).setMaterial(m);
     }
   }
     
@@ -240,45 +247,38 @@ public class Mesh {
   //questo metodo
   void splitMeshes(){
     //nuovo array dei triangoli
-    Obj[] objects2 =new Obj[nObj*2];
-    int n=0;
-
-    for(int i=0; i<nObj; i++){
+    ArrayList<Obj> objects2 = new ArrayList<>(objects.size()*2);
+    for (Obj object : objects) {
       //valido solamente su triangoli
-      if(objects[i].t!=null){
+      if (object.t != null) {
         //carico i vertici del triangolo
-        Point3D[] v=objects[i].t.vertices;
+        Point3D[] v = object.t.vertices;
         //creo i lati del triangolo
-        Point3D l[]={ v[2].subtract(v[0]),
-                v[0].subtract(v[1]),v[1].
-                subtract(v[2])};
+        Point3D l[] = {v[2].subtract(v[0]),
+            v[0].subtract(v[1]), v[1].
+            subtract(v[2])};
         //cerco il lato piu' lungo del triangolo
-        int pos=0;
-        if(l[1].normalize()>l[pos].normalize())pos=1;
-        if(l[2].normalize()>l[pos].normalize())pos=2;
+        int pos = 0;
+        if (l[1].normalize() > l[pos].normalize()) pos = 1;
+        if (l[2].normalize() > l[pos].normalize()) pos = 2;
 
         //cerco il punto a meta' del lato piu'
         //lungo del triangolo
-        float val=(float) (l[pos].normalize()*0.5);
+        float val = (float) (l[pos].normalize() * 0.5);
         //normalizzo il lato piu' lungo
         l[pos].getNormalizedPoint();
         //carico i nuovi vertici del triangolo
-        Point3D nv[]={v[(pos+1)%3],v[(pos+2)%3],
-                v[pos],l[pos].multiplyScalar(val).
-                add(v[pos])};
+        Point3D[] nv = {v[(pos + 1) % 3], v[(pos + 2) % 3],
+            v[pos], l[pos].multiplyScalar(val).
+            add(v[pos])};
         //creo i nuovi due triangoli
-        objects2[n]=new Obj(new Triangle(nv[0],
-                nv[1],nv[3]),objects[i].matId);
-        n++;
-        objects2[n]=new Obj(new Triangle(nv[0],
-                nv[3],nv[2]),objects[i].matId);
-        n++;
+        objects2.add(new Obj(new Triangle(nv[0], nv[1], nv[3]), object.matId));
+        objects2.add(new Obj(new Triangle(nv[0], nv[3], nv[2]), object.matId));
       }
-
     }
+
     //aggiorno l'array degli oggetti e il numero di
     //oggetti della mesh
     objects= objects2;
-    nObj=nObj*2;
   }
 }

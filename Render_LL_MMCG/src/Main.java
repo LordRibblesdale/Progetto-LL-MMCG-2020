@@ -19,7 +19,7 @@ import java.awt.event.ActionListener;
 //Ci sono due scelte per la visualizzare dell'immagine 
 //finale: una di radiosita' pura ed una di radiosita' 
 //seguita da illuminazione riflessa indiretta 
-//(impostando true il parametro Fg) che permette di
+//(impostando true il parametro doFinalGathering) che permette di
 //ottenere un'immagine fotorealistica
 //Si puo' scegliere se visualizzare sfere
 //di vetro o di giada impostando true o false 
@@ -36,303 +36,54 @@ import java.awt.event.ActionListener;
 //comunque apportare le volute modifiche sui 
 //materiali, sulla posizione delle sfere, etc.
 public class Main implements StandardMaterial {
-	//metodo: scegliere una delle due flag per
-	//visualizzare il rendering con il metodo di Jacobi
-	//stocastico (jacob) o con il final gathering(Fg)
-	static boolean jacob=true;
-	static boolean Fg=false;
-	//translucentJade=true se si vuole una
-	//visualizzazione con BSSRDF
-	static boolean translucentJade=false;
-	//diffusiveJade=true se vogliamo una giada
-	//"diffusiva"
-	static boolean diffusiveJade=false;
-	static boolean glass=false;
-	static boolean aligned=false;
-
-	//nome del file in cui si andra' a salvare l'immagine
-	//di output
-	private final static String filename = "image.ppm";
-	//stringa contenente le informazioni da scrivere nel
-	//file immagine image.ppm
-	private static String matrix="";
-
-	//commentare una delle due seguenti grandezze in
-	//base alle esigenze di risoluzione dell'output
-
-	static int w=1080;	//larghezza dell'immagine
-
-	static int h=720;	//altezza dell'immagine
-
-
-	static float distfilm=700.0f;	//distanza dal centro della fotocamera al viewplane
-	static float ap=0;	//apertura diaframma della fotocamera
-
-	//parametri della fotocamera con sistema di riferimento centrato nella scena:
-	//absolutePos e' vero se stiamo guardando proprio al centro della scena
-	static boolean absolutePos=false;
-
-	//punto in cui e' posizionata la fotocamera rispetto al
-	//centro della scena (0,0,0)
-	static Point3D eye=new Point3D(0.0f,2.0f,12.0f);
-
-	//punto guardato rispetto al centro della scena (0,0,0)
-	//inizialmente coincide  con il centro ma poiche'
-	//absolutePos=false lo cambieremo in seguito
-	static Point3D lookat=new Point3D(0.0f);
-
-	//punto messo a fuoco rispetto al centro della scena
-	//(0,0,0): inizialmente coincide  con il centro ma lo
-	//cambieremo in seguito
-	static Point3D focusPoint=new Point3D(0.0f);
-
-	//campioni del pixel: numero di campioni per ogni pixels.
-	//Si tratta dei punti nei pixel attraverso cui faremo
-	//passare raggi
-	static int samps=30;
-
-	//campioni (numero di raggi) per l'illuminazione indiretta
-	//(ricorsivo in global illumination, non ricorsivo in
-	//final gathering)
-	static int aosamps=1;
-
-	static int dirsamps=1;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
-
-	static int refSample=100;	//campioni scelti per le riflessioni e le rifrazioni
-
-	static int Jacobisamps=150000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
-
-	static int steps;	//numero di step raggiunti dal processo Jacobi Stocastico
-
-	static float err;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
-
-	//variabile globale in cui verranno salvati gli oggetti
-	//della scena (in modo da poter essere aggionati nei
-	//metodi richiamati)
-	static Obj[] GlobalObjects;
-
-	//variabile globale, utilizzata nel metodo intersect(),
-	//in cui viene salvato l'oggetto intersecato da un
-	//raggio considerato
-	static Obj intersObj;
-
-	static int maxsteps=15;	//step massimi per le iterazioni di Jacobi Stocastico
-	static float maxerr=0.001f;	//errore massimo nel processo di Jacobi Stocastico
-	static int sceneDepth= 0;	//densita' triangoli nella stanza
-	static int depth=14;	//profondita' dell'octree
-
-	//soglia dei triangoli dentro ad un box se ce ne sono di
-	//meno si ferma la partizione; si puo' regolare in base
-	//al numero totale dei triangoli della scena
-	static int sogliaBox=4;
-
-	//nRay indica il numero di rimbalzi all'interno della
-	//scena; e' una variabile globale in modo da potersi
-	//aggiornare all'interno del metodo radiance()
-	static int nRay;
-
-	//peso che gestisce la distanza delle pareti dall'oggetto:
-	//1 se distanza = diametro oggetto
-	static float scaleX=1.5f;
-	static float scaleZ=1.5f;
-
-	//se true si vede solo il muro frontale. Se si cambia in
-	//true, decommentare le parti in createScene()
-	static boolean frontWall=false;
-
-	static float hroom=1.2f;	//altezza da aggiungere alla stanza
-
-	//parametri luce:
-
-	//grandezza della luce ( se lightsize=1 e dilata=0 e'
-	//grande come tutta la scena )
-	static Point3D scaleL=new Point3D(1.5f);
-
-	//se true la luce e' frontale. Se si cambia in true,
-	//deccommentare le parti in createScene()
-	static boolean frontL=false;
-
-	static Point3D translateL=new Point3D();	//parametro per la traslazione delle pareti della stanza
-	static int matIdL=0;	//indice del materiale della luce della stanza
-
-//vettore costruttore dei materiali 
-	static Material[] material = {
-					//luce
-					MATERIAL_LIGHT_WHITE,
-
-		    	//diffusivi:
-					MATERIAL_DIFFUSIVE_RED,
-					MATERIAL_DIFFUSIVE_GREEN,
-					MATERIAL_DIFFUSIVE_BLUE,
-					MATERIAL_DIFFUSIVE_GRAY,
-					MATERIAL_DIFFUSIVE_BLACK,
-
-					//riflettenti:
-					MATERIAL_REFLECTIVE_GLASS,
-					MATERIAL_REFLECTIVE_PERFECT_GLASS,
-
-		    	//materiali particolari:
-					MATERIAL_COOK_TORRANCE_VIOLET,
-					MATERIAL_STEEL,
-					MATERIAL_DEEP_RED,
-					MATERIAL_IMPERFECT_STEEL,
-					MATERIAL_TRANSLUCENT_JADE,
-					MATERIAL_DIFFUSIVE_PINK,
-					MATERIAL_DIFFUSIVE_DEEP_GRAY,
-					MATERIAL_DIFFUSIVE_JADE
-	};
-
-	static int[] matIdRoom = {	//vettore per gli indici dei materiali delle pareti della stanza
-		3, //sinistra
-		4, //inferiore
-		13, //posteriore
-		3, //destra
-		4, //superiore
-		4  //frontale
-	};
-
-	//metodo che imposta, a seconda della scelta
-	//effettuata dall'utente, il materiale
-	//appropriato alle prime tre sfere
-	static int setMatIdSphere() {
-
-		int translucentJadeIndex=12;
-		int diffusiveJadeIndex=15;
-		int glassIndex=7;
-		int one=1;
-
-		if(translucentJade)
-			return translucentJadeIndex;
-		else if(diffusiveJade)
-			return diffusiveJadeIndex;
-		else if(glass)
-			return glassIndex;
-
-		return one;
-	}
-
-	//static int mIS=setMatIdSphere();
-	// vettore per gli indici dei materiali delle sfere
-	// si fa corrispondere alla sfera i-esima del vettore
-	// spheres definito poco sotto, il materiale di
-	// indice corrispondente nel vettore material
-	static int[] matIdSphere ={
-		1,//mIS,
-		1,//mIS,
-		1,//mIS,
-		1,//7,
-		1,//7,
-		1,//7,
-		1,//4,
-		1,//4,
-		1,//4,
-		1,//4
-	};
-
-	static Sphere[] spheres = {	//vettore costruttore delle sfere
-			new Sphere(1,new Point3D()),
-			new Sphere(1,new Point3D()),
-			new Sphere(1,new Point3D()),
-			new Sphere(1,new Point3D(4.0f,0.1f,1.4f)),
-			new Sphere(1,new Point3D(-3.0f,0.4f,2.3f)),
-			new Sphere(1,new Point3D(-4.0f,2.0f,4.0f)),
-			new Sphere(1,new Point3D(6.0f,5.3f,2.0f)),
-			new Sphere(1,new Point3D(7.0f,3.4f,1.4f)),
-			new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
-			new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
-	};
-
-	static int nSphere=3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
-
-	static Point3D background = new Point3D(1.0f,1.0f,1.0f);	// Background: lo impostiamo come nero
-
-	static float inf=(float) 1e20;	//distanza massima dal raggio
-
-	//variabile globale, utilizzata nel metodo intersect(),
-	//in cui viene salvato punto di intersezione tra l'oggetto
-	//e il raggio considerato
-	static float inters;//sarebbe t del metodo intersect;
-
-	/// vettore in cui carichero' le luci (sono dei semplici
-	//Obj che hanno pero' come materiale una luce)
-	static Obj[] lights;
-	static int nLight=0;	//numero di luci
-	static Box bound;	//primo elemento della lista di Box (usato per la BSP)
-	static Mesh[] m;	//array di mesh della scena
-	static Point3D[] image = new Point3D[w*h];	//array che contiene tutti i pixel (rgb) dell'immagine
-
-	static Point3D sceneRadiance;	// Radianza della scena
-
-	//variabile utilizzata per visualizzare lo stato di
-	//caricamento dei box durante la partizione spaziale
-	//della scena
-	static int loadedBoxes = 0;	//rappresenta i box che sono stati caricati
-
-	//massimi box (cioe' massima profondita') nell'albero
-	//per la partizione spaziale della scena
-	static int maxPartitions = 0;
-	//liv e' il livello di profondita' all'interno dell'albero
-	//per la partizione spaziale della scena
-	static int depthLevel = 0;
-
-	static int[] samplesX=new int[w*h];	//campioni per la fotocamera
-	static int[] samplesY=new int[w*h];
-
-	static int[] aoSamplesX=new int[w*h];	//campioni per la luce indiretta
-	static int[] aoSamplesY=new int[w*h];
-
-	static int[] dirSamples1=new int[w*h];	//campioni per la luce diretta
-	static int[] dirSamples2=new int[w*h];
-	static int[] dirSamples3=new int[w*h];
-
-	static int[] refSamples1=new int[w*h];	//campioni riflessioni/rifrazioni
-	static int[] refSamples2=new int[w*h];
+	static final JTextField tf = new JTextField();
+	static final JButton ok_button=new JButton("Conferma");
 
 	private static void addItemsToMethodMenu(
 		JMenu method_menu,int[] bool)
-{
-	JRadioButtonMenuItem menuItem;
-	ButtonGroup bg = new ButtonGroup(); 
+	{
+		JRadioButtonMenuItem menuItem;
+		ButtonGroup bg = new ButtonGroup();
 		
     menuItem = new JRadioButtonMenuItem(); 
     menuItem.setText("Solo Jacobi");	
-    menuItem.addActionListener(new ActionListener(){  
-    	public void actionPerformed(ActionEvent e){  
-    				bool[0]=0;//Fg
+    menuItem.addActionListener(new ActionListener(){
+    	public void actionPerformed(ActionEvent e){
+    				bool[0]=0;//doFinalGathering
     	        }  
-    	    });
+    });
+
     // Aggiungo il bottone al gruppo
-    bg.add(menuItem); 
-    // Infine lo aggiungo al menu
-    method_menu.add(menuItem); 
+		bg.add(menuItem);
+		// Infine lo aggiungo al menu
+		method_menu.add(menuItem);
     
     menuItem = new JRadioButtonMenuItem(); 
     menuItem.setText("Jacobi + final gathering");	
     menuItem.addActionListener(new ActionListener(){  
     	public void actionPerformed(ActionEvent e){  
-    				bool[0]=1;//Fg  
+    				bool[0]=1;//doFinalGathering
     	        }  
-    	    });
-    bg.add(menuItem); 
-    method_menu.add(menuItem);     
-    
-}
+    });
 
-private static void addItemsToMaterialMenu(
-		JMenu material_menu,int[] bool)
-{
-	JRadioButtonMenuItem menuItem;
-	ButtonGroup bg = new ButtonGroup(); 
+    bg.add(menuItem); 
+    method_menu.add(menuItem);
+	}
+
+	private static void addItemsToMaterialMenu(JMenu material_menu,int[] bool) {
+		JRadioButtonMenuItem menuItem;
+		ButtonGroup bg = new ButtonGroup();
 	
     menuItem = new JRadioButtonMenuItem(); 
     menuItem.setText("Giada Realistica (traslucente)");	
-    menuItem.addActionListener(new ActionListener(){  
-    	public void actionPerformed(ActionEvent e){  
-    				bool[1]=1;//translucentJade=true;  
-    				bool[2]=0;//diffusiveJade=false;
-    				bool[3]=0;//glass=false;
-    	        }  
-    	    });
+    menuItem.addActionListener(new ActionListener(){
+    	public void actionPerformed(ActionEvent e){
+    		bool[1]=1;//translucentJade=true;
+				bool[2]=0;//diffusiveJade=false;
+				bool[3]=0;//glass=false;
+    	}
+    });
+
     bg.add(menuItem); 
     material_menu.add(menuItem); 
     
@@ -340,11 +91,12 @@ private static void addItemsToMaterialMenu(
     menuItem.setText("Giada Diffusiva");	
     menuItem.addActionListener(new ActionListener(){  
     	public void actionPerformed(ActionEvent e){  
-    				bool[1]=0;//translucentJade=false;  
-    				bool[2]=1;//diffusiveJade=true;
-    				bool[3]=0;//glass=false;
-    	        }  
-    	    });
+    		bool[1]=0;//translucentJade=false;
+				bool[2]=1;//diffusiveJade=true;
+				bool[3]=0;//glass=false;
+    	}
+    });
+
     bg.add(menuItem); 
     material_menu.add(menuItem); 
     
@@ -352,28 +104,27 @@ private static void addItemsToMaterialMenu(
     menuItem.setText("Cristallo");	
     menuItem.addActionListener(new ActionListener(){  
     	public void actionPerformed(ActionEvent e){  
-    				bool[1]=0;//FgtranslucentJade=false;  
-    				bool[2]=0;//FgdiffusiveJade=false;
-    				bool[3]=1;//glass=true;
-    	        }  
-    	    });
+    		bool[1]=0;//FgtranslucentJade=false;
+				bool[2]=0;//FgdiffusiveJade=false;
+				bool[3]=1;//glass=true;
+    	}
+    });
+
     bg.add(menuItem);
     material_menu.add(menuItem); 
-}
+	}
 
-private static void addItemsToPositionMenu(
-		JMenu position_menu,int[] bool)
-{
-	JRadioButtonMenuItem menuItem;
-	ButtonGroup bg = new ButtonGroup(); 
+	private static void addItemsToPositionMenu(JMenu position_menu,int[] bool) {
+		JRadioButtonMenuItem menuItem;
+		ButtonGroup bg = new ButtonGroup();
 	
     menuItem = new JRadioButtonMenuItem(); 
     menuItem.setText("Sfere allineate");	
     menuItem.addActionListener(new ActionListener(){  
     	public void actionPerformed(ActionEvent e){  
-    				bool[4]=1;//aligned=true;  
-    	        }  
-    	    });
+    		bool[4]=1;//aligned=true;
+    	}
+    });
     bg.add(menuItem); 
     position_menu.add(menuItem);
     
@@ -381,29 +132,25 @@ private static void addItemsToPositionMenu(
     menuItem.setText("Sfere sovrapposte");	
     menuItem.addActionListener(new ActionListener(){  
     	public void actionPerformed(ActionEvent e){  
-    				bool[4]=0;//aligned=false;  
-    	        }  
-    	    });
+    		bool[4]=0;//aligned=false;
+    	}
+    });
+
     bg.add(menuItem); 
     position_menu.add(menuItem);
-    
-    
-}
+	}
 
-//metodo per creare il menu box
-private static void createMenu(JFrame f, final 
-		JTextField tf, final JButton ok_button, 
-		int[] bool)
-{
-	// componenti del jFrame
-	JMenuBar menu_bar;
+	//metodo per creare il menu box
+	private static void createMenu(JFrame f, final JTextField tf, final JButton ok_button, int[] bool) {
+		// componenti del jFrame
+		JMenuBar menu_bar;
     JMenu method_menu;
     JMenu material_menu;
     JMenu position_menu;
     
     // creo la menu bar
-	menu_bar = new JMenuBar(); 
-	menu_bar.setBounds(15,15,300,40);
+		menu_bar = new JMenuBar();
+		menu_bar.setBounds(15,15,300,40);
 
     // creo i menu
     method_menu = new JMenu("Metodo");
@@ -439,528 +186,22 @@ private static void createMenu(JFrame f, final
     // scelgo cosa succedera'  quando si chiudera'
     //  la finestra
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-}
-
-//la classe main costruisce una stanza rettangolare con 
-//dentro 3 sfere e opportune luci, e un osservatore che 
-//guarda in una direzione appropriata: il generico raggio
-//di visuale attraversa un appropriato pixel del 
-//viewplane. Su quel pixel vengono calcolati, mediante 
-//metodi di radiosita' stocastica, colore e luminosita' 
-//di cio' che l'osservatore vede.
-
-public static void main(String[] args) {
-  //inizialmente imposto la finestra con le varie
-  //scelte per l'utente
-  JFrame f=new JFrame("Image creator");
-  final JTextField tf=new JTextField();
-  final JButton ok_button=new JButton("Conferma");
-  int[] bool=new int[5];
-  createMenu(f,tf,ok_button, bool);
-  ok_button.addActionListener(new ActionListener(){  
-    public void actionPerformed(ActionEvent e) {
-  	  	//Metodo
-  	  	if(bool[0]==1)
-  	          Fg=true;
-  	  	else if(bool[0]==0)
-  	  		Fg=false;
-
-  	  	//Materiale
-  	  	if(bool[1]==1)
-  	          translucentJade=true;
-  	  	else if(bool[1]==0)
-  	  		translucentJade=false;
-  	  	if(bool[2]==1)
-  	  		diffusiveJade=true;
-  	  	else if(bool[2]==0)
-  	  		diffusiveJade=false;
-  	  	if(bool[3]==1)
-  	  		glass=true;
-  	  	else if(bool[3]==0)
-  	  		glass=false;
-
-  	  	//Posizione
-  	  	if(bool[4]==1)
-  	              aligned=true;
-  	  	else if(bool[4]==0)
-  	  			aligned=false;
-
-  	  	tf.setText("Creazione immagine in corso");
-
-  	  	int mIS=setMatIdSphere();
-  	  	for(int sph=0; sph<nSphere; sph++)
-  	  		matIdSphere[sph]=mIS;
-
-  	  	Point3D sPos0= Sphere.setSpheresPosition(0);
-  	  	Point3D sPos1= Sphere.setSpheresPosition(1);
-  	  	Point3D sPos2= Sphere.setSpheresPosition(2);
-  	  	//vettore costruttore delle sfere
-  	  	spheres[0]=new Sphere(1,sPos0);
-  	  	spheres[1]=new Sphere(1,sPos1);
-  	  	spheres[2]=new Sphere(1,sPos2);
-
-
-  	  ok_button.setEnabled(false);
-  	  //Qua inizia il processo di creazione dell'immagine
-			//inizializzo il numero di mesh
-			int nMesh = 0;
-
-			//dovendo disegnare 3 sfere e la stanza definisco un
-			//array di 2 Mesh: nella prima delle due mesh (per
-			//m[0]) aggiungiamo le 3
-			//sfere richiamando il metodo caricaSphere
-  	  //if(drawSphere){
-  	  	m=new Mesh[2];
-  	      nMesh=1;
-  	      m[0]= Mesh.loadSphere(nSphere);
-  	  //}
-
-  	  //inizializzo massimo e minimo punto della scena
-  	  Point3D max = null;
-  	  Point3D min = null;
-  	  //inizializzo dei fittizi massimo e minimo, che mi
-  	  //serviranno per definire i valori di max e min
-  	  Point3D oldMin=new Point3D(Float.POSITIVE_INFINITY);
-  	  Point3D oldMax=new Point3D(Float.NEGATIVE_INFINITY);
-
-  	  //trovo le dimensioni della scena (tralasciando la
-  	  //stanza in cui gli oggetti sono contenuti)
-  	  for(int i=0; i<nMesh;i++)
-  	  {
-  	    max=Obj.getBoundMax(m[i].objects,oldMax,m[i].nObj);
-  	    min=Obj.getBoundMin(m[i].objects,oldMin,m[i].nObj);
-  	  }
-  	  //ingrandisco un po' la stanza
-  	  //max.operatorTimes(2.4f);
-  	  //min.operatorTimes(2.4f);
-  	  //definisco e calcolo il punto in cui guarda
-  	  //l'osservatore: il centro della scena
-  	  Point3D center= (max.add(min)).
-							multiplyScalar(0.5f);
-  	  if(!absolutePos)
-  	  {
-  	  	//lookat= (0,0,0)+center
-  	  	lookat=lookat.add(center);
-  	  }
-  	  //l'osservatore si trova nel punto camPosition
-  	  Point3D camPosition= center.add(eye);
-  	  //calcolo del punto di messa a fuoco pf
-  	  Point3D pf = new Point3D();
-  	  //pf= center+(0,0,0)
-  	  pf.copy(center.add(focusPoint));
-
-  	  //costruttore della fotocamera
-  	  //imposto la fotocamera che guarda il centro
-  	  //dell'oggetto ed e' posizionata davanti
-  	  Camera cam=new Camera(camPosition,lookat,new
-							Point3D(0.00015f,1.00021f,0.0f),w,h,distfilm);
-
-  	  //Abbiamo ora a disposizione tutti gli elementi
-  	  //necessari per costruire la stanza
-  	  //Creo la stanza in cui mettere l'oggetto (per
-  	  //visualizzare l'illuminazione globale)
-  	  //La carico come ultima mesh
-  	  m[nMesh]= Mesh.createScene(max,min);
-
-  	  //nel nostro caso sceneDepth=0, quindi non si entra
-  	  //mai in questo ciclo
-  	  for(int q=0;q<sceneDepth;q++){
-  	      m[nMesh].splitMeshes();
-  	  }
-
-  	  //A questo punto consideriamo l'intero array di mesh,
-  	  //ora composto da oggetti+stanza e aggiorno i valori
-  	  //della grandezza della stanza, usando di nuovo i
-  	  //metodi getBoundMin e getBoundMax.
-  	  oldMax=max;
-  	  oldMin=min;
-  	  max=Obj.getBoundMax(m[nMesh].objects,oldMax,m[nMesh].nObj);
-  	  min=Obj.getBoundMin(m[nMesh].objects,oldMin,m[nMesh].nObj);
-
-  	  //numero di oggetti nella scena
-  	  int nO=0;
-
-  	  //ciclo per la mesh delle sfere + la mesh della
-  	  //stanza, per aggiornare il numero di oggetti e di
-  	  //luci.
-  	  for(int i=0; i<nMesh+1;i++){
-  	      //aggiungiamo al contatore n0 il numero di
-  	  	//oggetti nella mesh m[i];
-  	      nO+=m[i].nObj;
-
-  	      //per ogni oggetto della mesh
-  	      for(int j=0;j<m[i].nObj;j++){
-
-  	        //se l'oggetto e' una luce aggiorno il
-  	        //valore del contatore delle luci nLight
-  	        if(material[m[i].objects[j].matId].emittedLight.max()>0)
-  	        {
-  	      	 nLight++;
-  	        }
-  	      }
-  	  }
-
-  	  //vettore che conterra' gli oggetti della scena
-  	  Obj[] objects= new Obj[nO];
-  	  Obj[] SceneObjects= new Obj[nO];
-  	  //vettore che contiene solo le luci della scena
-  	  lights = new Obj[nLight];
-  	  nO=0;
-  	  nLight=0;
-
-  	  for(int i=0; i<nMesh+1;i++){
-
-  	      //e carico tutto nella lista globale degli oggetti
-  	      for(int j=0;j<m[i].nObj;j++){
-  	          objects[nO]=m[i].objects[j];
-  	          SceneObjects[nO]=m[i].objects[j];
-  	          nO++;
-  	          //se l'oggetto e' una luce la carico dentro
-  	          //l'array delle luci
-  	          if(material[m[i].objects[j].matId].emittedLight.max()>0)
-  	          {
-  	              lights[nLight]=m[i].objects[j];
-  	              nLight++;
-  	          }
-
-  	      }
-  	  }
-
-  	  //costruzione del Kd-tree che ripartisce la scena
-
-  	  //l=0: iniziamo a partizionare col piano xy
-  	  int l=0;
-  	  //liv e' il livello di profondita' all'interno
-  	  //dell'albero
-  	  depthLevel =0;
-
-  	  //creo il Bounding Box
-  	  //Bound e' il primo elemento dell'albero che contiene
-  	  //tutti gli oggetti della scena
-  	  bound =new Box(min, max, (short) l);
-
-  	  bound.setObjects(objects,nO);
-
-  	  //inizializzo la variabile S che e' la massima
-  	  //profondita' dell'albero
-  	  for(int i=1; i<depth; i++){
-  	  	maxPartitions +=Math.pow(2,i);
-  	  }
-
-  	  //crea il tree: si richiama il metodo setPartition()
-  	  //per dividere gli oggetti del box padre nei box figli
-  	  bound = Box.setPartition(bound);
-
-  	  //salviamo gli oggetti della scena nella variabile
-  	  //globale GlobalObjects in modo da poterli aggiornare
-  	  //in JacobiStoc()
-  	  GlobalObjects=new Obj[nO];
-  	  System.arraycopy(SceneObjects, 0, GlobalObjects, 0, nO);
-
-  	  //la definizione di inters mi serve per il metodo
-  	  //intersectBPS che utilizza questa variabile
-  	  inters=inf;
-
-  	  //richiamo la funzione per il calcolo della radiosita'
-  	  //della scena attraverso il metodo di Jacobi
-  	  //stocastico
-  	  if(!Fg)
-  	  	(new Renderer()).jacobiStoc(nO);
-
-  	  //aggiorno la variabile locale SceneObjects con i
-  	  //valori ora contenuti in globalObjects
-				System.arraycopy(GlobalObjects, 0, SceneObjects, 0, nO);
-
-  	  //nota: rand() in C++ e' un numero random tra 0 e
-  	  //RAND_MAX=2147483647: qua usero'
-  	  //Math.random() * (fine-iniz+1)) + iniz
-  	  //cioe' Math.random()* (2147483648)
-  	  for (int i = 0; i < (w*h); i++) {
-  	  	//creiamo i campioni necessari per:
-
-  	  	//la fotocamera
-			samplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-			samplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-
-			//la luce indiretta
-			aoSamplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-			aoSamplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-
-			//la luce diretta
-			dirSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-			dirSamples2[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-			dirSamples3[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-
-			//riflessioni/rifrazioni
-			refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-			refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-
-			//inizializzo l'immagine nera
-			image[i]=new Point3D();
-		}
-
-  	  //Stampiamo le varie informazioni
-		System.out.println("Samples: "+samps+" "+aosamps);
-  	  System.out.println("Origin: x "+cam.eye.x+" y "+
-  	  			cam.eye.y+" z "+cam.eye.z);
-  	  System.out.println("Direction: x "+cam.lookAt.x+" y "+
-  	  			cam.lookAt.y+" z "+cam.lookAt.z);
-  	  System.out.println("Up: x "+cam.up.x+" y "+cam.up.y+
-  	  			" z "+cam.up.z);
-  	  System.out.println("D: "+cam.d+" W: "+cam.width+
-  	  			" H: "+cam.height);
-
-		cam.aperturaDiaframma = ap;// =0
-
-		//l'istruzione seguente calcola il fattore di scala
-		//con una trasformazione perospettica che porta
-		//l'origine della posizione della fotocamera e il
-		//vettore dell'osservatore al vettore della fotocamera
-		cam.fuoco = (pf.z - cam.eye.z) / (cam.W.z*(-cam.d));
-
-		System.out.println("Fuoco: "+cam.fuoco);
-		System.out.println("Apertura diaframma: "+cam.
-				aperturaDiaframma);
-
-
-		//Ora viene creata l'immagine
-
-		//iniziamo la stringa matrix con valori di settaggio
-		//richiesti
-		matrix +="P3\n" + w + "\n" + h + "\n255\n";
-
-  	  //per tutte le righe
-			for(int y = 0; y <= h; y++)
-			{
-
-		  //stampiamo la percentuale di completamento per
-		  //monitorare l'avanzamento del rendering
-		  double percentY = ((float)y / (float)h) * 100;
-		  System.out.println("percentuale di completamento " + "radianza:	 "+percentY);
-
-		  //per tutte le colonne
-  	    for(int x = 0; x <= w; x++)
-  	    {
-  	  	// Ora siamo nel pixel
-			// r e' la radianza: in questo caso e' tutto nero
-			sceneRadiance = new Point3D(0.0f);
-
-			// Loop per ogni campione
-			for (int s = 0; s < samps; s++) {
-				//inizializiamo un raggio per la camera
-				Ray cameraRay;
-
-				//transformazione delle variabili x e y in
-				//float corrispondono alla posizione che
-				//cameraRay deve raggiungere
-				float raster_x = (float)x;
-				float raster_y = (float)y;
-
-				//origine del raggio della fotocamera
-				Point3D origin=new Point3D();
-				origin.copy(cam.eye);
-
-				//se ho piu' di un campione allora
-				//distribuisco gli altri campioni in modo
-				//casuale
-				// !!! COMPLETARE I COMMENTI DI QUESTA
-				//PARTE CON AIUTO DI FORTI!!!
-				if (s > 0) {
-
-				  float rndX=0;
-				  float rndY=0;
-
-				//utilizzo questa variabile tt perche' non
-					//posso usare il valore x+y*w nell'array
-					//samplesX[], altrimenti l'ultimo indice
-					//sarebbe fuori dal range (ricordo che la
-					//misura e' w*h ma gli indici vanno da 0 a
-					//w*h-1)
-					int tt =x+y*w;
-					//allora faccio l'if per tt<w*h cosi' da
-					//accertarmi che non sia considerato l'indice
-					//w*h-esimo
-					if(tt<w*h)
-					{
-						// gli passo il numero random da cui
-						  //siamo partiti all'interno del pixel
-						  rndX = Utilities.generateRandom(samplesX[tt]);
-						  rndY = Utilities.generateRandom(samplesY[tt]);
-
-					}
-
-				  //if (cam.aperturaDiaframma > 0) {
-					//prendiamo un punto a caso su un disco di
-					raster_x += Math.cos(2 * Utilities.MATH_PI *
-							rndX)*cam.aperturaDiaframma*rndY;
-					raster_y += Math.sin(2 * Utilities.MATH_PI *
-							rndX)*cam.aperturaDiaframma*rndY;
-					Point3D camUFuoco=cam.U.multiplyScalar(cam.
-							fuoco*(x - raster_x));
-					Point3D camVFuoco=cam.V.multiplyScalar(cam.
-							fuoco*(y - raster_y));
-
-					origin = origin.add(camUFuoco).
-									add(camVFuoco);
-
-				  //}
-				  /*else{//diaframma=0
-
-					// in this case i take another
-					//quindi aggiungo alla posizione del
-					//pixel (presa all'angolo in basso a
-					//sinistra) le quantita' random comprese
-					//in [0,1]
-					raster_x += rndX;
-					raster_y += rndY;
-				  }*/
-				}
-
-				// prediamo la direzione della fotocamera
-				Point3D ray_direction;
-				//ray_direction e' calcolato con l'ONB(base
-				//ortonormale) della fotocamera
-				//il raggio dalla fotocamera al campione sara'
-				//data dalla combinazione lineare dell'ONB
-				//della fotocamera
-				//centro il piano rispetto alla fotocamera
-				//sottraendo w/2 alla componente in x e h/2
-				//alla componente in y infine la distanza z
-				//tra la fotocamera e il piano e' cam.d
-
-				//ray_direction=U*(raster_x-w/2)+
-				//+V*(raster_y-h/2)+W*(-cam.d)
-				ray_direction = (cam.U.multiplyScalar(
-						raster_x - 0.5f*w)).add(
-						cam.V.multiplyScalar(raster_y -
-						0.5f*h)).add(cam.W.
-								multiplyScalar(-cam.d));
-				ray_direction=ray_direction.getNormalizedPoint();
-
-				//Ora si crea il raggio della fotocamera
-				cameraRay = new Ray(origin, ray_direction);
-
-				//dichiaro e inizializzo la variabile t in cui
-				//salveremo il punto di intersezione fra
-				//l'oggetto considerato  e cameraRay
-  	          float t = inf;
-  	          //inizializzo a null l'oggetto intersecato
-  	          //dal raggio
-  	          Obj o=null;
-				//intersezione del raggio con gli elementi
-  	          //della scena:
-				if(Utilities.intersect(cameraRay, o)) {
-				  //pongo t uguale al valore di intersezione
-				  //memorizzato nella variabile globale inters
-  	      	  t=inters;
-  	      	  //resetto inters uguale a inf in modo da
-  	      	  //avere il giusto valore di partenza la
-  	      	  //prossima volta che si utilizzera'
-  	      	  //il metodo intersect()
-  	      	  inters=inf;
-  	      	  //salvo nella variabile o objX l'elemento
-  	      	  //intersecato dal raggio cameraRay
-  	      	  o=intersObj;
-  	      	  //resetto intersObj=null in modo da avere
-  	      	  //il giusto valore di partenza la prossima
-  	      	  //volta che si utilizzera' il metodo
-  	      	  //intersect()
-  	      	  intersObj=null;
-  	      	  //si calcola il punto di intersezione
-				  Point3D iP = (cameraRay.o).add(
-						  cameraRay.d.multiplyScalar(t));
-				  //viene creato il primo raggio per il
-				  //calcolo della radianza
-				  //questo raggio parte dal punto ed e'
-				  //diretto verso l'osservatore
-				  Ray first=new Ray(iP, (cameraRay.d).
-									multiplyScalar(-1));
-				  //si aggiunge alla variabile r il contributo
-				  //di radianza del punto considerato
-				  sceneRadiance = sceneRadiance.add(Renderer.radiance(first, o, x, y));
-				 }
-				//se non si interseca nessun oggetto si
-				//aggiunge alla variabile r il colore di
-				//background (nero)
-				else
-				{
-					sceneRadiance = sceneRadiance.add(background);
-				}
-			}
-			//divido per il numero di campioni del pixel
-			sceneRadiance = sceneRadiance.divideScalar((float)samps);
-			sceneRadiance.multiplyScalar(0.3f);
-			// A questo punto si crea un'immagine basata sui
-			//valori di radianza r
-
-			//le componenti RGB del vettore r vengono tagliate
-			//se non comprese in [0,1] dopodiche' vengono
-			//caricate nel vettore image
-			//nota: per ogni y che aumenta abbiamo gia'
-			//caricato w pixel
-
-			//utilizzo questa variabile tt perche' non posso
-			//usare il valore x+y*w nell'array image[w*y],
-			//altrimenti l'ultimo indice sarebbe fuori dal
-			//range (ricordo che la misura e' w*h ma gli
-			//indici vanno da 0 a w*h-1)
-			int tt =x+y*w;
-			//allora faccio l'if per tt<w*h cosi' da
-			//accertarmi che non sia considerato l'indice
-			//w*h-esimo
-			if(tt<w*h)
-			{
-				image[x+y*w].x = Point3D.clamp(sceneRadiance.x);
-				image[x+y*w].y = Point3D.clamp(sceneRadiance.y);
-				image[x+y*w].z = Point3D.clamp(sceneRadiance.z);
-			}
-		  }
- 		}
-
-  	  //Ora si disegna l'immagine: si procede aggiungendo
-		//alla stringa matrix le informazioni contenute
-		//nell'array image in cui abbiamo precedentemente
-  	  //salvato tutti i valori di radianza
-  	  for(int i = 0; i <w*h; i++){
-
-  	  	//stampiamo la percentuale di completamento per
-  	  	//monitorare l'avanzamento della creazione
-  	  	//dell'immagine
-  	  	double percent = ((float)i / (float)(w*h)) * 100;
-  	  	double percentFloor=Math.floor(percent);
-  	  	double a=percent-percentFloor;
-  	  	if(a==0.0)
-  	  	{
-  	  	 System.out.println("percentuale di completamento "
-  	  			+ "immagine: "+percent);
-  	  	}
-
-
-  	  	//i valori di radianza devono essere trasformati
-  	  	//nell'intervallo [0,255] per rappresentare la
-  	  	//gamma cromatica in valori RGB
-  	      matrix += ""+ Utilities.toInt(image[i].x) + " "
-  	      		+ Utilities.toInt(image[i].y) + " " +
-  	      		Utilities.toInt(image[i].z) + "  " ;
-
-
-
-  	  } tf.setText("Immagine completata!");
-
-  	  //Per finire viene scritto il file con con permesso
-  	  //di scrittura e chiuso.
-  	  FileOutputStream fos;
-		try {
-			fos = new FileOutputStream(filename);
-			fos.write(new String(matrix).getBytes());
-			fos.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-
-			}
-  	});
+	}
+
+	//la classe main costruisce una stanza rettangolare con
+	//dentro 3 sfere e opportune luci, e un osservatore che
+	//guarda in una direzione appropriata: il generico raggio
+	//di visuale attraversa un appropriato pixel del
+	//viewplane. Su quel pixel vengono calcolati, mediante
+	//metodi di radiosita' stocastica, colore e luminosita'
+	//di cio' che l'osservatore vede.
+
+	public static void main(String[] args) {
+  	//inizialmente imposto la finestra con le varie
+  	//scelte per l'utente
+  	JFrame f=new JFrame("Image creator");
+  	int[] bool=new int[5];
+  	createMenu(f,tf,ok_button, bool);
+  	ok_button.addActionListener(new RenderAction(bool));
   }
 }
