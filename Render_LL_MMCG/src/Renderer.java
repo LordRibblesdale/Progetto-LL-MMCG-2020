@@ -417,7 +417,6 @@ public class Renderer {
   //x indica la colonna in cui ci troviamo, y indica la
   //riga in cui ci troviamo
   Point3D radiance(Ray r, Obj o, int x, int y) {
-
     //definisco e inizializzo a (0,0,0) il float3 per la
     //radianza riflessa
     Point3D radianceRefl=new Point3D();
@@ -600,11 +599,9 @@ public class Renderer {
          RenderAction.nRay--;
          //divido per il numero di raggi che sono stati creati
          radianceRefl=radianceRefl.divideScalar((float) RenderAction.refSample);
-
       }
      }
     }
-
 
     //rifrazione
     //si verifica che l'oggetto abbia Kg>0, non sia un
@@ -1011,12 +1008,9 @@ public class Renderer {
           //creo 3 variabili randomiche che si basano
           //sul seme iniziale casuale s definito
           //randomicamente
-          float rndX=0.0f;
-          float rndY=0.0f;
-          float rndZ=0.0f;
-          rndX= Utilities.generateRandom(s);
-          rndY= Utilities.generateRandom(s);
-          rndZ= Utilities.generateRandom(s);
+          float rndX = Utilities.generateRandom(s);
+          float rndY = Utilities.generateRandom(s);
+          float rndZ = Utilities.generateRandom(s);
 
           //Inverse Cumulative Distribuction Function
           //creiamo la base ortonormale per generare
@@ -1124,13 +1118,10 @@ public class Renderer {
         for (int j=0; j<NY; j++) {
 
           Point3D dir;
-          float rndX=0.0f;
-          float rndY=0.0f;
-          float rndZ=0;
 
-          rndX= Utilities.generateRandom(s);
-          rndY= Utilities.generateRandom(s);
-          rndZ= Utilities.generateRandom(s);
+          float rndX = Utilities.generateRandom(s);
+          float rndY = Utilities.generateRandom(s);
+          float rndZ = Utilities.generateRandom(s);
 
           float rndPhi=2*Utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(

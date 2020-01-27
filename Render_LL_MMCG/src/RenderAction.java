@@ -197,18 +197,12 @@ class RenderAction extends AbstractAction {
   //della scena
   static int loadedBoxes = 0;	//rappresenta i box che sono stati caricati
 
-  Point3D sceneRadiance;	// Radianza della scena
+  private static int[] bool;
 
-  static int[] bool;
+  private Renderer renderer;
 
-  //stringa contenente le informazioni da scrivere nel
-  //file immagine image.ppm
-  static private String matrix="";
-
-  Renderer renderer;
-
-  public RenderAction(int[] bool) {
-    this.bool = bool;
+  RenderAction(int[] bool) {
+    RenderAction.bool = bool;
 
     renderer = new Renderer();
   }
@@ -345,7 +339,7 @@ class RenderAction extends AbstractAction {
     //costruzione del Kd-tree che ripartisce la scena
 
     //l=0: iniziamo a partizionare col piano xy
-    int l=0;
+    short l=0;
     //liv e' il livello di profondita' all'interno
     //dell'albero
     depthLevel =0;
@@ -353,7 +347,7 @@ class RenderAction extends AbstractAction {
     //creo il Bounding Box
     //Bound e' il primo elemento dell'albero che contiene
     //tutti gli oggetti della scena
-    bound = new Box(min, max, (short) l);
+    bound = new Box(min, max, l);
 
     bound.setObjects(objects);
 
@@ -397,21 +391,21 @@ class RenderAction extends AbstractAction {
       //creiamo i campioni necessari per:
 
       //la fotocamera
-      samplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-      samplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
+      samplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      samplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
       //la luce indiretta
-      aoSamplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-      aoSamplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
+      aoSamplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      aoSamplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
       //la luce diretta
-      dirSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-      dirSamples2[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-      dirSamples3[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
+      dirSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      dirSamples2[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      dirSamples3[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
       //riflessioni/rifrazioni
-      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
-      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE+1));
+      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
       //inizializzo l'immagine nera
       image[i]=new Point3D();
@@ -437,20 +431,10 @@ class RenderAction extends AbstractAction {
     cam.fuoco = (pf.z - cam.eye.z) / (cam.W.z*(-cam.d));
 
     System.out.println("Fuoco: "+cam.fuoco);
-    System.out.println("Apertura diaframma: "+cam.
-        aperturaDiaframma);
-
-
-    //Ora viene creata l'immagine
-
-    //iniziamo la stringa matrix con valori di settaggio
-    //richiesti
-    matrix +="P3\n" + w + "\n" + h + "\n255\n";
+    System.out.println("Apertura diaframma: "+cam.aperturaDiaframma);
 
     //per tutte le righe
-    for(int y = 0; y <= h; y++)
-    {
-
+    for(int y = 0; y <= h; y++) {
       //stampiamo la percentuale di completamento per
       //monitorare l'avanzamento del rendering
       double percentY = ((float)y / (float)h) * 100;
@@ -461,7 +445,8 @@ class RenderAction extends AbstractAction {
       {
         // Ora siamo nel pixel
         // r e' la radianza: in questo caso e' tutto nero
-        sceneRadiance = new Point3D(0.0f);
+        // Radianza della scena
+        Point3D sceneRadiance = new Point3D(0.0f);
 
         // Loop per ogni campione
         for (int s = 0; s < samps; s++) {
@@ -501,7 +486,6 @@ class RenderAction extends AbstractAction {
               //siamo partiti all'interno del pixel
               rndX = Utilities.generateRandom(samplesX[tt]);
               rndY = Utilities.generateRandom(samplesY[tt]);
-
             }
 
             //prendiamo un punto a caso su un disco di
@@ -619,52 +603,8 @@ class RenderAction extends AbstractAction {
       }
     }
 
-    //Ora si disegna l'immagine: si procede aggiungendo
-    //alla stringa matrix le informazioni contenute
-    //nell'array image in cui abbiamo precedentemente
-    //salvato tutti i valori di radianza
-    for(int i = 0; i <w*h; i++){
-
-      //stampiamo la percentuale di completamento per
-      //monitorare l'avanzamento della creazione
-      //dell'immagine
-      double percent = ((float)i / (float)(w*h)) * 100;
-      double percentFloor=Math.floor(percent);
-      double a=percent-percentFloor;
-      if(a==0.0)
-      {
-        System.out.println("percentuale di completamento "
-            + "immagine: "+percent);
-      }
-
-
-      //i valori di radianza devono essere trasformati
-      //nell'intervallo [0,255] per rappresentare la
-      //gamma cromatica in valori RGB
-      matrix += ""+ Utilities.toInt(image[i].x) + " "
-          + Utilities.toInt(image[i].y) + " " +
-          Utilities.toInt(image[i].z) + "  " ;
-
-
-
-    }
-
-    Main.tf.setText("Immagine completata!");
-
-    //nome del file in cui si andra' a salvare l'immagine
-    //di output
-    String filename = "image.ppm";
-
-    //Per finire viene scritto il file con con permesso
-    //di scrittura e chiuso.
-    FileOutputStream fos;
-    try {
-      fos = new FileOutputStream(filename);
-      fos.write(new String(matrix).getBytes());
-      fos.close();
-    } catch (IOException e1) {
-      e1.printStackTrace();
-    }
+    //Ora viene creata l'immagine
+    createImage();
   }
 
   //metodo che imposta, a seconda della scelta
@@ -684,5 +624,59 @@ class RenderAction extends AbstractAction {
       return glassIndex;
 
     return one;
+  }
+
+  void createImage() {
+    //stringa contenente le informazioni da scrivere nel
+    //file immagine image.ppm
+    //String matrix="";
+    StringBuilder matrix = new StringBuilder();
+
+    //iniziamo la stringa matrix con valori di settaggio
+    //richiesti
+    //matrix +="P3\n" + w + "\n" + h + "\n255\n";
+    matrix.append("P3\n").append(w).append("\n").append(h).append("\n255\n");
+
+    //Ora si disegna l'immagine: si procede aggiungendo
+    //alla stringa matrix le informazioni contenute
+    //nell'array image in cui abbiamo precedentemente
+    //salvato tutti i valori di radianza
+    for(int i = 0; i <w*h; i++) {
+      //stampiamo la percentuale di completamento per
+      //monitorare l'avanzamento della creazione
+      //dell'immagine
+      double percent = ((float)i / (float)(w*h)) * 100;
+      double percentFloor=Math.floor(percent);
+      double a=percent-percentFloor;
+      if(a==0.0)
+      {
+        System.out.println("percentuale di completamento "
+            + "immagine: "+percent);
+      }
+
+      //StringBuilder matrix
+
+      //i valori di radianza devono essere trasformati
+      //nell'intervallo [0,255] per rappresentare la
+      //gamma cromatica in valori RGB
+      matrix.append(Utilities.toInt(image[i].x)).append(" ").append(Utilities.toInt(image[i].y)).append(" ").append(Utilities.toInt(image[i].z)).append("  ");
+    }
+
+    Main.tf.setText("Immagine completata!");
+
+    //nome del file in cui si andra' a salvare l'immagine
+    //di output
+    String filename = "image.ppm";
+
+    //Per finire viene scritto il file con con permesso
+    //di scrittura e chiuso.
+    FileOutputStream fos;
+    try {
+      fos = new FileOutputStream(filename);
+      fos.write(matrix.toString().getBytes());
+      fos.close();
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
   }
 }
