@@ -59,7 +59,7 @@ public class Mesh {
     Point3D minn=new Point3D();
     minn.copy(min);
     
-    float maxhroom = maxx.y + RenderAction.hroom;
+    double maxhroom = maxx.y + RenderAction.hroom;
     maxx.y = max.y;
     
     //definisco un array per gli 8 vertici della stanza
@@ -128,7 +128,7 @@ public class Mesh {
   
     //anche in questo caso copio i valori in delle 
     //variabili che non si aggiornano
-    Point3D translateLL=new Point3D();
+    Point3D translateLL;
     Point3D Lv1=new Point3D();
     Lv1.copy(Lv[1]);
     Point3D Lv4=new Point3D();
@@ -145,14 +145,10 @@ public class Mesh {
       //problemi di aliasing dati dal linee 
       //perfettamente dritte nella fase di rendering
       translateLL=new Point3D(0,-Utilities.EPSILON,0);
-      Point3D Lv1tr=new Point3D();
-      Lv1tr=(Lv1).add(translateLL);
-      Point3D Lv4tr=new Point3D();
-      Lv4tr=(Lv4).add(translateLL);
-      Point3D Lv5tr=new Point3D();
-      Lv5tr=(Lv5).add(translateLL);
-      Point3D Lv6tr=new Point3D();
-      Lv6tr=(Lv6).add(translateLL);
+      Point3D Lv1tr = (Lv1).add(translateLL);
+      Point3D Lv4tr = (Lv4).add(translateLL);
+      Point3D Lv5tr = (Lv5).add(translateLL);
+      Point3D Lv6tr = (Lv6).add(translateLL);
       //si creano e si aggiungono i triangoli per la 
       //luce
       Triangle Tr0=new Triangle(Lv4tr,Lv5tr,Lv6tr);

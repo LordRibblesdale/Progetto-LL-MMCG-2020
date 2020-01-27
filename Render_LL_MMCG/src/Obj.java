@@ -131,7 +131,7 @@ public class Obj {
 					y*l1.y+l1.z*l1.z);
 			float l2_norma=(float) Math.sqrt(l2.x*l2.x+l2.
 					y*l2.y+l2.z*l2.z);
-			float cosl1_l2=l1.dotProduct(l2)/(l1_norma*l2_norma);
+			double cosl1_l2=l1.dotProduct(l2)/(l1_norma*l2_norma);
 			float sinl1_l2=(float) Math.sqrt(1-cosl1_l2*
 					cosl1_l2);
 
@@ -143,7 +143,7 @@ public class Obj {
     
 	//controlla se il raggio passato come parametro
 	//interseca l'oggetto
-	float intersect(Ray raggio) {
+	double intersect(Ray raggio) {
 		//richiamo rispettivamente i metodi di triangle o
 		//sphere
 		if(s!=null){

@@ -63,7 +63,7 @@ public class Sphere {
 
   //funzione di intersezione con un raggio: Return
 	//distanza o -1.0f se non c'e' intersezione
-	float intersect(Ray r){
+	double intersect(Ray r){
 		//sostituendo il raggio o+td all'equazione della 
 		//sfera (td+(o-p)).(td+(o-p)) -R^2 =0 si ottiene 
 		//l'intersezione. Si deve risolvere
@@ -73,12 +73,12 @@ public class Sphere {
 		// C=(o-p).(o-p)-R^2
 		Point3D op = p.subtract(r.o);
 		// calcolo della distanza
-		float t;
+		double t;
 		// 2*t*B -> semplificato usando b/2 invece di B
-		float B=op.dotProduct(r.d);
-		float C=op.dotProduct(op)-rad*rad;
+		double B=op.dotProduct(r.d);
+		double C=op.dotProduct(op)-rad*rad;
 	    //determinante equazione quadratica
-		float det=B*B-C;
+		double det=B*B-C;
 	    // se e' negativo non c'e' intersezione reale, 
 		//altrimenti assegna a det il risultato
 		if (det<0) 

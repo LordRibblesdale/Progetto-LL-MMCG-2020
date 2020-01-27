@@ -10,7 +10,7 @@ public class PhotonBox {
     //dimensione corrispondente alla normale del piano con cui viene suddiviso il box
     int  dim;
     //posizione del piano lungo la dimensione dim
-    float planePos;
+    double planePos;
 
     public PhotonBox(Point3D v1, Point3D v2, Photon[] p, int n){
         V[0]=v1;
@@ -51,7 +51,7 @@ public class PhotonBox {
         //ora viene scelto il parametro dim in base al lato del bounding box piu' lungo
         Point3D d= max.subtract(min);
         d.abs();
-        float dist[]={d.x,d.y,d.z};
+        double[] dist={d.x,d.y,d.z};
 
         //piano yz
         dim=0;
@@ -68,13 +68,13 @@ public class PhotonBox {
             Photon pSaved=ph[i];
 
             //la posizione viene inserita in un array di 3 elementi
-            float pos_i[]= {pSaved.position.x,pSaved.position.y,pSaved.position.z};
+            double[] pos_i= {pSaved.position.x,pSaved.position.y,pSaved.position.z};
 
             //si controlla l'elemento precedente
             int j = i-1;
 
             //viene caricato l'elemento precedente in un array di 3 elementi
-            float pos_j[]={ph[j].position.x,ph[j].position.y,ph[j].position.z};
+            double[] pos_j={ph[j].position.x,ph[j].position.y,ph[j].position.z};
 
             //se non e' stata controllata tutta la lista ordinata e l'elemento in posizione j e' piu' grande di quello in i allora i due fotoni vengono scambiati
             while ((j >= 0) && (pos_j[dim]>pos_i[dim])){
@@ -103,7 +103,7 @@ public class PhotonBox {
         median.copy(ph[mpos].position);
         System.out.println("median x: "+median.x+" y: "+median.y+" z: "+median.z);
         //viene quindi assegnata la posizione del piano in base al parametro dim
-        float m[]={median.x,median.y,median.z};
+        double[] m={median.x,median.y,median.z};
         planePos=m[dim];
         System.out.println("planePos"+planePos);
 

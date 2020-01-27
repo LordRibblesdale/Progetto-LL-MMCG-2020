@@ -39,7 +39,7 @@ public class Utilities {
 
         //inizializziamo il punto di intersezione
         //con il raggio
-        float d=0;
+        double d=0;
 
         for (Obj object : objects) {  //per ogni oggetto
           //nell'if si richiama il metodo intersect()
@@ -121,7 +121,7 @@ public class Utilities {
 	}
 
 	//costringe un numero in [0,1]
-	static float clamp(float x){
+	static double clamp(double x){
 		return x<0 ? 0 : x>1 ? 1 : x;
 	}
 
@@ -134,7 +134,7 @@ public class Utilities {
 	//piu' problemmi. Moltiplicando infine per 255 si 
 	//estende per il range di bit preso in esame e la 
 	//funzione ritorna l'approssimazione ad intero
-	static int toInt(float x){
+	static int toInt(double x){
 		return (int) (Math.pow(clamp(x), 1/2.2)*255);
 	}
 }

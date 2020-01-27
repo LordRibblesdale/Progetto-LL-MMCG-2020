@@ -94,9 +94,9 @@ public class Renderer {
           float cosT=(float)Math.cos(rndTeta);
           float sinP=(float)Math.sin(rndPhi);
           float sinT=(float)Math.sin(rndTeta);
-          float px=r.o.x+l*cosP*cosT;
-          float py=r.o.y+l*cosP*sinT;
-          float pz=r.o.z+l*sinT;
+          double px=r.o.x+l*cosP*cosT;
+          double py=r.o.y+l*cosP*sinT;
+          double pz=r.o.z+l*sinT;
           Point3D newPoint=new Point3D(px,py,pz);
 
 
@@ -111,7 +111,7 @@ public class Renderer {
           dir = dir.getNormalizedPoint();
           //creazione del raggio d'ombra diretto verso
           //la luce
-          float cosTheta=r.d.dotProduct(n1);
+          double cosTheta=r.d.dotProduct(n1);
           Point3D Ftheta= RenderAction.material[mId].getFresnelCoefficient(
               cosTheta);
 
@@ -137,7 +137,7 @@ public class Renderer {
           objX = RenderAction.lights.get(i);
           //si inizializza la massima distanza a cui il
           //raggio puo' arrivare
-          float t = RenderAction.inf;
+          double t = RenderAction.inf;
 
           //verifica del fattore di visibilita'
           if (Utilities.intersect(directRay, objX)) {
@@ -150,7 +150,7 @@ public class Renderer {
             //identificativo del materiale della luce
             int lid = RenderAction.lights.get(i).matId;
             //calcoliamo la BSSRDF
-            float cosPsi=directRay.d.dotProduct(n1);
+            double cosPsi=directRay.d.dotProduct(n1);
             Point3D Fpsi= RenderAction.material[mId].getFresnelCoefficient(
                 cosPsi);
             //float cosTheta=r.d.dot(n1);
@@ -203,7 +203,7 @@ public class Renderer {
             //calcolo dell'illuminazione diretta
             //vengono definiti i seguenti float3 per
             //leggibilita' del risultato
-            float dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
+            double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
             radianceOutput = radianceOutput.
                     add(RenderAction.material[lid].emittedLight.
@@ -240,7 +240,7 @@ public class Renderer {
           objX = RenderAction.lights.get(i);
           //si inizializza la massima distanza a cui il
           //raggio puo' arrivare
-          float t = RenderAction.inf;
+          double t = RenderAction.inf;
 
           //verifica del fattore di visibilita'
           if (Utilities.intersect(directRay, objX)) {
@@ -259,7 +259,7 @@ public class Renderer {
             //calcolo dell'illuminazione diretta
             //vengono definiti i seguenti float3 per
             //leggibilita' del risultato
-            float dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
+            double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
             //radianceOutput = radianceOutput +
             //+ material[lid].Le.mult(BRDF)*(area)*
@@ -352,7 +352,7 @@ public class Renderer {
       //creo il raggio dal punto di intersezione ad un
       //punto a caso sull'emisfero
       Ray reflRay=new Ray(r.o, dir);
-      float t = RenderAction.inf;
+      double t = RenderAction.inf;
       Obj objX;
       objX=null;
       // il metodo va' avanti solo se interseca un
@@ -432,7 +432,7 @@ public class Renderer {
     n1= o.normal(r.o);
 
     //coseno tra il raggio entrante e la normale
-    float cos_i= r.d.dotProduct(n1);
+    double cos_i= r.d.dotProduct(n1);
 
     //fattore di Fresnel
     Point3D Fresn = RenderAction.material[mId].getFresnelCoefficient(cos_i);
@@ -466,7 +466,7 @@ public class Renderer {
         //dichiaro e inizializzo la variabile t in cui
         //salveremo il punto di intersezione fra l'oggetto
         //considerato e reflRay
-        float t= RenderAction.inf;
+        double t= RenderAction.inf;
         //definizione e inizializzoazione a null dell'oggetto
         //che si andra' ad intersecare
         Obj objX;
@@ -576,7 +576,7 @@ public class Renderer {
            reflRay.o=r.o;
            reflRay.d=dir;
            //massima distanza del raggio
-           float t= RenderAction.inf;
+           double t= RenderAction.inf;
            Obj objX;
            objX=null;
            //intersezione con gli oggetti della scena
@@ -617,128 +617,119 @@ public class Renderer {
       if((RenderAction.material[mId].refractionIndexRGB.x == RenderAction.material[mId].refractionIndexRGB.y)
           && (RenderAction.material[mId].refractionIndexRGB.x == RenderAction.material[mId].refractionIndexRGB.z))
         {
-        //direzione del raggio rifratto:
-        Point3D dir=new Point3D();
-        //calcolo della direzione per il raggio rifratto:
-        dir= Point3D.getRefraction(r.d,n1,
-            RenderAction.material[mId].refractionIndexRGB.x);
-        //se c'e' effettivamente una rifrazione non interna
-        if(!dir.equals(new Point3D(-1.0f))){
+          //direzione del raggio rifratto:
+          //calcolo della direzione per il raggio rifratto:
+          Point3D dir = Point3D.getRefraction(r.d, n1, RenderAction.material[mId].refractionIndexRGB.x);
+          //se c'e' effettivamente una rifrazione non interna
+          if(!dir.equals(new Point3D(-1.0f))) {
 
-          //viene creato il raggio rigratto
-          Ray refrRay=new Ray(r.o,dir);
+            //viene creato il raggio rigratto
+            Ray refrRay=new Ray(r.o,dir);
 
-          //si verifica il parametro di imperfezione del
-          //materiale
-          if((RenderAction.material[mId].refImperfection==0)||(RenderAction.nRay>0))
-          {
-            float t= RenderAction.inf;
-            Obj objX;
-            objX=null;
-
-            if(Utilities.intersect(refrRay, objX))
+            //si verifica il parametro di imperfezione del
+            //materiale
+            if((RenderAction.material[mId].refImperfection==0)||(RenderAction.nRay>0))
             {
-              t= RenderAction.inters;
-              RenderAction.inters = RenderAction.inf;
-              objX= RenderAction.intersObj;
-              RenderAction.intersObj =null;
-              Point3D iP=(refrRay.o).add(
-                   refrRay.d.multiplyScalar(t));
-              Ray r2=new Ray(iP,dir.multiplyScalar(-1));
+              double t= RenderAction.inf;
+              Obj objX;
+              objX=null;
 
+              if(Utilities.intersect(refrRay, objX))
+              {
+                t= RenderAction.inters;
+                RenderAction.inters = RenderAction.inf;
+                objX= RenderAction.intersObj;
+                RenderAction.intersObj =null;
+                Point3D iP=(refrRay.o).add(
+                     refrRay.d.multiplyScalar(t));
+                Ray r2=new Ray(iP,dir.multiplyScalar(-1));
+
+                RenderAction.nRay++;
+                //calcolo della radianza rifratta
+                radianceRefr=radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn));
+                RenderAction.nRay--;
+              }
+            } else {
               RenderAction.nRay++;
-              //calcolo della radianza rifratta
-              radianceRefr=radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn));
+              //per ogni sample
+              for(int s = 0; s< RenderAction.refSample; s++){
+                float random1;
+                float random2;
+                //flag di controllo sulla direzione creata
+                boolean okdir=true;
+                //float3 dir;
+
+                while(okdir){
+                  //variabili aleatorie uniformi in
+                  //[0,1]
+                  random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
+                  random2= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
+
+                  //distribuisco i numeri random sull'
+                  //emisfero
+                  float rndPhi=2*Utilities.MATH_PI *(random1);
+                  float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
+
+                  // creazione della base ortonormale
+                  //creata a partire dal raggio rifratto
+                  Point3D u,v,w;
+                  w=refrRay.d;
+                  //vettore up (simile a (0,1,0))
+                  Point3D up=new Point3D(0.0015f,1.0f,0.021f);
+                  v=w.crossProduct(up);
+                  v=v.getNormalizedPoint();
+                  u=v.crossProduct(w);
+                  //si calcola la direzione del raggio
+
+                  float cosPhi=(float) Math.cos(rndPhi);
+                  float sinTeta=(float) Math.sin(rndTeta);
+                  float sinPhi=(float) Math.sin(rndPhi);
+                  float cosTeta=(float) Math.cos(rndTeta);
+                  dir=(u.multiplyScalar(cosPhi*sinTeta))
+                      .add(v.multiplyScalar(sinPhi*sinTeta))
+                      .add(w.multiplyScalar(cosTeta));
+                  //si verifica che l'angolo tra la
+                  //normale e la nuova direzione sia
+                  //maggiore di 90 gradi
+                  if(dir.dotProduct(n1.multiplyScalar(-1))>0)
+                    okdir=false;
+                 }//fine while(okdir)
+
+                 //nuovo raggio:
+                 Ray rRay=new Ray();
+                 rRay.o=r.o;
+                 rRay.d=dir;
+
+                 double t= RenderAction.inf;
+                 Obj objX;
+                 objX=null;
+
+                 if(Utilities.intersect(refrRay, objX)){
+                   t= RenderAction.inters;
+                   RenderAction.inters = RenderAction.inf;
+                   objX= RenderAction.intersObj;
+                   RenderAction.intersObj =null;
+                   //punto di intersezione
+                   Point3D iP=(refrRay.o).add((refrRay.d).multiplyScalar(t));
+                   Ray r2=new Ray(iP,dir.multiplyScalar(-1));
+
+                   //calcolo della radianca rifratta
+                   radianceRefr=radianceRefr.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn)));
+                 }
+              }
               RenderAction.nRay--;
-            }
-          } else {
-            RenderAction.nRay++;
-            //per ogni sample
-            for(int s = 0; s< RenderAction.refSample; s++){
-              float random1;
-              float random2;
-              //flag di controllo sulla direzione creata
-              boolean okdir=true;
-              //float3 dir;
-
-               while(okdir){
-
-                 //variabili aleatorie uniformi in
-                 //[0,1]
-                 random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
-                 random2= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
-
-                 //distribuisco i numeri random sull'
-                 //emisfero
-                 float rndPhi=2*Utilities.MATH_PI *(random1);
-                 float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
-
-                 // creazione della base ortonormale
-                 //creata a partire dal raggio rifratto
-                 Point3D u,v,w;
-                 w=refrRay.d;
-                 //vettore up (simile a (0,1,0))
-                 Point3D up=new Point3D(0.0015f,1.0f,0.021f);
-                 v=w.crossProduct(up);
-                 v=v.getNormalizedPoint();
-                 u=v.crossProduct(w);
-                 //si calcola la direzione del raggio
-
-                 float cosPhi=(float) Math.cos(rndPhi);
-                 float sinTeta=(float) Math.sin(rndTeta);
-                 float sinPhi=(float) Math.sin(rndPhi);
-                 float cosTeta=(float) Math.cos(rndTeta);
-                 dir=(u.multiplyScalar(cosPhi*sinTeta))
-                     .add(v.multiplyScalar(sinPhi*sinTeta))
-                     .add(w.multiplyScalar(cosTeta));
-                 //si verifica che l'angolo tra la
-                 //normale e la nuova direzione sia
-                 //maggiore di 90 gradi
-                 if(dir.dotProduct(n1.multiplyScalar(-1))>0)
-                   okdir=false;
-                }//fine while(okdir)
-
-                //nuovo raggio:
-                Ray rRay=new Ray();
-                rRay.o=r.o;
-                rRay.d=dir;
-
-                float t= RenderAction.inf;
-                Obj objX;
-                objX=null;
-
-                if(Utilities.intersect(refrRay, objX)){
-                  t= RenderAction.inters;
-                  RenderAction.inters = RenderAction.inf;
-                  objX= RenderAction.intersObj;
-                  RenderAction.intersObj =null;
-                    //punto di intersezione
-                    Point3D iP=(refrRay.o).add((
-                        refrRay.d).multiplyScalar(t));
-                    Ray r2=new Ray(iP,dir.multiplyScalar(
-                        -1));
-
-                    //calcolo della radianca rifratta
-                    radianceRefr=radianceRefr.add
-                        (radiance(r2,objX,x,y).multiplyComponents(
-                        RenderAction.material[mId].T_BRDF(Fresn)));
-                }
-            }
-            RenderAction.nRay--;
-            //si mediano i contributi di tutti i raggi
-            //usati
-            radianceRefr=radianceRefr.divideScalar(
-                (float) RenderAction.refSample);
-
+              //si mediano i contributi di tutti i raggi
+              //usati
+              radianceRefr=radianceRefr.divideScalar(
+                  (float) RenderAction.refSample);
           }
         }
-      }
-      //se l'indice di rifrazione e' diverso nelle 3
-      //componeneti RGB allora si devono calcolare 3 raggi
-      //uno per ogni componente. In questo caso pero' per
-      //facilitare il calcolo non viene considerato l'indice
-      //di imperfezione del materiale
-      else{
+      } else {
+        //se l'indice di rifrazione e' diverso nelle 3
+        //componeneti RGB allora si devono calcolare 3 raggi
+        //uno per ogni componente. In questo caso pero' per
+        //facilitare il calcolo non viene considerato l'indice
+        //di imperfezione del materiale
 
         // rifrazone del raggio basata sulla normale
         // Raggio utilizzato per la rifrazione
@@ -749,7 +740,7 @@ public class Renderer {
         refrRay[0].o=r.o;
         refrRay[1].o=r.o;
         refrRay[2].o=r.o;
-        float K[]={0,0,0};
+        float[] K = {0, 0, 0};
 
         //calcolo dei 3 raggi rifratti
         refrRay = Point3D.getRefraction(refrRay,r.d,n1, RenderAction.material[mId].
@@ -758,15 +749,14 @@ public class Renderer {
         //carichiamo la brdf sul vettore g[] di 3 elementi
         //cosi da accedervi piu' facilmente
         Point3D brdf= RenderAction.material[mId].T_BRDF(Fresn);
-        float g[]={brdf.x,brdf.y,brdf.z};
+        double[] g = {brdf.x, brdf.y, brdf.z};
         RenderAction.nRay++;
         //per ogni componente RGB
         for(int i=0;i<3;i++) {
           //si verifica che non ci sia stata riflessione
                 //totale
           if(refrRay[i].depth!=0){
-
-            float t= RenderAction.inf;
+            double t= RenderAction.inf;
             Obj objX;
             objX=null;
 
@@ -784,7 +774,7 @@ public class Renderer {
               Point3D pr= radiance(r2,objX,x,y);
               //si deve ora estrapolare la componente
               //i di tale radianza
-              float[] rg=new float[3];
+              double[] rg=new double[3];
               rg[0]=pr.x;
               rg[1]=pr.y;
               rg[2]=pr.z;
@@ -852,7 +842,7 @@ public class Renderer {
     //con il seguente if si controlla se il materiale
     //emette effettivamente luce
     if (RenderAction.material[mId].emittedLight.max() > 0) {
-      float Ler = RenderAction.material[mId].emittedLight.max();
+      double Ler = RenderAction.material[mId].emittedLight.max();
       Point3D Ler3=new Point3D(Ler);
       //con il metodo clamp3 si evita che la radianza in
       //uscita superi il valore massimo di radianza: 1
@@ -860,6 +850,171 @@ public class Renderer {
       radianceOutput = Ler3;
     }
     return radianceOutput;
+  }
+
+  void calculateRadiance(Camera cam) {
+    //per tutte le righe
+    for(int y = 0; y <= RenderAction.h; y++) {
+      //stampiamo la percentuale di completamento per
+      //monitorare l'avanzamento del rendering
+      double percentY = ((float)y / (float) RenderAction.h) * 100;
+      System.out.println("percentuale di completamento " + "radianza:	 " + percentY);
+
+      //per tutte le colonne
+      for(int x = 0; x <= RenderAction.w; x++)
+      {
+        // Ora siamo nel pixel
+        // r e' la radianza: in questo caso e' tutto nero
+        // Radianza della scena
+        Point3D sceneRadiance = new Point3D(0.0f);
+
+        // Loop per ogni campione
+        for (int s = 0; s < RenderAction.samps; s++) {
+          //inizializiamo un raggio per la camera
+          Ray cameraRay;
+
+          //transformazione delle variabili x e y in
+          //float corrispondono alla posizione che
+          //cameraRay deve raggiungere
+          float raster_x = (float)x;
+          float raster_y = (float)y;
+
+          //origine del raggio della fotocamera
+          Point3D origin=new Point3D();
+          origin.copy(cam.eye);
+
+          //se ho piu' di un campione allora
+          //distribuisco gli altri campioni in modo
+          //casuale
+          if (s > 0) {
+            float rndX=0;
+            float rndY=0;
+
+            //utilizzo questa variabile tt perche' non
+            //posso usare il valore x+y*w nell'array
+            //samplesX[], altrimenti l'ultimo indice
+            //sarebbe fuori dal range (ricordo che la
+            //misura e' w*h ma gli indici vanno da 0 a
+            //w*h-1)
+            int tt =x+y*RenderAction.w;
+            //allora faccio l'if per tt<w*h cosi' da
+            //accertarmi che non sia considerato l'indice
+            //w*h-esimo
+            if(tt<RenderAction.w*RenderAction.h) {
+              // gli passo il numero random da cui
+              //siamo partiti all'interno del pixel
+              rndX = Utilities.generateRandom(RenderAction.samplesX[tt]);
+              rndY = Utilities.generateRandom(RenderAction.samplesY[tt]);
+            }
+
+            //prendiamo un punto a caso su un disco di
+            raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+            raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+            Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
+            Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
+
+            origin = origin.add(camUFuoco).add(camVFuoco);
+          }
+
+          // prediamo la direzione della fotocamera
+          Point3D ray_direction;
+          //ray_direction e' calcolato con l'ONB(base
+          //ortonormale) della fotocamera
+          //il raggio dalla fotocamera al campione sara'
+          //data dalla combinazione lineare dell'ONB
+          //della fotocamera
+          //centro il piano rispetto alla fotocamera
+          //sottraendo w/2 alla componente in x e h/2
+          //alla componente in y infine la distanza z
+          //tra la fotocamera e il piano e' cam.d
+
+          //ray_direction=U*(raster_x-w/2)+
+          //+V*(raster_y-h/2)+W*(-cam.d)
+          ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f*RenderAction.w))
+              .add(cam.V.multiplyScalar(raster_y - 0.5f*RenderAction.h))
+              .add(cam.W.multiplyScalar(-cam.d));
+          ray_direction=ray_direction.getNormalizedPoint();
+
+          //Ora si crea il raggio della fotocamera
+          cameraRay = new Ray(origin, ray_direction);
+
+          //dichiaro e inizializzo la variabile t in cui
+          //salveremo il punto di intersezione fra
+          //l'oggetto considerato  e cameraRay
+          double t = RenderAction.inf;
+          //inizializzo a null l'oggetto intersecato
+          //dal raggio
+          Obj o=null;
+          //intersezione del raggio con gli elementi
+          //della scena:
+          if(Utilities.intersect(cameraRay, o)) {
+            //pongo t uguale al valore di intersezione
+            //memorizzato nella variabile globale inters
+            t= RenderAction.inters;
+            //resetto inters uguale a inf in modo da
+            //avere il giusto valore di partenza la
+            //prossima volta che si utilizzera'
+            //il metodo intersect()
+            RenderAction.inters = RenderAction.inf;
+            //salvo nella variabile o objX l'elemento
+            //intersecato dal raggio cameraRay
+            o= RenderAction.intersObj;
+            //resetto intersObj=null in modo da avere
+            //il giusto valore di partenza la prossima
+            //volta che si utilizzera' il metodo
+            //intersect()
+            RenderAction.intersObj=null;
+            //si calcola il punto di intersezione
+            Point3D iP = (cameraRay.o).add(cameraRay.d.multiplyScalar(t));
+            //viene creato il primo raggio per il
+            //calcolo della radianza
+            //questo raggio parte dal punto ed e'
+            //diretto verso l'osservatore
+            Ray first = new Ray(iP, (cameraRay.d).multiplyScalar(-1));
+            //si aggiunge alla variabile r il contributo
+            //di radianza del punto considerato
+            sceneRadiance = sceneRadiance.add(radiance(first, o, x, y));
+          } else {
+            //se non si interseca nessun oggetto si
+            //aggiunge alla variabile r il colore di
+            //background (nero)
+
+            sceneRadiance = sceneRadiance.add(RenderAction.background);
+          }
+        }
+
+        //divido per il numero di campioni del pixel
+        sceneRadiance = sceneRadiance.divideScalar((float) RenderAction.samps);
+        sceneRadiance.multiplyScalar(0.3f);
+        // A questo punto si crea un'immagine basata sui
+        //valori di radianza r
+
+        //le componenti RGB del vettore r vengono tagliate
+        //se non comprese in [0,1] dopodiche' vengono
+        //caricate nel vettore image
+        //nota: per ogni y che aumenta abbiamo gia'
+        //caricato w pixel
+
+        //utilizzo questa variabile tt perche' non posso
+        //usare il valore x+y*w nell'array image[w*y],
+        //altrimenti l'ultimo indice sarebbe fuori dal
+        //range (ricordo che la misura e' w*h ma gli
+        //indici vanno da 0 a w*h-1)
+        int tt =x+y*RenderAction.w;
+        //allora faccio l'if per tt<w*h cosi' da
+        //accertarmi che non sia considerato l'indice
+        //w*h-esimo
+        if(tt<RenderAction.w*RenderAction.h) {
+          RenderAction.image[x+y*RenderAction.w].x = Point3D.clamp(sceneRadiance.x);
+          RenderAction.image[x+y*RenderAction.w].y = Point3D.clamp(sceneRadiance.y);
+          RenderAction.image[x+y*RenderAction.w].z = Point3D.clamp(sceneRadiance.z);
+        }
+      }
+    }
+  }
+
+  void calculateThreadedRadiance(Camera cam, Renderer renderer) {
+    new Runner(true, cam, renderer);
   }
 
   //funzione per il calcolo della radiosita' della scena:
@@ -870,10 +1025,7 @@ public class Renderer {
   //conservare i valori aggiornati delle potenze dei vari
   //oggetti
   void jacobiStoc(int nObj) {
-    ArrayList<ParallelProcessRadiance> parallelisation = null;
-    //TODO controllare probabili ottimizzazioni
-
-    //definizco la potenza residua totale delle patch:
+    //definisco la potenza residua totale delle patch:
     Point3D Prtot=new Point3D();
     //definisco la potenza di ogni patch della scena:
     Point3D[] P=new Point3D[nObj];
@@ -905,7 +1057,9 @@ public class Renderer {
       float area= RenderAction.globalObjects.get(i).areaObj;
       //se l'area e' piu' piccola della precisione di
       //calcolo allora impostiamo l'area a 0
-      if(area<Utilities.EPSILON) {area=0;}
+      if(area<Utilities.EPSILON) {
+        area=0;
+      }
 
       //potenza della luce
       //Potenza emessa dalla patch i:
@@ -964,13 +1118,13 @@ public class Renderer {
       int NZ=0;
 
       //potenza residua totale nelle tre componenti
-      float Prt= Prtot.x+Prtot.y+Prtot.z;
+      double Prt= Prtot.x+Prtot.y+Prtot.z;
       //campioni distribuiti in base alla potenza
       //totale di ciascuna componente RGB che chiamiamo
       //qui (x,y,z)
 
-      Point3D samps=new Point3D(RenderAction.Jacobisamps*Prtot.x,
-              RenderAction.Jacobisamps*Prtot.y, RenderAction.Jacobisamps*Prtot.z);
+      Point3D samps=new Point3D(RenderAction.jacobiSamps*Prtot.x,
+              RenderAction.jacobiSamps*Prtot.y, RenderAction.jacobiSamps*Prtot.z);
       samps=samps.divideScalar(Prt);
       //parametro che ci permette di contare, quindi
       //utilizzare tutti i campioni che erano stati
@@ -995,7 +1149,7 @@ public class Renderer {
         //per la patch i in base alla sua potenza
         //e anche in base a quanti campioni sono gia'
         //stati usati
-        NX=Math.round((q.x*samps.x)+NprevX*(-1));
+        NX= (int) Math.round((q.x*samps.x)+NprevX*(-1));
 
         //per ogni campione dell'elemento i
         for (int j=0; j<NX; j++) {
@@ -1112,7 +1266,7 @@ public class Renderer {
         //componente verde:
 
         //campioni per la patch i
-        NY=Math.round((q.y*samps.y)+NprevY*(-1));
+        NY= (int) Math.round((q.y*samps.y)+NprevY*(-1));
 
         //per ogni campione sull'elemento i
         for (int j=0; j<NY; j++) {
@@ -1172,7 +1326,7 @@ public class Renderer {
         //componente blu:
 
         //campioni per la patch i
-        NZ=Math.round((q.z*samps.z)+NprevZ*(-1));
+        NZ= (int) Math.round((q.z*samps.z)+NprevZ*(-1));
 
         //per ogni campione sull'elemento i
         for (int j=0; j<NZ; j++){

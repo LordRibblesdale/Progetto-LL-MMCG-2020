@@ -19,7 +19,7 @@ class Camera {
 	public Point3D U,V,W;
 	   
 	public float aperturaDiaframma = 0;
-	public float fuoco=0;
+	public double fuoco=0;
 	
 	//costruttore di default imposta la fotocamera 
 	//nell'origine che guarda l'origine con distanza 

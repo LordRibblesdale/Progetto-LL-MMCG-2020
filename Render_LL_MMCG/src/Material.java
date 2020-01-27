@@ -88,7 +88,7 @@ public class Material {
 
 		emittedLight =new Point3D(0.0f);
 		//normalizzazione: Kd+Kr deve essere <1
-		float Ftot= diffusionColor.max()+reflectionColor.max();
+		double Ftot= diffusionColor.max()+reflectionColor.max();
 		if( Ftot>1){
 			this.diffusionColor =diffusionColor.divideScalar(Ftot);
 			this.reflectionColor =reflectionColor.divideScalar(Ftot);
@@ -118,7 +118,7 @@ public class Material {
 	//metodo che calcola il coefficente di Fresnel in base  
 	//al coseno dell'angolo di incidenza del raggio visuale 
 	//con la normale
-	public Point3D getFresnelCoefficient(float cosI){
+	public Point3D getFresnelCoefficient(double cosI){
 		Point3D etat= refractionIndexRGB;
 	    //viene calcolato solamente per materiali con 
 		//indice di rifrazione maggiore di 0
@@ -271,13 +271,13 @@ public class Material {
 				Point3D H = (psi.d.add(theta.d)).getNormalizedPoint();
 
 				//<psi,H>=<theta,H>
-				float c = psi.d.dotProduct(H);
+				double c = psi.d.dotProduct(H);
 				//<n,H>
-				float cNH = n.dotProduct(H);
+				double cNH = n.dotProduct(H);
 				//<psi,n>
-				float cPsiN = psi.d.dotProduct(n);
+				double cPsiN = psi.d.dotProduct(n);
 				//<teta,n>
-				float cThetaN = theta.d.dotProduct(n);
+				double cThetaN = theta.d.dotProduct(n);
 
 
 				//calcolo coefficiente di Fresnel

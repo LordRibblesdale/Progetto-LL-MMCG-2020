@@ -10,53 +10,73 @@
 public class Point3D {
 	//ha come parametri soltanto le tre componenti di un 
 	//float in uno spazio a 3 dimensioni
-	public float x;
-	public float y;
-	public float z;
+	public double x;
+	public double y;
+	public double z;
 	
 	//costruttori
 	public Point3D() {
-		x = 0.0f;
-		y = 0.0f;
-		z = 0.0f;
+		x = 0;
+		y = 0;
+		z = 0;
 	}
 
-	public Point3D(float x_, float y_, float z_) {
+	public Point3D(double x_, double y_, double z_) {
 		x = x_;
 		y = y_;
 		z = z_;
 	}
 	
-	public Point3D(float x_) {
+	public Point3D(double x_) {
 		x = x_;
 		y = x_;
 		z = x_;
 	}
 	
 	//metodi set e get
-	public void setX(float newX) {
+	public void setX(double newX) {
 		x = newX;
 	}
 
-	public void setY(float newY) {
+	public void setY(double newY) {
 		y=newY;
 	}
 
-	public void setZ(float newZ) {
+	public void setZ(double newZ) {
 		z=newZ;
 	}
 	
-	public float getX() {
+	public double getX() {
 		return x;
 	}
 
-	public float getY() {
+	public double getY() {
 		return y;
 	}
 
-	public float getZ() {
+	public double getZ() {
 		return z;
 	}
+
+	public double getDim(int i) {
+	  if (i == 0) {
+	    return getX();
+    } else if (i == 1) {
+	    return getY();
+    } else {
+	    return getZ();
+    }
+  }
+
+  public void setDim(int i, double value) {
+    if (i == 0) {
+      setX(value);
+    } else if (i == 1) {
+      setY(value);
+    } else {
+      setZ(value);
+    }
+  }
 	
 	//addizione componente componente tra 2 vettori in R3
 	public Point3D add(Point3D b) {
@@ -78,7 +98,7 @@ public class Point3D {
 	
 	//moltiplicazione tra ogni componente di un vettore 
 	//in R3 con uno scalare b
-	public Point3D multiplyScalar(float b)	{
+	public Point3D multiplyScalar(double b)	{
 		Point3D a=new Point3D(x,y,z);
 		a.x=a.x*b;
 		a.y=a.y*b;
@@ -88,7 +108,7 @@ public class Point3D {
 	
 	//divisione tra ogni componente di un vettore in R3 
 	//con uno scalare b
-	public Point3D divideScalar(float b)	{
+	public Point3D divideScalar(double b)	{
 		Point3D a=new Point3D(x,y,z);
 		a.x=a.x/b;
 		a.y=a.y/b;
@@ -130,13 +150,13 @@ public class Point3D {
 	}
 
 	//norma al quadrato
-	float squareNorm() {
+	double squareNorm() {
    	Point3D a=new Point3D(x,y,z);
 		return a.x*a.x+a.y*a.y+a.z*a.z;
    }
 
   //media delle componenti di un vettore in R3
-  float average() {
+  double average() {
    	Point3D a=new Point3D(x,y,z);
 		return (a.x+a.y+a.z)/3;
 	}
@@ -145,14 +165,14 @@ public class Point3D {
   Point3D getNormalizedPoint() {
   	Point3D a=new Point3D(x,y,z);
   	float n = a.normalize();
-  	float ax=(a.x)/n;
-  	float ay=(a.y)/n;
-  	float az=(a.z)/n;
+  	double ax=(a.x)/n;
+  	double ay=(a.y)/n;
+  	double az=(a.z)/n;
 		return new Point3D(ax,ay,az);
   }
     
   // Prodotto scalare
- 	float dotProduct(Point3D b) {
+ 	double dotProduct(Point3D b) {
  		Point3D a=new Point3D(x,y,z);
 		return a.x*b.x+a.y*b.y+a.z*b.z; 
 	}
@@ -165,8 +185,8 @@ public class Point3D {
  	}
 
  	//Cerca la componente massima di un vettore in R3
- 	float max() {
- 		float max=x; 
+ 	double max() {
+ 		double max=x;
  		if(y>x){max=y;} 
  		if(z>max){max=z;} 
  		return max;
@@ -208,7 +228,7 @@ public class Point3D {
   // in questa funzione la rifrazione non varia con la
   //lunghezza d'onda
 
-  static Point3D getRefraction(Point3D direction, Point3D normal, float refractionIndex){
+  static Point3D getRefraction(Point3D direction, Point3D normal, double refractionIndex){
 		// direction definito come "i" nei commenti
 		// normal definito come "n" nei commenti
 
@@ -218,7 +238,7 @@ public class Point3D {
 
   	//si calcola il coseno tra la normale e il vettore
   	//entrante i: <n,i>
-  	float cosThetaI = normal.dotProduct(direction);
+  	double cosThetaI = normal.dotProduct(direction);
 
   	//si prende in esame l'indice di rifrazione ior
   	//del materiale. Per semplificare il calcolo viene
@@ -228,7 +248,7 @@ public class Point3D {
   	//con indice di rifrazione differente
   	//indice di rifrazione nel vuoto (=1) / indice di
   	//rifrazione del materiale
-  	float eta=1/refractionIndex;
+  	double eta=1/refractionIndex;
 
   	//se il coseno dell'angolo tra il vettore i e n e'
   	//minore di 0 allora dobbiamo invertire la normale
@@ -242,13 +262,13 @@ public class Point3D {
   	}
 
   	//calcolo dei fattori necessari
-  	float sin2ThetaI = 1-(cosThetaI*cosThetaI);
-  	float sin2ThetaT = eta*eta*sin2ThetaI;
+  	double sin2ThetaI = 1-(cosThetaI*cosThetaI);
+  	double sin2ThetaT = eta*eta*sin2ThetaI;
 
   	// se questo coefficente e' minore di 0 allora
   	//avviene una riflessione totale e il resto del
   	//calcolo non viene effettuato
-  	float K= 1 - sin2ThetaT;
+  	double K= 1 - sin2ThetaT;
   	if (K<0) {
   		//riflessione totale
 			return new Point3D(-1.0f);
@@ -256,7 +276,7 @@ public class Point3D {
   		//altrimenti si procede con il calcolo del
   		//vettore rifratto
   		float cosThetaT= (float) Math.sqrt(K);
-  		float angle = eta*cosThetaI - cosThetaT;
+  		double angle = eta*cosThetaI - cosThetaT;
 			return normal.multiplyScalar(angle)
 							.subtract(direction.multiplyScalar(eta));
   	}
@@ -284,7 +304,7 @@ public class Point3D {
 
 		direction.getNormalizedPoint();
 		// <n, i>
-  	float cosThetaI = normal.dotProduct(direction);
+  	double cosThetaI = normal.dotProduct(direction);
   	Point3D eta = new Point3D(1.0f).divideComponents(refractionIndex);
      //se l'angolo di incidenza e' superiore a pi/2
   	//allora devo cambiare il verso della normale e
@@ -309,7 +329,7 @@ public class Point3D {
   		rays[0].depth=0;
   	} else {
 			float cos_theta_t= (float) Math.sqrt(K.x);
-			float angle=eta.x*cosThetaI-cos_theta_t;
+			double angle=eta.x*cosThetaI-cos_theta_t;
   		rays[0].d= normal.multiplyScalar(angle);
   		rays[0].d= rays[0].d.subtract(direction.multiplyScalar(eta.x));
   	}
@@ -319,7 +339,7 @@ public class Point3D {
   		rays[1].depth=0;
   	} else {
   		float cos_theta_t= (float) Math.sqrt(K.y);
-  		float angle =eta.y*cosThetaI-cos_theta_t;
+  		double angle =eta.y*cosThetaI-cos_theta_t;
   		rays[1].d= normal.multiplyScalar(angle);
   		rays[1].d= rays[1].d.subtract(direction.multiplyScalar(eta.y));
   	}
@@ -329,7 +349,7 @@ public class Point3D {
   		rays[2].depth=0;
   	} else {
   		float cos_theta_t= (float) Math.sqrt(K.z);
-  		float angle=eta.z*cosThetaI-cos_theta_t;
+  		double angle=eta.z*cosThetaI-cos_theta_t;
   		rays[2].d= normal.multiplyScalar(angle);
   		rays[2].d= rays[2].d.subtract(direction.multiplyScalar(eta.z));
 		}
@@ -338,7 +358,7 @@ public class Point3D {
   }
     
   //costringe un numero in [0,1]
-	public static float clamp(float x) {
+	public static double clamp(double x) {
 		if(x<0)
 			return 0;
 		else if (x>1)
@@ -349,9 +369,9 @@ public class Point3D {
 
     //costringe le componenti di un vettore in R3 in [0,1]
   public static Point3D clamp3(Point3D f) {
-  	float xf=clamp(f.x);
-  	float yf=clamp(f.y);
-  	float zf=clamp(f.z);
+  	double xf=clamp(f.x);
+  	double yf=clamp(f.y);
+  	double zf=clamp(f.z);
 		return new Point3D(xf,yf,zf);
   }
 }

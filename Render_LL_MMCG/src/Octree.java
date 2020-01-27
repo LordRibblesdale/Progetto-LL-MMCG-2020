@@ -41,21 +41,20 @@ public class Octree {
     }
 	
 	boolean intersect(Ray r){
-        
         //si inizializza il parametro di intersezione del raggio
         
         //parametro di entrata dal box
-        float Tnear=Float.NEGATIVE_INFINITY;
+        double Tnear=Float.NEGATIVE_INFINITY;
         //parametro di uscita dal box
-        float Tfar=Float.POSITIVE_INFINITY;
+        double Tfar=Float.POSITIVE_INFINITY;
         
         //si carica il raggio r dentro due array di 3 dimensioni
-        float d[]={r.d.x,r.d.y,r.d.z};
-        float o[]={r.o.x,r.o.y,r.o.z};
+        double[] d={r.d.x,r.d.y,r.d.z};
+        double[] o={r.o.x,r.o.y,r.o.z};
         
         //si carica il minimo e massimo del box dentro un array di 3 dimensioni
-        float min[]={V[0].x,V[0].y,V[0].z};
-        float max[]={V[1].x,V[1].y,V[1].z};
+        double[] min={V[0].x,V[0].y,V[0].z};
+        double[] max={V[1].x,V[1].y,V[1].z};
         
         //corrispondenze 
         //i=0 asse x
@@ -74,12 +73,12 @@ public class Octree {
             }else{
                 
                 //altrimenti mi ricavo le intersezioni del raggio con i piani i nelle posizioni min[i] e max[i]
-                float T1= (min[i] -o[i])/d[i];
-                float T2= (max[i] -o[i])/d[i];
+                double T1= (min[i] -o[i])/d[i];
+                double T2= (max[i] -o[i])/d[i];
                 
                 //si ordinano dal piu' piccolo al piu' grande le intersezioni
                 if(T1>T2) {//swap(T1,T2);
-                	float app=T2;
+                	double app=T2;
                     T2=T1;
                     T1=app;
                 }

@@ -137,18 +137,18 @@ public class Box {
   boolean intersect(Ray r){
   	//inizializziamo a + e - infinito i piani
   	//near e far
-    float tNear = Float.NEGATIVE_INFINITY;
-    float tFar = Float.POSITIVE_INFINITY;
+    double tNear = Float.NEGATIVE_INFINITY;
+    double tFar = Float.POSITIVE_INFINITY;
     //array con le componenti della direzione del
     //raggio
-    float[] direction = {
+    double[] direction = {
             r.d.getX(),
             r.d.getY(),
             r.d.getZ()
     };
     //array con le componenti dell'origine del
     //raggio
-    float[] origin = {
+    double[] origin = {
             r.o.getX(),
             r.o.getY(),
             r.o.getZ()
@@ -156,12 +156,12 @@ public class Box {
 
     //array con le componenti dei vertici del box
     //V[0] e V[1]
-    float[] min ={
+    double[] min ={
             V[0].getX(),
             V[0].getY(),
             V[0].getZ()
     };
-    float[] max = {
+    double[] max = {
             V[1].getX(),
             V[1].getY(),
             V[1].getZ()
@@ -180,13 +180,13 @@ public class Box {
       } else {
         //si definiscono le intersezioni piu'
         //vicina e piu' lontana
-        float T1= (min[i] -origin[i])/direction[i];
-        float T2= (max[i] -origin[i])/direction[i];
+        double T1= (min[i] -origin[i])/direction[i];
+        double T2= (max[i] -origin[i])/direction[i];
         //ordina dal piu' piccolo (T1) al piu'
         //grande (T2)
         if(T1>T2){
           //swap(T1,T2);
-          float app=T2;
+          double app=T2;
           T2=T1;
           T1=app;
         }
