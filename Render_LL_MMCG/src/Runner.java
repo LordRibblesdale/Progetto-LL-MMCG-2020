@@ -1,12 +1,10 @@
 import java.util.ArrayList;
 
 public class Runner {
-  private boolean isRadiance;
   private Camera cam;
   private Renderer renderer;
 
-  Runner(boolean isRadiance, Camera cam, Renderer renderer) {
-    this.isRadiance = isRadiance;
+  Runner(Camera cam, Renderer renderer) {
     this.cam = cam;
     this.renderer = renderer;
 
@@ -15,35 +13,38 @@ public class Runner {
 
   private void execute() {
     int y = 0;
-    ArrayList<ParallelProcess> parallelisation = new ArrayList<>();
+    ArrayList<Thread> parallelisation = new ArrayList<>();
 
     int threads = Runtime.getRuntime().availableProcessors();
 
     for (int c = 0; c < threads; c++) {
-      if (isRadiance) {
-        parallelisation.add(new ParallelProcessRadiance(y, cam, renderer));
-      } else {
-        parallelisation.add(new ParallelProcessImage(y));
+      parallelisation.add(new Thread(new ParallelProcessRadiance(y, cam, renderer, new Utilities())));
+      parallelisation.get(parallelisation.size()-1).start();
+
+      synchronized (Runner.this) {
+        try {
+          wait(50);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
     }
 
     while (y < RenderAction.h){
       for (int i = 0; i < parallelisation.size(); i++) {
-        if (!parallelisation.get(i).getStatus()) {
+        if (!parallelisation.get(i).isAlive()) {
+          parallelisation.get(i).interrupt();
           y++;
 
           try {
             synchronized (Runner.this) {
-              if (isRadiance) {
-                parallelisation.set(i, new ParallelProcessRadiance(y, cam, renderer));
-              } else {
-                parallelisation.set(i, new ParallelProcessImage(y));
-              }
-
+              parallelisation.set(i, new Thread(new ParallelProcessRadiance(y, cam, renderer, new Utilities())));
               parallelisation.get(i).start();
-            }
-          } catch (IllegalThreadStateException e) {
 
+              wait(50);
+            }
+          } catch (IllegalThreadStateException | InterruptedException e) {
+            e.printStackTrace();
           }
         }
       }

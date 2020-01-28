@@ -4,20 +4,23 @@
 //della sfera con un raggio, e la funzione che restituisce
 //la normale alla sfera in un punto dato
 public class Sphere {
-		
 	// raggio
 	public float rad; 
 	// posizione (centro)
 	public Point3D p;
+
+	private Utilities utilities;
 	
 	//costruttore di default
 	public Sphere() {
+	  utilities = new Utilities();
 		rad=0.0f;
 		p=new Point3D();
 	}
 	
 	//costruttore
 	public Sphere(float nrad, Point3D np) {
+	  utilities = new Utilities();
 		rad=nrad;
 		p=np;
 	}
@@ -88,10 +91,10 @@ public class Sphere {
 	        //ritorna la t piu' piccola se questa e' >0 
 			//altrimenti vedi quella piu' grande se e' >0 
 			//se sono tutte negative non c'e' intersezione
-			if((t=B-det)>Utilities.EPSILON)
+			if((t=B-det)> utilities.EPSILON)
 				return t;
 			else {
-				if((t=B+det)>Utilities.EPSILON)
+				if((t=B+det)> utilities.EPSILON)
 					return t;
 				else
 					return -1.0f;

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class Mesh {
 	//nome della mesh
   String nome;
+  Utilities utilities;
   
   //array di puntatori ad oggetti
   public ArrayList<Obj> objects;
@@ -29,11 +30,17 @@ public class Mesh {
       4  //frontale
   };
 
+  private Mesh() {
+    utilities = new Utilities();
+  }
+
   Mesh(int nSpheres, Sphere[] spheres, int[] matIdSphere) {
+    this();
     loadSphere(nSpheres, spheres, matIdSphere);
   }
 
   Mesh(Point3D max, Point3D min) {
+    this();
     createScene(max, min);
   }
 
@@ -141,10 +148,10 @@ public class Mesh {
     if(!RenderAction.frontL){
       //definisco i vertici dei triagoli della stanza, 
       //traslandoli sulla y del valore 
-      //Utilities.EPS=0.01f per evitare di avere 
+      //utilities.EPS=0.01f per evitare di avere
       //problemi di aliasing dati dal linee 
       //perfettamente dritte nella fase di rendering
-      translateLL=new Point3D(0,-Utilities.EPSILON,0);
+      translateLL=new Point3D(0,-utilities.EPSILON,0);
       Point3D Lv1tr = (Lv1).add(translateLL);
       Point3D Lv4tr = (Lv4).add(translateLL);
       Point3D Lv5tr = (Lv5).add(translateLL);

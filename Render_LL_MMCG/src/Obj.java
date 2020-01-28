@@ -33,8 +33,16 @@ public class Obj {
     //dei materiali, quindi determina il materiale dell'Obj
 	int matId;
 
+	private Utilities utilities;
+
+	private Obj() {
+		utilities = new Utilities();
+	}
+
 	//costruttore per Obj sfera
 	public Obj(Sphere sp,int nmatId) {
+		this();
+
 		s=sp;
 		t=null;
 		matId=nmatId;
@@ -50,6 +58,8 @@ public class Obj {
     
 	//costruttore per Obj triangolo
 	public Obj(Triangle tr,int nmatId){
+		this();
+
 		s=null;
 		t=tr;
 		matId=nmatId;
@@ -116,7 +126,7 @@ public class Obj {
 	float area(){
 		if(s!=null){
 			//area sfera: 4*pigreco*r
-			return 4*Utilities.MATH_PI *s.rad;
+			return 4* utilities.MATH_PI *s.rad;
 		}
 		else if(t!=null){
 			//prendo i vertici del triangolo

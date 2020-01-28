@@ -1,16 +1,16 @@
-public class ParallelProcessRadiance extends Thread implements ParallelProcess {
+public class ParallelProcessRadiance implements Runnable {
   private boolean status = true;
 
   private int y;
   private Camera cam;
   private Renderer renderer;
+  private Utilities utilities;
 
-  ParallelProcessRadiance(int y, Camera cam, Renderer renderer) {
+  ParallelProcessRadiance(int y, Camera cam, Renderer renderer, Utilities utilities) {
     this.y = y;
     this.cam = cam;
     this.renderer = renderer;
-
-    start();
+    this.utilities = utilities;
   }
 
   @Override
@@ -99,29 +99,29 @@ public class ParallelProcessRadiance extends Thread implements ParallelProcess {
         //dichiaro e inizializzo la variabile t in cui
         //salveremo il punto di intersezione fra
         //l'oggetto considerato  e cameraRay
-        double t = RenderAction.inf;
+        double t = utilities.inf;
         //inizializzo a null l'oggetto intersecato
         //dal raggio
         Obj o=null;
         //intersezione del raggio con gli elementi
         //della scena:
-        if(Utilities.intersect(cameraRay, o)) {
+        if(utilities.intersect(cameraRay, o)) {
           //pongo t uguale al valore di intersezione
           //memorizzato nella variabile globale inters
-          t= RenderAction.inters;
+          t= utilities.inters;
           //resetto inters uguale a inf in modo da
           //avere il giusto valore di partenza la
           //prossima volta che si utilizzera'
           //il metodo intersect()
-          RenderAction.inters = RenderAction.inf;
+          utilities.inters = utilities.inf;
           //salvo nella variabile o objX l'elemento
           //intersecato dal raggio cameraRay
-          o= RenderAction.intersObj;
+          o= utilities.intersObj;
           //resetto intersObj=null in modo da avere
           //il giusto valore di partenza la prossima
           //volta che si utilizzera' il metodo
           //intersect()
-          RenderAction.intersObj=null;
+          utilities.intersObj=null;
           //si calcola il punto di intersezione
           Point3D iP = (cameraRay.o).add(cameraRay.d.multiplyScalar(t));
           //viene creato il primo raggio per il
@@ -168,11 +168,5 @@ public class ParallelProcessRadiance extends Thread implements ParallelProcess {
         RenderAction.image[x+y*RenderAction.w].z = Point3D.clamp(sceneRadiance.z);
       }
     }
-
-    status = false;
-  }
-
-  public boolean getStatus() {
-    return status;
   }
 }

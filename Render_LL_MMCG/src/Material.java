@@ -48,10 +48,13 @@ public class Material {
 	//e' permeabile o meno: serve per capire se e' 
 	//necessario calcolare la BRDF o la BSSRDF
 	public boolean translucent=false;
+
+	private Utilities utilities;
 	
 	//materiale di default: diffusivo bianco senza 
 	//riflessione
 	public Material() {
+		utilities = new Utilities();
 		diffusionColor =new Point3D(1.0f);
 		reflectionColor =new Point3D(0.0f);
 		refractionColor =new Point3D(0.0f);
@@ -62,7 +65,7 @@ public class Material {
 	//costruttore materiale 1: materiali diffusivi e 
 	//riflessivi 
 	public Material(Point3D diffusionColor, Point3D reflectionColor) {
-		
+		utilities = new Utilities();
 		this.diffusionColor = diffusionColor;
 		this.reflectionColor = reflectionColor;
 		refractionColor =new Point3D(0.0f);
@@ -74,7 +77,8 @@ public class Material {
 	//costruttore materiali lucidi (tramite il modello di 
 	//Cook-Torrance)
 	public Material(Point3D diffusionColor, Point3D refractionIndexRGB, float slope_) {
-		
+		utilities = new Utilities();
+
 		this.diffusionColor = diffusionColor;
 		slope = slope_;
 		this.refractionIndexRGB =refractionIndexRGB;
@@ -84,7 +88,8 @@ public class Material {
 	//costruttore materiale generico
 	public Material(Point3D diffusionColor, Point3D reflectionColor, Point3D refractionColor,
 									Point3D refractionIndexRGB, Point3D absorptionCoefficient, float slope_,
-									float refImperfection_, boolean translucent_){
+									float refImperfection_, boolean translucent_) {
+		utilities = new Utilities();
 
 		emittedLight =new Point3D(0.0f);
 		//normalizzazione: Kd+Kr deve essere <1
@@ -108,12 +113,14 @@ public class Material {
 	//materiali che emettono luce: Le corrisponde al colore
 	//della luce emessa
 	public Material(Point3D emittedLight) {
-        diffusionColor =new Point3D(0.0f);
-        reflectionColor =new Point3D(0.0f);
-        refractionColor =new Point3D(0.0f);
-        refractionIndexRGB =new Point3D(0.0f);
-        this.emittedLight = emittedLight.multiplyScalar(Utilities.MATH_1_DIV_PI);
-    }
+		utilities = new Utilities();
+
+		diffusionColor =new Point3D(0.0f);
+		reflectionColor =new Point3D(0.0f);
+		refractionColor =new Point3D(0.0f);
+		refractionIndexRGB =new Point3D(0.0f);
+		this.emittedLight = emittedLight.multiplyScalar(utilities.MATH_1_DIV_PI);
+	}
     
 	//metodo che calcola il coefficente di Fresnel in base  
 	//al coseno dell'angolo di incidenza del raggio visuale 
@@ -198,7 +205,7 @@ public class Material {
 								add(Rperp.multiplyComponents(Rperp))).
 								multiplyScalar(0.5f);
 
-				if(result.average() < Utilities.EPSILON)
+				if(result.average() < utilities.EPSILON)
 					result=new Point3D(0.0f);
 
 				//controllo della riflessione totale su
@@ -259,7 +266,7 @@ public class Material {
 	//uscita, n e' la normale dell'oggetto
     Point3D C_T_BRDF(Ray psi, Ray theta, Point3D n) {
     	//parte diffusiva
-    	Point3D fr= diffusionColor.multiplyScalar(Utilities.MATH_1_DIV_PI);
+    	Point3D fr= diffusionColor.multiplyScalar(utilities.MATH_1_DIV_PI);
         
     	//la parte riflettente viene considerata solo se 
     	//lo slope e' stato inizializzato (ovvero e' 
@@ -334,7 +341,7 @@ public class Material {
 
 				//modello di Cook-Torrance
 				fr = fr.add(F.multiplyScalar(Df * Gf *
-								Utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
+								utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
 			}
 
     	return fr;
@@ -361,7 +368,7 @@ public class Material {
     	dr=(float) Math.sqrt(l2+zr*zr);
     	//System.out.println("dv+ "+dv);
     	//pi4=4*3.14
-    	Point3D pi4=new Point3D(4*Utilities.MATH_PI);
+    	Point3D pi4=new Point3D(4* utilities.MATH_PI);
     	//i valori si sigmas e sigmaa sono specifici per 
     	//la giada
     	Point3D sigmas=new Point3D(0.657f,0.786f,0.9f);
@@ -392,7 +399,7 @@ public class Material {
 							add(vPart));
     	
     	result=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
-							divideScalar(Utilities.MATH_PI);
+							divideScalar(utilities.MATH_PI);
     	
     	return result;
     }

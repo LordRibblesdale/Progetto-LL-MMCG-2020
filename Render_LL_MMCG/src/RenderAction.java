@@ -113,19 +113,6 @@ class RenderAction extends AbstractAction implements Properties {
   //metodi richiamati)
   static ArrayList<Obj> globalObjects;
 
-  //variabile globale, utilizzata nel metodo intersect(),
-  //in cui viene salvato l'oggetto intersecato da un
-  //raggio considerato
-  static Obj intersObj;
-  //static ThreadLocal<Obj> intersObj;
-
-  //variabile globale, utilizzata nel metodo intersect(),
-  //in cui viene salvato punto di intersezione tra l'oggetto
-  //e il raggio considerato
-  static double inters;//sarebbe t del metodo intersect;
-  //static ThreadLocal<Double> inters = new ThreadLocal<>();
-  static double inf=(float) 1e20;	//distanza massima dal raggio
-
   static int[] samplesX=new int[w*h];	//campioni per la fotocamera
   static int[] samplesY=new int[w*h];
 
@@ -191,11 +178,13 @@ class RenderAction extends AbstractAction implements Properties {
   private static int[] bool;
 
   private Renderer renderer;
+  private Utilities utilities;
 
   RenderAction(int[] bool) {
     RenderAction.bool = bool;
 
-    renderer = new Renderer();
+    utilities = new Utilities();
+    renderer = new Renderer(utilities);
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -357,7 +346,7 @@ class RenderAction extends AbstractAction implements Properties {
 
     //la definizione di inters mi serve per il metodo
     //intersectBPS che utilizza questa variabile
-    inters=inf;
+    utilities.inters= Utilities.inf;
 
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
@@ -431,7 +420,7 @@ class RenderAction extends AbstractAction implements Properties {
   //metodo che imposta, a seconda della scelta
   //effettuata dall'utente, il materiale
   //appropriato alle prime tre sfere
-  int setMatIdSphere() {
+  private int setMatIdSphere() {
     int translucentJadeIndex=12;
     int diffusiveJadeIndex=15;
     int glassIndex=7;
@@ -447,15 +436,13 @@ class RenderAction extends AbstractAction implements Properties {
     return one;
   }
 
-  void createImage() {
+  private void createImage() {
     //stringa contenente le informazioni da scrivere nel
     //file immagine image.ppm
-    //String matrix="";
     StringBuilder matrix = new StringBuilder();
 
     //iniziamo la stringa matrix con valori di settaggio
     //richiesti
-    //matrix +="P3\n" + w + "\n" + h + "\n255\n";
     matrix.append("P3\n").append(w).append("\n").append(h).append("\n255\n");
 
     //Ora si disegna l'immagine: si procede aggiungendo

@@ -9,23 +9,26 @@ public class Triangle {
 	public Point3D[]vertices;
 	//Normale al triangolo
 	public Point3D n;
+
+	private Utilities utilities;
 	
 	//costruttore di default
-	public Triangle() {
-		
+	private Triangle() {
+		utilities = new Utilities();
 	}
 	
 	//costruttore:i parametri in input sono i tre vertici
 	//del triangolo
-	public Triangle(Point3D v0, Point3D v1, Point3D v2){
+	public Triangle(Point3D v0, Point3D v1, Point3D v2) {
+		this();
        
-        // triangolo definito da un array di 3 float3 
+		// triangolo definito da un array di 3 float3
 		vertices = new Point3D[3];
 		vertices[0]=v0;
 		vertices[1]=v1;
 		vertices[2]=v2;
         
-        //calcoliamo la normale con un metodo apposito
+		//calcoliamo la normale con un metodo apposito
 		n=tNormalCalc();
 	}
 	
@@ -112,7 +115,7 @@ public class Triangle {
 		double e3=a*p-b*r1+d*s;
 		float t=(float) (e3*inv_denom);
 
-		if(t<Utilities.EPSILON)
+		if(t< utilities.EPSILON)
 			return -1.0f;
 		else
 			return t;

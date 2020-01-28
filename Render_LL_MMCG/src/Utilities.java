@@ -17,6 +17,15 @@ public class Utilities {
 
 	//massima ricorsivita' del ray tracing
 	static int MAX_DEPTH_CAUSTIC=100;
+  //variabile globale, utilizzata nel metodo intersect(),
+  //in cui viene salvato l'oggetto intersecato da un
+  //raggio considerato
+  Obj intersObj = null;
+  //variabile globale, utilizzata nel metodo intersect(),
+  //in cui viene salvato punto di intersezione tra l'oggetto
+  //e il raggio considerato
+  static double inf=(float) 1e20;	//distanza massima dal raggio
+  double inters = inf;//sarebbe t del metodo intersect;
 
   //Intersezione con i box della ripartizione spaziale.
   //Controllando in modo ricorsivo, cerso l'intersezione
@@ -26,7 +35,7 @@ public class Utilities {
   //r: raggio considerato
 
 
-  static boolean intersectBSP(Box b,Ray r){
+  boolean intersectBSP(Box b,Ray r){
     if(b.intersect(r)) {  //controllo che i figli non siano nulli (ovvero che abbia figli)
       if((b.leaf1 != null) && (b.leaf2 != null)) { //se non e' nullo ricomincia con i figli
         intersectBSP(b.leaf1,r);
@@ -54,13 +63,13 @@ public class Utilities {
           //sia < del valore gia' memorizzato nella
           //variabile inters (dal momento che dobbiamo
           //salvare l'intersezione piu' vicina)
-          if ((d = object.intersect(r)) >= 0.0f && d < RenderAction.inters) {
+          if ((d = object.intersect(r)) >= 0.0f && d < inters) {
             //salviamo quindi il valore di d nella
             //variabile globale inters
-            RenderAction.inters = d;
+            inters = d;
             //e salviamo l'oggetto intersecato nella
             //variabile globale intersObj
-            RenderAction.intersObj = object;
+            intersObj = object;
           }
         }
       }
@@ -72,14 +81,14 @@ public class Utilities {
       //rimasto minore della distanza massima del raggio inf
     //altrimenti l'intersezione e' troppo lontana quindi
     //non la consideriamo
-    return RenderAction.inters < RenderAction.inf;
+    return inters < inf;
   }
 
 
   //metodo che serve a calcolare l'intersezione tra un
   //oggetto e un raggio, che richiama la funzione
   //inersectBSP
-  static boolean intersect(Ray r, Obj oi) {
+  boolean intersect(Ray r, Obj oi) {
     if((oi)==null) {
         //se l'oggetto e' nullo si richiama semplicemente
         //il metodo intersectBSP
@@ -92,7 +101,7 @@ public class Utilities {
       oi=null;
 
       if(intersectBSP(RenderAction.bound,r)) {
-        oi = RenderAction.intersObj;
+        oi = intersObj;
 
         return (o1) == (oi);
       } else {
