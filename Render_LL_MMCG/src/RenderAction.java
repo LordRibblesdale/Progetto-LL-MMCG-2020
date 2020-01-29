@@ -410,8 +410,11 @@ class RenderAction extends AbstractAction implements Properties {
     System.out.println("Fuoco: " + cam.fuoco);
     System.out.println("Apertura diaframma: " + cam.aperturaDiaframma);
 
-    //renderer.calculateRadiance(cam);
-    renderer.calculateThreadedRadiance(cam);
+    if (doFinalGathering) {
+      renderer.calculateThreadedRadiance(cam);
+    } else {
+      renderer.calculateRadiance(cam);
+    }
 
     //Ora viene creata l'immagine
     createImage();

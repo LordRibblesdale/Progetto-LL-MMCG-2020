@@ -13,7 +13,7 @@ public class ParallelProcessRadiance implements Runnable {
 
   @Override
   public void run() {
-    double percentY = ((float)y / (float) RenderAction.h) * 100;
+    double percentY = (y*100 / (float) RenderAction.h);
     System.out.println("percentuale di completamento " + "radianza:	 " + percentY);
 
     //per tutte le colonne
