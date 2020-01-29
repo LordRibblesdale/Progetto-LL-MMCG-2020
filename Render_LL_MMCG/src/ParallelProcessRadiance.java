@@ -1,16 +1,14 @@
 public class ParallelProcessRadiance implements Runnable {
-  private boolean status = true;
-
   private int y;
   private Camera cam;
   private Renderer renderer;
   private Utilities utilities;
 
-  ParallelProcessRadiance(int y, Camera cam, Renderer renderer, Utilities utilities) {
+  ParallelProcessRadiance(int y, Camera cam, Renderer renderer) {
     this.y = y;
     this.cam = cam;
     this.renderer = renderer;
-    this.utilities = utilities;
+    this.utilities = renderer.utilities;
   }
 
   @Override
@@ -99,7 +97,7 @@ public class ParallelProcessRadiance implements Runnable {
         //dichiaro e inizializzo la variabile t in cui
         //salveremo il punto di intersezione fra
         //l'oggetto considerato  e cameraRay
-        double t = utilities.inf;
+        double t = Utilities.inf;
         //inizializzo a null l'oggetto intersecato
         //dal raggio
         Obj o=null;

@@ -2,11 +2,9 @@ import java.util.ArrayList;
 
 public class Runner {
   private Camera cam;
-  private Renderer renderer;
 
-  Runner(Camera cam, Renderer renderer) {
+  Runner(Camera cam) {
     this.cam = cam;
-    this.renderer = renderer;
 
     execute();
   }
@@ -15,10 +13,11 @@ public class Runner {
     int y = 0;
     ArrayList<Thread> parallelisation = new ArrayList<>();
 
-    int threads = Runtime.getRuntime().availableProcessors();
+    //int threads = Runtime.getRuntime().availableProcessors() -1;
+    int threads = 1;
 
     for (int c = 0; c < threads; c++) {
-      parallelisation.add(new Thread(new ParallelProcessRadiance(y, cam, renderer, new Utilities())));
+      parallelisation.add(new Thread(new ParallelProcessRadiance(y, cam, new Renderer(new Utilities()))));
       parallelisation.get(parallelisation.size()-1).start();
 
       synchronized (Runner.this) {
@@ -38,7 +37,7 @@ public class Runner {
 
           try {
             synchronized (Runner.this) {
-              parallelisation.set(i, new Thread(new ParallelProcessRadiance(y, cam, renderer, new Utilities())));
+              parallelisation.set(i, new Thread(new ParallelProcessRadiance(y, cam, new Renderer(new Utilities()))));
               parallelisation.get(i).start();
 
               wait(50);

@@ -140,8 +140,8 @@ class RenderAction extends AbstractAction implements Properties {
   static int aosamps=1;
 
   static int dirsamps=1;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
-  static int refSample=100;	//campioni scelti per le riflessioni e le rifrazioni
-  static int jacobiSamps =150000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+  static int refSample=50;	//campioni scelti per le riflessioni e le rifrazioni
+  static int jacobiSamps =15000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
   static int steps;	//numero di step raggiunti dal processo Jacobi Stocastico
   static float err;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
   static int maxsteps=15;	//step massimi per le iterazioni di Jacobi Stocastico
@@ -410,8 +410,8 @@ class RenderAction extends AbstractAction implements Properties {
     System.out.println("Fuoco: " + cam.fuoco);
     System.out.println("Apertura diaframma: " + cam.aperturaDiaframma);
 
-    renderer.calculateRadiance(cam);
-    //renderer.calculateThreadedRadiance(cam, renderer);
+    //renderer.calculateRadiance(cam);
+    renderer.calculateThreadedRadiance(cam);
 
     //Ora viene creata l'immagine
     createImage();
