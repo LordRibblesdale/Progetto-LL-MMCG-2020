@@ -13,23 +13,14 @@ public class Runner {
     int y = 0;
     ArrayList<Thread> parallelisation = new ArrayList<>();
 
-    //int threads = Runtime.getRuntime().availableProcessors() -1;
-    int threads = 1;
+    int threads = Runtime.getRuntime().availableProcessors() -1;
 
     for (int c = 0; c < threads; c++) {
-      parallelisation.add(new Thread(new ParallelProcessRadiance(y, cam, new Renderer(new Utilities()))));
+      parallelisation.add(new Thread(new ParallelProcessRadiance(y++, cam, new Renderer(new Utilities()))));
       parallelisation.get(parallelisation.size()-1).start();
-
-      synchronized (Runner.this) {
-        try {
-          wait(50);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
     }
 
-    while (y < RenderAction.h){
+    while (y < RenderAction.h) {
       for (int i = 0; i < parallelisation.size(); i++) {
         if (!parallelisation.get(i).isAlive()) {
           parallelisation.get(i).interrupt();
@@ -40,13 +31,20 @@ public class Runner {
               parallelisation.set(i, new Thread(new ParallelProcessRadiance(y, cam, new Renderer(new Utilities()))));
               parallelisation.get(i).start();
 
-              wait(50);
             }
-          } catch (IllegalThreadStateException | InterruptedException e) {
+          } catch (IllegalThreadStateException e) {
             e.printStackTrace();
           }
         }
       }
+    }
+
+    try {
+      synchronized (Runner.this) {
+        wait(100);
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
   }
 }

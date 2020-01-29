@@ -351,8 +351,9 @@ class RenderAction extends AbstractAction implements Properties {
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
     //stocastico
-    if(!doFinalGathering)
+    if(!doFinalGathering) {
       renderer.jacobiStoc(objects.size());
+    }
 
     //aggiorno la variabile locale sceneObjects con i
     //valori ora contenuti in globalObjects
@@ -410,11 +411,7 @@ class RenderAction extends AbstractAction implements Properties {
     System.out.println("Fuoco: " + cam.fuoco);
     System.out.println("Apertura diaframma: " + cam.aperturaDiaframma);
 
-    if (doFinalGathering) {
-      renderer.calculateThreadedRadiance(cam);
-    } else {
-      renderer.calculateRadiance(cam);
-    }
+    renderer.calculateThreadedRadiance(cam);
 
     //Ora viene creata l'immagine
     createImage();
