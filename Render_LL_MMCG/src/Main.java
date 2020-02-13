@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 public class Main implements StandardMaterial {
 	static final JTextField tf = new JTextField();
 	static final JButton ok_button=new JButton("Conferma");
+  static JFrame f=new JFrame("Image creator");
 
   //la classe main costruisce una stanza rettangolare con
 	//dentro 3 sfere e opportune luci, e un osservatore che
@@ -43,7 +44,7 @@ public class Main implements StandardMaterial {
 	public static void main(String[] args) {
   	//inizialmente imposto la finestra con le varie
   	//scelte per l'utente
-  	JFrame f=new JFrame("Image creator");
+
   	int[] bool=new int[5];
   	createMenu(f,tf,ok_button, bool);
   	ok_button.addActionListener(new RenderAction(bool));
@@ -69,10 +70,32 @@ public class Main implements StandardMaterial {
     method_menu.add(menuItem);
 
     menuItem = new JRadioButtonMenuItem();
-    menuItem.setText("Jacobi + final gathering");
+    menuItem.setText("Final Gathering");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         bool[0]=1;//doFinalGathering
+      }
+    });
+
+    bg.add(menuItem);
+    method_menu.add(menuItem);
+
+    menuItem = new JRadioButtonMenuItem();
+    menuItem.setText("Final Gathering + Photon Mapping");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        bool[0]=2;//doPhotonFinalGathering
+      }
+    });
+
+    bg.add(menuItem);
+    method_menu.add(menuItem);
+
+    menuItem = new JRadioButtonMenuItem();
+    menuItem.setText("MultiPass Photon Mapping");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        bool[0]=3;//doMultiPassPhotonMapping
       }
     });
 

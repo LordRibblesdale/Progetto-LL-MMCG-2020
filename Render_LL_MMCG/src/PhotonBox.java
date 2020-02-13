@@ -1,10 +1,12 @@
+import java.util.ArrayList;
+
 //sistemare i commenti
 public class PhotonBox {
 
 	//vertici del box
     Point3D[] V=new Point3D[2];
     //array di fotoni
-    Photon[] ph;
+    ArrayList<Photon> ph;
     int nph;
 
     //dimensione corrispondente alla normale del piano con cui viene suddiviso il box
@@ -12,13 +14,13 @@ public class PhotonBox {
     //posizione del piano lungo la dimensione dim
     double planePos;
 
-    public PhotonBox(Point3D v1, Point3D v2, Photon[] p, int n){
+    public PhotonBox(Point3D v1, Point3D v2, ArrayList<Photon> p){
         V[0]=v1;
         V[1]=v2;
 
         ph=p;
-        nph=n;
-        if(n>0){
+        this.nph = p.size();
+        if(nph > 0){
         Point3D max=new Point3D(Float.NEGATIVE_INFINITY);
         Point3D min=new Point3D(Float.POSITIVE_INFINITY);
 
@@ -28,9 +30,9 @@ public class PhotonBox {
         //il parametro viene assegnato alla dimensione in cui i fotoni sono piu' distanti tra loro
 
         //calcolo il bounding box dei fotoni
-        for(int i=0; i<nph; i++){
+        for(int i = 0; i< this.nph; i++){
 
-            Point3D pp= ph[i].position;
+            Point3D pp= ph.get(i).position;
 
             //vedo se il vertice e' il massimo (se lo e' lo imposto come massimo)
             if(pp.x>max.x)
@@ -63,9 +65,9 @@ public class PhotonBox {
         //ordinamento
 
         //si scorrono tutti gli elementi dell'array dei fotoni saltando il primo
-        for(int i=1; i<nph; i++){
+        for(int i = 1; i< this.nph; i++){
             //si salva il fotone in esame da una parte
-            Photon pSaved=ph[i];
+            Photon pSaved = ph.get(i);
 
             //la posizione viene inserita in un array di 3 elementi
             double[] pos_i= {pSaved.position.x,pSaved.position.y,pSaved.position.z};
@@ -74,38 +76,38 @@ public class PhotonBox {
             int j = i-1;
 
             //viene caricato l'elemento precedente in un array di 3 elementi
-            double[] pos_j={ph[j].position.x,ph[j].position.y,ph[j].position.z};
+            double[] pos_j={ph.get(j).position.x,ph.get(j).position.y,ph.get(j).position.z};
 
             //se non e' stata controllata tutta la lista ordinata e l'elemento in posizione j e' piu' grande di quello in i allora i due fotoni vengono scambiati
             while ((j >= 0) && (pos_j[dim]>pos_i[dim])){
 
                 //scambio
-                ph[j + 1] = ph[j];
+                ph.set(j + 1, ph.get(j));
 
                 //si scorre j
                 j = j-1;
 
                 //queste operazioni vengono effettuate solamente se la lista ordinata non e' stata scorsa completamente
                 if(j>=0){
-                pos_j[0]=ph[j].position.x;
-                pos_j[1]=ph[j].position.y;
-                pos_j[2]=ph[j].position.z;}
+                pos_j[0]=ph.get(j).position.x;
+                pos_j[1]=ph.get(j).position.y;
+                pos_j[2]=ph.get(j).position.z;}
                 //l'elemento che prima era in posizione j ora e' p
-                ph[j+1]=pSaved;
+                ph.set(j+1, pSaved);
                 }
-        }
+            }
 
-        //il fotone che ci interessa e' quello a meta' di questo array
-        int mpos= (int) Math.floor(nph/2);
-        System.out.println("mpos"+mpos);
+            //il fotone che ci interessa e' quello a meta' di questo array
+            int mpos= (int) Math.floor(this.nph /2);
+            System.out.println("mpos"+mpos);
 
-        //la mediana e' costituita proprio dalla posizione di questo fotone
-        median.copy(ph[mpos].position);
-        System.out.println("median x: "+median.x+" y: "+median.y+" z: "+median.z);
-        //viene quindi assegnata la posizione del piano in base al parametro dim
-        double[] m={median.x,median.y,median.z};
-        planePos=m[dim];
-        System.out.println("planePos"+planePos);
+            //la mediana e' costituita proprio dalla posizione di questo fotone
+            median.copy(ph.get(mpos).position);
+            System.out.println("median x: "+median.x+" y: "+median.y+" z: "+median.z);
+            //viene quindi assegnata la posizione del piano in base al parametro dim
+            double[] m={median.x,median.y,median.z};
+            planePos=m[dim];
+            System.out.println("planePos"+planePos);
 
         }
     }

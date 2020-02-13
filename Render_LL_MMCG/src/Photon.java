@@ -7,8 +7,7 @@ public class Photon {
 	    
 	public Photon(Point3D ip, Point3D d, Point3D p){
 		position.copy(ip);
-	    power.copy(p);
-	    direction.copy(d);
+		power.copy(p);
+		direction.copy(d);
 	}
-
 }

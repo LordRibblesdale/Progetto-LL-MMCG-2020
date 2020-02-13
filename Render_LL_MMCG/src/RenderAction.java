@@ -56,6 +56,8 @@ class RenderAction extends AbstractAction implements Properties {
   //stocastico (doJacobi) o con il final gathering(doFinalGathering)
   static boolean doJacobi = true;
   static boolean doFinalGathering = false;
+  static boolean doPhotonFinalGathering = false;
+  static boolean doMultiPassPhotonMapping = false;
   //translucentJade=true se si vuole una
   //visualizzazione con BSSRDF
   private static boolean translucentJade=false;
@@ -101,8 +103,12 @@ class RenderAction extends AbstractAction implements Properties {
 
   /// vettore in cui carichero' le luci (sono dei semplici
   //Obj che hanno pero' come materiale una luce)
+  static Point3D max = null;
+  static Point3D min = null;
   static Box bound;	//primo elemento della lista di Box (usato per la BSP)
   static int depth=14;	//profondita' dell'octree
+
+  static int Kdepth = 17;
 
   //massimi box (cioe' massima profondita') nell'albero
   //per la partizione spaziale della scena
@@ -132,16 +138,39 @@ class RenderAction extends AbstractAction implements Properties {
   //campioni del pixel: numero di campioni per ogni pixels.
   //Si tratta dei punti nei pixel attraverso cui faremo
   //passare raggi
-  static int samps=30;
+  static int samps = 50;
 
   //campioni (numero di raggi) per l'illuminazione indiretta
   //(ricorsivo in global illumination, non ricorsivo in
   //final gathering)
-  static int aosamps=1;
+  static int aosamps = 1;
 
-  static int dirsamps=1;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
-  static int refSample=50;	//campioni scelti per le riflessioni e le rifrazioni
-  static int jacobiSamps =15000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+  static int dirsamps = 1;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
+  static int refSample = 75;	//campioni scelti per le riflessioni e le rifrazioni
+  static int jacobiSamps = 15000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+
+  static ArrayList<Photon> photons = new ArrayList<>();
+  static ArrayList<Photon> caustics = new ArrayList<>();
+  static ArrayList<PhotonBox> KdTree = new ArrayList<>();
+  static ArrayList<PhotonBox>  causticTree = new ArrayList<>();
+  static int nPhoton = 200; // Sample per la massima ricorsività del photon mapping
+  static int causticPhoton = 200; // Sample per la massima ricorsività del photon mapping
+  static int aoCausticPhoton = 300;
+  static int ProjectionResolution=600;
+  static float scaleCausticPower = 1;
+  static int P = 0;
+  static int pbn = 0;
+
+  //distanza al quadrato disco di ricerca dei fotoni
+  static double photond_2=1000;
+
+  //distanza al quadrato disco di ricerca dei fotoni nell caustiche
+  static double causticd_2=100;
+
+  //numero di fotoni da ricercare
+  static int nPhotonSearch= 80;
+  static int nCausticSearch= 1500;
+
   static int steps;	//numero di step raggiunti dal processo Jacobi Stocastico
   static float err;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
   static int maxsteps=15;	//step massimi per le iterazioni di Jacobi Stocastico
@@ -175,6 +204,9 @@ class RenderAction extends AbstractAction implements Properties {
   //della scena
   static int loadedBoxes = 0;	//rappresenta i box che sono stati caricati
 
+  //parametro per la ricerca sferica su una faccia piana in [0,1]
+  static double sphericalSearch = 1;
+
   private static int[] bool;
 
   private Renderer renderer;
@@ -193,10 +225,16 @@ class RenderAction extends AbstractAction implements Properties {
 
     //TODO: optimise here
     //Metodo
-    if(bool[0]==1)
+    if (bool[0] == 1) {
       doFinalGathering =true;
-    else if(bool[0]==0)
+    } else if (bool[0] == 0) {
       doFinalGathering =false;
+    } else if(bool[0] == 2) {
+      doFinalGathering = true;
+      doPhotonFinalGathering = true;
+    } else if (bool[0] == 3) {
+      doMultiPassPhotonMapping = true;
+    }
 
     //Materiale
     if(bool[1]==1)
@@ -239,8 +277,7 @@ class RenderAction extends AbstractAction implements Properties {
     meshes.add(new Mesh(SPHERE_NUM, spheres, matIdSphere));
 
     //inizializzo massimo e minimo punto della scena
-    Point3D max = null;
-    Point3D min = null;
+
     //inizializzo dei fittizi massimo e minimo, che mi
     //serviranno per definire i valori di max e min
     Point3D oldMin=new Point3D(Float.POSITIVE_INFINITY);
@@ -360,6 +397,11 @@ class RenderAction extends AbstractAction implements Properties {
     //sceneObjects.
     sceneObjects.clear();
     sceneObjects.addAll(globalObjects);
+
+    // Aggiunta del photon mapping
+    if (doPhotonFinalGathering || doMultiPassPhotonMapping) {
+      renderer.calculatePhotonMapping();
+    }
 
     //nota: rand() in C++ e' un numero random tra 0 e
     //RAND_MAX=2147483647: qua usero'

@@ -119,7 +119,7 @@ public class Material {
 		reflectionColor =new Point3D(0.0f);
 		refractionColor =new Point3D(0.0f);
 		refractionIndexRGB =new Point3D(0.0f);
-		this.emittedLight = emittedLight.multiplyScalar(utilities.MATH_1_DIV_PI);
+		this.emittedLight = emittedLight.multiplyScalar(Utilities.MATH_1_DIV_PI);
 	}
     
 	//metodo che calcola il coefficente di Fresnel in base  
@@ -205,7 +205,7 @@ public class Material {
 								add(Rperp.multiplyComponents(Rperp))).
 								multiplyScalar(0.5f);
 
-				if(result.average() < utilities.EPSILON)
+				if(result.average() < Utilities.EPSILON)
 					result=new Point3D(0.0f);
 
 				//controllo della riflessione totale su
@@ -266,7 +266,7 @@ public class Material {
 	//uscita, n e' la normale dell'oggetto
     Point3D C_T_BRDF(Ray psi, Ray theta, Point3D n) {
     	//parte diffusiva
-    	Point3D fr= diffusionColor.multiplyScalar(utilities.MATH_1_DIV_PI);
+    	Point3D fr= diffusionColor.multiplyScalar(Utilities.MATH_1_DIV_PI);
         
     	//la parte riflettente viene considerata solo se 
     	//lo slope e' stato inizializzato (ovvero e' 
@@ -341,7 +341,7 @@ public class Material {
 
 				//modello di Cook-Torrance
 				fr = fr.add(F.multiplyScalar(Df * Gf *
-								utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
+						Utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
 			}
 
     	return fr;
@@ -368,7 +368,7 @@ public class Material {
     	dr=(float) Math.sqrt(l2+zr*zr);
     	//System.out.println("dv+ "+dv);
     	//pi4=4*3.14
-    	Point3D pi4=new Point3D(4* utilities.MATH_PI);
+    	Point3D pi4=new Point3D(4* Utilities.MATH_PI);
     	//i valori si sigmas e sigmaa sono specifici per 
     	//la giada
     	Point3D sigmas=new Point3D(0.657f,0.786f,0.9f);
@@ -399,7 +399,7 @@ public class Material {
 							add(vPart));
     	
     	result=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
-							divideScalar(utilities.MATH_PI);
+							divideScalar(Utilities.MATH_PI);
     	
     	return result;
     }

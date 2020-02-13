@@ -63,13 +63,18 @@ public class ParallelProcessRadiance implements Runnable {
             rndY = Utilities.generateRandom(RenderAction.samplesY[tt]);
           }
 
-          //prendiamo un punto a caso su un disco di
-          raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-          raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-          Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
-          Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
+          if (cam.aperturaDiaframma > 0) {
+            //prendiamo un punto a caso su un disco di
+            raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+            raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+            Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
+            Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
 
-          origin = origin.add(camUFuoco).add(camVFuoco);
+            origin = origin.add(camUFuoco).add(camVFuoco);
+          } else {
+            raster_x+=rndX;
+            raster_y+=rndY;
+          }
         }
 
         // prediamo la direzione della fotocamera
@@ -84,8 +89,6 @@ public class ParallelProcessRadiance implements Runnable {
         //alla componente in y infine la distanza z
         //tra la fotocamera e il piano e' cam.d
 
-        //ray_direction=U*(raster_x-w/2)+
-        //+V*(raster_y-h/2)+W*(-cam.d)
         ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f*RenderAction.w))
             .add(cam.V.multiplyScalar(raster_y - 0.5f*RenderAction.h))
             .add(cam.W.multiplyScalar(-cam.d));
