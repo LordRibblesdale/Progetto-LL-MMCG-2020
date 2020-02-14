@@ -151,8 +151,8 @@ class RenderAction extends AbstractAction implements Properties {
 
   static ArrayList<Photon> photons = new ArrayList<>();
   static ArrayList<Photon> caustics = new ArrayList<>();
-  static ArrayList<PhotonBox> KdTree = new ArrayList<>();
-  static ArrayList<PhotonBox>  causticTree = new ArrayList<>();
+  static PhotonBox[] KdTree;
+  static PhotonBox[] causticTree;
   static int nPhoton = 200; // Sample per la massima ricorsività del photon mapping
   static int causticPhoton = 200; // Sample per la massima ricorsività del photon mapping
   static int aoCausticPhoton = 300;

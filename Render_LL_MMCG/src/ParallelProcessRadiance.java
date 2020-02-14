@@ -17,8 +17,7 @@ public class ParallelProcessRadiance implements Runnable {
     System.out.println("percentuale di completamento " + "radianza:	 " + percentY);
 
     //per tutte le colonne
-    for(int x = 0; x <= RenderAction.w; x++)
-    {
+    for(int x = 0; x <= RenderAction.w; x++) {
       // Ora siamo nel pixel
       // r e' la radianza: in questo caso e' tutto nero
       // Radianza della scena
@@ -63,18 +62,12 @@ public class ParallelProcessRadiance implements Runnable {
             rndY = Utilities.generateRandom(RenderAction.samplesY[tt]);
           }
 
-          if (cam.aperturaDiaframma > 0) {
-            //prendiamo un punto a caso su un disco di
-            raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-            raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-            Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
-            Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
+          raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+          raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+          Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
+          Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
 
-            origin = origin.add(camUFuoco).add(camVFuoco);
-          } else {
-            raster_x+=rndX;
-            raster_y+=rndY;
-          }
+          origin = origin.add(camUFuoco).add(camVFuoco);
         }
 
         // prediamo la direzione della fotocamera
@@ -114,7 +107,7 @@ public class ParallelProcessRadiance implements Runnable {
           //avere il giusto valore di partenza la
           //prossima volta che si utilizzera'
           //il metodo intersect()
-          utilities.inters = utilities.inf;
+          utilities.inters = Utilities.inf;
           //salvo nella variabile o objX l'elemento
           //intersecato dal raggio cameraRay
           o= utilities.intersObj;

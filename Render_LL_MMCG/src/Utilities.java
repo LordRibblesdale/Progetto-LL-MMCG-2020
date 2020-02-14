@@ -236,7 +236,7 @@ public class Utilities {
     u = v.crossProduct(w);
 
     //incremento
-    float dTheta = MATH_PI/(2*RenderAction.ProjectionResolution);
+    float dTheta = (MATH_PI/2)/(RenderAction.ProjectionResolution);
     float dPhi=(2*MATH_PI)/ RenderAction.ProjectionResolution;
 
     //latitudine
@@ -245,34 +245,32 @@ public class Utilities {
 
     Obj objY = null;
 
-    for(int i = 0; i< RenderAction.ProjectionResolution; i++) {
-
+    for(int i = 0; i < RenderAction.ProjectionResolution; i++) {
       //longitudine
       float Phi=0;
 
-      for(int j = 0; j < RenderAction.ProjectionResolution; j++){
+      for(int j = 0; j < RenderAction.ProjectionResolution; j++) {
 
         //direzione corrispondente all'angolo in esame
-        Point3D dir = new Point3D((Math.cos(Phi)*Math.sin(Theta)), Math.sin(Phi)*Math.sin(Theta), (Math.cos(Theta)));
+        Point3D dir = u.multiplyScalar((Math.cos(Phi)*Math.sin(Theta))).add(v.multiplyScalar(Math.sin(Phi)*Math.sin(Theta))).add(w.multiplyScalar((Math.cos(Theta))));
 
         Ray pRay= new Ray(p,dir);
 
-        double t = Utilities.inf;
         if(intersect(pRay, objY)){
           objY = intersObj;
-          t = inters;
 
           intersObj = null;
           inters = inf;
 
           //verifico la presenza di un materiale trasparente
-          if(RenderAction.material[objY.matId].refractionColor.max()>0){
+          if(RenderAction.material[objY.matId].refractionColor.max() > 0) {
             Point3D angle = new Point3D(Phi,Theta,T);
             ProjectionMap.add(angle);
           }
         }
         Phi+=dPhi;
       }
+
       T+=dTheta;
       Theta=T*Math.sin(T);
     }
@@ -280,10 +278,10 @@ public class Utilities {
     return ProjectionMap;
   }
 
-  void locate_photons(Map<Double, Photon> nearPh, Point3D iP, int index, Obj objX, ArrayList<PhotonBox> Tree, double d_2, int nph){
+  void locate_photons(Map<Double, Photon> nearPh, Point3D iP, int index, Obj objX, PhotonBox[] Tree, double d_2, int nph){
 
 //si verifica che il box index non sia vuoto
-    if(Tree.get(index-1).nph != 0){
+    if(Tree[index-1].nph != 0){
 
       //si verifica che il nuovo indice non abbia ha superato la lunghezza dell'albero (P), in tal caso l'indice corrisponde ad un box all'estremità dell'albero
       if((2*index)+1< RenderAction.P){
@@ -292,7 +290,7 @@ public class Utilities {
         double[] pos = {iP.x, iP.y, iP.z};
 
         //si calcola la distanza del punto dal piano del nodo in esame
-        double delta = pos[Tree.get(index-1).dim]-Tree.get(index-1).planePos;
+        double delta = pos[Tree[index-1].dim]-Tree[index-1].planePos;
 
         //a seconda della risposta si continua la ricerca nella foglia sinistra o nella foglia destra
         if(delta<0){
@@ -324,8 +322,8 @@ public class Utilities {
         //se ci si trova all'estremità dell'albero
 
         //si caricano tutti i fotoni del box
-        int n = Tree.get(index-1).nph;
-        ArrayList<Photon> p = Tree.get(index-1).ph;
+        int n = Tree[index-1].nph;
+        ArrayList<Photon> p = Tree[index-1].ph;
 
         //per ogni fotone
         for(int i=0;i<n;i++){
@@ -397,6 +395,19 @@ public class Utilities {
         }
       }
     }
+  }
+
+  static boolean checkRefractionObjects() {
+    boolean isThereRefraction = false;
+
+    for (Obj o : RenderAction.globalObjects) {
+      if (RenderAction.material[o.matId].refractionColor.max() > 0) {
+        isThereRefraction = true;
+        break;
+      }
+    }
+
+    return isThereRefraction;
   }
 
   //metodo che genera randomicamente un valore in [0,1]
