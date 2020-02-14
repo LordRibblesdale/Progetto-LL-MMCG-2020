@@ -153,10 +153,14 @@ class RenderAction extends AbstractAction implements Properties {
   static ArrayList<Photon> caustics = new ArrayList<>();
   static PhotonBox[] KdTree;
   static PhotonBox[] causticTree;
-  static int nPhoton = 200; // Sample per la massima ricorsività del photon mapping
-  static int causticPhoton = 200; // Sample per la massima ricorsività del photon mapping
-  static int aoCausticPhoton = 300;
-  static int ProjectionResolution=600;
+  //static int nPhoton = 200; // Sample per la massima ricorsività del photon mapping
+  static int nPhoton = 100; // Sample per la massima ricorsività del photon mapping
+  //static int causticPhoton = 200; // Sample per la massima ricorsività del photon mapping
+  static int causticPhoton = 100; // Sample per la massima ricorsività del photon mapping
+  //static int aoCausticPhoton = 300;
+  static int aoCausticPhoton = 150;
+  //static int ProjectionResolution=600;
+  static int ProjectionResolution=300;
   static float scaleCausticPower = 1;
   static int P = 0;
   static int pbn = 0;
@@ -394,7 +398,6 @@ class RenderAction extends AbstractAction implements Properties {
 
     //aggiorno la variabile locale sceneObjects con i
     //valori ora contenuti in globalObjects
-    //sceneObjects.
     sceneObjects.clear();
     sceneObjects.addAll(globalObjects);
 

@@ -90,9 +90,7 @@ public class Obj {
 			return t.normal();
 		else
 			return new Point3D();
-
 	}
-   
 
 	//metodo che restituisce un punto random sulla
 	//superficie dell'oggetto

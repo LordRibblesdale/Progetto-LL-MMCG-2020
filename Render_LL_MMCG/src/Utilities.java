@@ -268,6 +268,7 @@ public class Utilities {
             ProjectionMap.add(angle);
           }
         }
+
         Phi+=dPhi;
       }
 

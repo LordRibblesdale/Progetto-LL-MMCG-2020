@@ -374,4 +374,9 @@ public class Point3D {
   	double zf=clamp(f.z);
 		return new Point3D(xf,yf,zf);
   }
+
+  @Override
+	public String toString() {
+		return x + " " + y + " " + z;
+	}
 }

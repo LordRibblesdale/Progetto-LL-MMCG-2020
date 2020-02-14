@@ -40,7 +40,6 @@ public class Renderer {
 
      //per ogni luce
     for (int i = 0; i < RenderAction.lights.size(); i++) {
-
       //carico l'area della luce in esame
       float area = RenderAction.lights.get(i).areaObj;
 
@@ -64,7 +63,7 @@ public class Renderer {
           float dv;
           float zr=0.0025f;
           float dr;
-          dv=(float) (Math.random()*(150-90) + 90);
+          dv=(float) (Math.random()*(60) + 90);
             //lo divido per non avere un numero troppo
             //grande
           dv /= 10000f;
@@ -83,11 +82,11 @@ public class Renderer {
           //sarebbe fuori dal range (ricordo che la
           //misura e' w*h ma gli indici vanno da 0 a
           //w*h-1)
-          int tt =x+y* RenderAction.w;
+          int tt = x+y* RenderAction.w;
           //allora faccio l'if per tt<w*h cosi' da
           //accertarmi che non sia considerato l'indice
           //w*h-esimo
-          if(tt< RenderAction.w * RenderAction.h) {
+          if(tt < RenderAction.w * RenderAction.h) {
             rnd1 = Utilities.generateRandom(RenderAction.dirSamples1[tt]);
             rnd2 = Utilities.generateRandom(RenderAction.dirSamples2[tt]);
             rnd3 = Utilities.generateRandom(RenderAction.dirSamples3[tt]);
@@ -99,13 +98,11 @@ public class Renderer {
               sqrt(rnd2));
           float cosP=(float)Math.cos(rndPhi);
           float cosT=(float)Math.cos(rndTeta);
-          float sinP=(float)Math.sin(rndPhi);
           float sinT=(float)Math.sin(rndTeta);
           double px=r.o.x+l*cosP*cosT;
           double py=r.o.y+l*cosP*sinT;
           double pz=r.o.z+l*sinT;
           Point3D newPoint=new Point3D(px,py,pz);
-
 
           //si carica il punto campionato sulla luce
           Point3D p = RenderAction.lights.get(i).randomPoint(rnd1,rnd2,rnd3);
@@ -119,22 +116,23 @@ public class Renderer {
           //creazione del raggio d'ombra diretto verso
           //la luce
           double cosTheta=r.d.dotProduct(n1);
-          Point3D Ftheta= RenderAction.material[mId].getFresnelCoefficient(
-              cosTheta);
+          Point3D Ftheta= RenderAction.material[mId].getFresnelCoefficient(cosTheta);
 
           //peso la direzione in base al fattore di Fresnel
           //ma verifico che la direzione formi un angolo
-                //di massimo 90 gradi con la normale
-          boolean okdir=true;
-          while(okdir) {
-               dir.x=dir.x*Ftheta.x;
-               dir.y=dir.y*Ftheta.y;
-               dir.z=dir.z*Ftheta.z;
+          //di massimo 90 gradi con la normale
+          boolean okdir = false;
 
-               if(dir.dotProduct(n1)>0)
-                    okdir=false;
-               //altrimenti si cerca una nuova direzione
-          }//fine while(okdir)
+          //TODO fix here
+          //while(!okdir) {
+            dir.x *= Ftheta.x;
+            dir.y *= Ftheta.y;
+            dir.z *= Ftheta.z;
+
+            if(dir.dotProduct(n1)>0)
+              okdir=true;
+            //altrimenti si cerca una nuova direzione
+          //}//fine while(okdir)
 
           Ray directRay= new Ray(newPoint, dir);
 
@@ -144,12 +142,10 @@ public class Renderer {
           objX = RenderAction.lights.get(i);
           //si inizializza la massima distanza a cui il
           //raggio puo' arrivare
-          double t = Utilities.inf;
 
           //verifica del fattore di visibilita'
           if (utilities.intersect(directRay, objX)) {
             utilities.inters = Utilities.inf;
-            objX= utilities.intersObj;
             utilities.intersObj =null;
             //vengono caricati i dati della luce:
             //normale nel punto p
@@ -160,13 +156,9 @@ public class Renderer {
             double cosPsi=directRay.d.dotProduct(n1);
             Point3D Fpsi= RenderAction.material[mId].getFresnelCoefficient(
                 cosPsi);
-            //float cosTheta=r.d.dot(n1);
-            //float3 Ftheta=material[mId].getFresn(
-            //		cosTheta);
             Point3D one=new Point3D(1.0f);
 
 
-            //pi4=4*3.14
             Point3D pi4=new Point3D(4* Utilities.MATH_PI);
             //i valori si sigmas e sigmaa sono specifici per
             //la giada
@@ -174,8 +166,7 @@ public class Renderer {
             Point3D sigmaa=new Point3D(0.2679f,0.3244f,0.1744f);
 
             Point3D sigmat=sigmaa.add(sigmas);
-            Point3D sigmatr=(sigmaa.multiplyComponents(sigmat)).
-                      multiplyScalar(3.0f);
+            Point3D sigmatr=(sigmaa.multiplyComponents(sigmat)).multiplyScalar(3.0f);
             sigmatr= Point3D.getSquareCompPoint(sigmatr);
             Point3D alpha=sigmas.divideComponents(sigmat);
 
@@ -186,17 +177,14 @@ public class Renderer {
 
             Point3D expdv=sigmatr.multiplyScalar(dv*-1.0f);
             float dv3=dv*dv*dv;
-            Point3D edivdv=(Point3D.exponent(expdv)).
-                  divideScalar(dv3);
-            Point3D rPart=(((sigmatr.multiplyScalar(dr)).
-                      add(one)).multiplyComponents(edivdr)).
-                      multiplyScalar(zr);
-            Point3D vPart=(((sigmatr.multiplyScalar(dv)).
-                      add(one)).multiplyComponents(edivdv)).
-                      multiplyScalar(zv);
+            Point3D edivdv=(Point3D.exponent(expdv)).divideScalar(dv3);
+            Point3D rPart=(((sigmatr.multiplyScalar(dr)).add(one)).multiplyComponents(edivdr))
+                .multiplyScalar(zr);
+            Point3D vPart=(((sigmatr.multiplyScalar(dv)).add(one)).multiplyComponents(edivdv))
+                .multiplyScalar(zv);
 
-            Point3D Rd=(alpha.divideComponents(pi4)).multiplyComponents(rPart.
-                      add(vPart));
+            Point3D Rd=(alpha.divideComponents(pi4))
+                .multiplyComponents(rPart.add(vPart));
 
             B=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
                       divideScalar(Utilities.MATH_PI);
@@ -219,9 +207,10 @@ public class Renderer {
                     divideScalar(norma2);
 
           }
-        } else { //Caso BRDF
+        } else {
+          //Caso BRDF
           int tt =x+y* RenderAction.w;
-          if(tt< RenderAction.w * RenderAction.h) {
+          if(tt < RenderAction.w * RenderAction.h) {
             rnd1 = Utilities.generateRandom(RenderAction.dirSamples1[tt]);
             rnd2 = Utilities.generateRandom(RenderAction.dirSamples2[tt]);
             rnd3 = Utilities.generateRandom(RenderAction.dirSamples3[tt]);
@@ -247,32 +236,30 @@ public class Renderer {
           objX = RenderAction.lights.get(i);
           //si inizializza la massima distanza a cui il
           //raggio puo' arrivare
-          double t = Utilities.inf;
 
           //verifica del fattore di visibilita'
           if (utilities.intersect(directRay, objX)) {
              utilities.inters = Utilities.inf;
-             objX= utilities.intersObj;
-             utilities.intersObj =null;
+             utilities.intersObj = null;
             //vengono caricati i dati della luce:
             //normale nel punto p
             Point3D n2 = RenderAction.lights.get(i).normal(p);
             //identificativo del materiale della luce
             int lid = RenderAction.lights.get(i).matId;
             //calcoliamo la BRDF
-            B = RenderAction.material[mId].C_T_BRDF(
-                directRay, r, n1);
+            B = RenderAction.material[mId].C_T_BRDF(directRay, r, n1);
 
             //calcolo dell'illuminazione diretta
             //vengono definiti i seguenti float3 per
             //leggibilita' del risultato
             double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
-            radianceOutput = radianceOutput.
-                    add(RenderAction.material[lid].emittedLight.
-                            multiplyComponents(B).multiplyScalar(area).
-                            multiplyScalar(dirN1N2)).
-                    divideScalar(norma2);
+            radianceOutput = radianceOutput
+                .add(RenderAction.material[lid].emittedLight
+                    .multiplyComponents(B)
+                    .multiplyScalar(area)
+                    .multiplyScalar(dirN1N2))
+                .divideScalar(norma2);
           }
         }
       }
@@ -435,12 +422,12 @@ public class Renderer {
     //si verifica se il materiale ha una componente speculare
     //e che non sia stato superato il numero massimo di
     //riflessioni
-    if((RenderAction.material[mId].reflectionColor.max()>0)&&
-        (RenderAction.nRay< Utilities.MAX_DEPTH +1)){
+    if((RenderAction.material[mId].reflectionColor.max() > 0) &&
+        (RenderAction.nRay < Utilities.MAX_DEPTH +1)) {
 
      //con questo controllo si evitano le riflessioni interne
      //al materiale
-     if(cos_i>0){
+     if (cos_i>0) {
      // riflessione del raggio in entrata rispetto alla
      //normale n1
      Point3D refl= Point3D.reflect(r.d,n1);
@@ -449,8 +436,8 @@ public class Renderer {
      //in questo modo l'aumento esponenziale dei raggi nel
      //caso in cui ci siano riflessioni multiple tra specchi
      //imperfetti)
-     if((RenderAction.material[mId].refImperfection==0)||(RenderAction.nRay>0)){
-      //definisco e inizializzo a (0,0,0) il raggio riflesso
+     if((RenderAction.material[mId].refImperfection == 0) || (RenderAction.nRay > 0)) {
+        //definisco e inizializzo a (0,0,0) il raggio riflesso
         Ray reflRay=new Ray();
         //l'origine e' la stessa del raggio passato come
         //parametro
@@ -571,9 +558,8 @@ public class Renderer {
            reflRay.o=r.o;
            reflRay.d=dir;
            //massima distanza del raggio
-           double t= Utilities.inf;
-           Obj objX;
-           objX=null;
+           double t;
+           Obj objX = null;
            //intersezione con gli oggetti della scena
            if(utilities.intersect(reflRay, objX)){
              t= utilities.inters;
@@ -603,7 +589,7 @@ public class Renderer {
     //metallo e non si siano superato il numero massimo di
     //riflessioni del ray tracer
     if((RenderAction.material[mId].refractionColor.max()>0)
-        &&(RenderAction.nRay< utilities.MAX_DEPTH+1)
+        &&(RenderAction.nRay < Utilities.MAX_DEPTH +1)
         &&(RenderAction.material[mId].absorptionCoefficient.max()==0)) {
       //si verifica che l'indice di rifrazione sia uguale per
       //tutte le componenti RGB
@@ -1717,7 +1703,7 @@ public class Renderer {
 
     int nP=0;
     while(nP < RenderAction.causticPhoton) {    //per ogni campione
-      System.out.println(nP);
+      System.out.println("Calcolo campioni caustiche: " + nP);
 
       rnd1= Utilities.generateRandom(RenderAction.loadedBoxes)*(RenderAction.lights.size());
 
@@ -1780,7 +1766,6 @@ public class Renderer {
           int nS=0;
 
           while(nS < RenderAction.aoCausticPhoton) {
-
             //campiono uniformemente la mappa di proiezione
             //TODO fix >=1.0 random value
             rnd1 = Utilities.generateRandom(RenderAction.loadedBoxes)*(nAngle);
@@ -1788,7 +1773,7 @@ public class Renderer {
             int floor = (int) Math.floor(rnd1);
 
             //prendo un angolo a caso dalla mappa di proiezione
-            Point3D angle = ProjectionMap.get(floor == 1 ? 0 : floor);
+            Point3D angle = ProjectionMap.get(floor >= 1 ? 0 : floor);
 
             //creo un raggio distribuito uniformemente all'interno della patch
             double rndPhi;
@@ -1809,14 +1794,13 @@ public class Renderer {
             objX = null;
 
             if(utilities.intersect(pRay, objX)) {
-
               objX = utilities.intersObj;
               t = utilities.inters;
               //si controlla se l'oggetto colpito è trasparente
 
               if(RenderAction.material[objX.matId].refractionColor.max() > 0) {
                 //aumento il numero di fotoni sparati per l'emisfero
-                nS++;
+                //nS++;
 
                 //creiamo il nuovo fotone e ne calcoliamo i rimbalzi nella scena
                 Point3D iP=pRay.o.add(pRay.d.multiplyScalar(t));
@@ -1825,6 +1809,8 @@ public class Renderer {
                 causticScatter(objX, 0, p2);
               }
             }
+
+            nS++;
           }
         }
       }

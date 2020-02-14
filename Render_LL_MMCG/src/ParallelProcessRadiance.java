@@ -64,8 +64,8 @@ public class ParallelProcessRadiance implements Runnable {
 
           raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
           raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-          Point3D camUFuoco=cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
-          Point3D camVFuoco=cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
+          Point3D camUFuoco = cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
+          Point3D camVFuoco = cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
 
           origin = origin.add(camUFuoco).add(camVFuoco);
         }
