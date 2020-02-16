@@ -14,9 +14,11 @@ import java.util.ArrayList;
 //dell'oggetto: i due valori min e max delimitano il
 //volume entro cui e' contenuto l'oggetto in questione
 public class Obj {
-	
 	Sphere s=null;
 	Triangle t=null;
+
+	public double i; // intensit\‘{a} della sorgete luminosa
+	public double q = 1, l = 0, c = 0; // coefficienti di decadimento
 	
 	//bounding box dell'oggetto:
 	Point3D min=new Point3D();
@@ -46,6 +48,9 @@ public class Obj {
 		s=sp;
 		t=null;
 		matId=nmatId;
+
+		//TODO setup intensity
+		i = RenderAction.material[matId].emittedLight.normalize();
 	       
 		//calcolo l'area dell'oggetto
 		areaObj=area();
@@ -254,5 +259,15 @@ public class Obj {
 		}
 
 		return oldMin;
+	}
+
+	public double getAtt(double r){
+		// getAtt() restituisce l’attenuazione dovuta dalla
+		//    distanza, usando i coefficienti
+		// caratteristici della sorgete luminosa
+		double att = (c + l*r + q*r*r);
+		if(att<1)
+			return 1;
+		return 1/att;
 	}
 }

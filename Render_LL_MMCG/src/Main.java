@@ -152,23 +152,12 @@ public class Main implements StandardMaterial {
     ButtonGroup bg = new ButtonGroup();
 
     menuItem = new JRadioButtonMenuItem();
-    menuItem.setText("Sfere allineate");
+    menuItem.setText("Apri modellatore");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         bool[4]=1;//aligned=true;
       }
     });
-    bg.add(menuItem);
-    position_menu.add(menuItem);
-
-    menuItem = new JRadioButtonMenuItem();
-    menuItem.setText("Sfere sovrapposte");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
-        bool[4]=0;//aligned=false;
-      }
-    });
-
     bg.add(menuItem);
     position_menu.add(menuItem);
   }

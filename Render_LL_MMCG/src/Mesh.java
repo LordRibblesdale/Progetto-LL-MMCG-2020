@@ -34,7 +34,7 @@ public class Mesh {
     utilities = new Utilities();
   }
 
-  Mesh(int nSpheres, Sphere[] spheres, int[] matIdSphere) {
+  Mesh(int nSpheres, ArrayList<Sphere> spheres, int[] matIdSphere) {
     this();
     loadSphere(nSpheres, spheres, matIdSphere);
   }
@@ -218,7 +218,7 @@ public class Mesh {
 
   }
 
-  void loadSphere(int n, Sphere[] spheres, int[] matIdSphere) {
+  void loadSphere(int n, ArrayList<Sphere> spheres, int[] matIdSphere) {
     //crea una mesh costituita da n sfere
     //creo un array di Obj di n elementi
       objects = new ArrayList<>(n);
@@ -228,7 +228,7 @@ public class Mesh {
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
       for(int i=0; i < n; i++){
-          objects.add(new Obj(spheres[i], matIdSphere[i]));
+          objects.add(new Obj(spheres.get(i), matIdSphere[i]));
       }
       nome = "sfere";
       //viene restituita una mesh delle sfere create

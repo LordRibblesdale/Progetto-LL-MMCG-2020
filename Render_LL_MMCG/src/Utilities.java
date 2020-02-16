@@ -280,8 +280,7 @@ public class Utilities {
   }
 
   void locate_photons(Map<Double, Photon> nearPh, Point3D iP, int index, Obj objX, PhotonBox[] Tree, double d_2, int nph){
-
-//si verifica che il box index non sia vuoto
+    //si verifica che il box index non sia vuoto
     if(Tree[index-1].nph != 0){
 
       //si verifica che il nuovo indice non abbia ha superato la lunghezza dell'albero (P), in tal caso l'indice corrisponde ad un box all'estremità dell'albero
@@ -318,8 +317,7 @@ public class Utilities {
             locate_photons(nearPh,iP,2*index,objX,Tree,d_2,nph);
           }
         }
-      }else{
-
+      } else {
         //se ci si trova all'estremità dell'albero
 
         //si caricano tutti i fotoni del box
@@ -353,8 +351,8 @@ public class Utilities {
               val= 1/(RenderAction.sphericalSearch);
             }
 
-            if(val < Utilities.EPSILON)val=0;
-
+            if(val < Utilities.EPSILON)
+              val=0;
 
             if((projN<=val) && (projN >= -val)) {
 

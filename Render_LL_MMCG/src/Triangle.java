@@ -6,9 +6,11 @@
 //restituisce la normale al triangolo
 public class Triangle {
 	//array dei vertici 
-	public Point3D[]vertices;
+	public Point3D[] vertices;
 	//Normale al triangolo
 	public Point3D n;
+	public Point3D center;
+	public int matId;
 
 	private Utilities utilities;
 	
@@ -30,6 +32,8 @@ public class Triangle {
         
 		//calcoliamo la normale con un metodo apposito
 		n=tNormalCalc();
+
+		center = Point3D.average(v0, v1, v2);
 	}
 	
 	//vettore normale e' ottenuto tramite prodotto 
@@ -39,8 +43,7 @@ public class Triangle {
 		//triangolo a e b
 		Point3D a=vertices[1].subtract(vertices[0]);
 		Point3D b=vertices[2].subtract(vertices[0]);
-		Point3D n=(a.crossProduct(b)).getNormalizedPoint();
-		return n;
+		return (a.crossProduct(b)).getNormalizedPoint();
 	}
 	
 	//funzione di intersezione con un raggio: Return 
@@ -115,7 +118,7 @@ public class Triangle {
 		double e3=a*p-b*r1+d*s;
 		float t=(float) (e3*inv_denom);
 
-		if(t< utilities.EPSILON)
+		if(t< Utilities.EPSILON)
 			return -1.0f;
 		else
 			return t;
