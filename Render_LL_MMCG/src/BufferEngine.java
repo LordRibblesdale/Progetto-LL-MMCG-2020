@@ -1,13 +1,8 @@
-import javafx.scene.Scene;
-
-import java.awt.*;
-
 class BufferEngine {
-  public static Color[][] pixelMatrix;
+  public static Point3D[][] pixelMatrix;
   public static double[][] zBuffer;
   public static int f, w, h;
-  public Point p1, p2, p3, p4,left,right;
-  public static Point3D p[] = new Point3D[4];
+  public static Point3D[] p = new Point3D[4];
   public static Point3D view;
 
   BufferEngine(int width, int height, int focal){
@@ -16,7 +11,7 @@ class BufferEngine {
     h = height;
     f = focal;
     view = new Point3D(0,0,f);
-    pixelMatrix = new Color[w][h];
+    pixelMatrix = new Point3D[w][h];
     zBuffer = new double[w][h];
 
     render();
@@ -31,14 +26,13 @@ class BufferEngine {
 
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
-        pixelMatrix[i][j] = new Color(0, 0, 0);
+        pixelMatrix[i][j] = new Point3D(0, 0, 0);
         zBuffer[i][j] = 99999;
       }
     }
 
     // per ogni triangolo della scena, calcolo il suo
     //rendering
-
     for (int i = 0; i < RenderAction.approxSceneObjects.size(); i++){
       render(RenderAction.approxSceneObjects.get(i));
     }
@@ -54,9 +48,14 @@ class BufferEngine {
 
     Point3D n = tr.n; // normale del triangolo tr
 
-    if (n.z > 0) {
+    //TODO fix backface culling
+    /*
+    if (tr.n.dotProduct(RenderAction.cam.lookAt) > 0) {
       return; // backface culling
     }
+    */
+
+    System.out.println(matId);
 
     //calcolo delle proiezioni dei tre vertici del triangolo
     //sul view plane
@@ -104,7 +103,7 @@ class BufferEngine {
     //    triangolo
 
     if (p[1].y == p[2].y) {
-      if (p[1].x>p[2].x) {
+      if (p[1].x > p[2].x) {
         swap(1,2);
       }
 
@@ -144,7 +143,7 @@ class BufferEngine {
     //spazio (double)
     // alle coordinate della pixelMatrix (int)
 
-    return (int) (Math.round(x) > 255 ? 255 : (int) (Math.round(x)));
+    return (Math.round(x) > 255 ? 255 : (int) (Math.round(x)));
   }
 
   private static void scan(Point3D p1, Point3D p2, Point3D p3, int v,
@@ -173,9 +172,8 @@ class BufferEngine {
 
     double rs = (p1.x - p3.x) / (p1.y - p3.y);
     double x, y, z, xl, xr, zx;
-    int i, j;
 
-    Color c = getShade(tr, RenderAction.material[matId].diffusionColor, matId);
+    Point3D c = getShade(tr, RenderAction.material[matId].diffusionColor, matId);
 
     // trovo il
     //valore d’illuminazione del triangolo nelle scena
@@ -239,7 +237,7 @@ class BufferEngine {
     }
   }
 
-  private static void draw(double xd, double yd, double z, Color c) {
+  private static void draw(double xd, double yd, double z, Point3D c) {
     // Se necessario, la funzione draw() aggiorna pixelMatrix con il colore c nel punto (xd,yd)
     // e inoltre aggiorna lo zBuffer nello stesso punto con il valore z
     // passo dalle coordinate dello spazio a quelle del viewplane (in pixel)
@@ -266,7 +264,7 @@ class BufferEngine {
     p[j] = t;
   }
 
-  public static Color getShade(Triangle tr, Point3D c, int matId){
+  public static Point3D getShade(Triangle tr, Point3D c, int matId){
     // getShade() ottiene l’illuminazione del trianagolo tr
     //    nella scena, calcolando
     // il contributo ambientale, diffusivo e riflessivo
@@ -277,7 +275,7 @@ class BufferEngine {
         RenderAction.material[matId].reflectionColor.normalize());
   }
 
-  public static Color getShade(Point3D p, Point3D N, Point3D clr, double kDif, double kRef){
+  public static Point3D getShade(Point3D p, Point3D N, Point3D clr, double kDif, double kRef){
     // getShade ottiene l’illuminazione del punto p nella
     //scena, con normale N,
     // calcolando il contributo ambientale, diffusivo
@@ -379,8 +377,13 @@ class BufferEngine {
     shade = Point3D.clamp3C(shade);
     //intShade = round(shade); // arrotondo all’intero piu’
     // vicino per la codifica RGB
+
     //noinspection SuspiciousNameCombination
-    return new Color(round(shade.x), round(shade.y), round(shade.z));
+    return new Point3D(round(shade.x), round(shade.y), round(shade.z));
     // restituisco l’illuminazione finale
+  }
+
+  public Point3D[][] getPixelMatrix() {
+    return pixelMatrix;
   }
 }

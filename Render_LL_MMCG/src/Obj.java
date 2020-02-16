@@ -67,6 +67,7 @@ public class Obj {
 
 		s=null;
 		t=tr;
+		t.matId = nmatId;
 		matId=nmatId;
 		//calcolo l'area dell'oggetto
 		areaObj=area();

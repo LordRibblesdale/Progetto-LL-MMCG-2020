@@ -32,7 +32,6 @@ class RenderAction extends AbstractAction implements Properties {
             StandardMaterial.MATERIAL_DIFFUSIVE_JADE
     };
 
-  //static int mIS=setMatIdSphere();
   // vettore per gli indici dei materiali delle sfere
   // si fa corrispondere alla sfera i-esima del vettore
   // spheres definito poco sotto, il materiale di
@@ -279,6 +278,8 @@ class RenderAction extends AbstractAction implements Properties {
     meshes.clear();
     objects.clear();
     sceneObjects.clear();
+    loadedBoxes = 0;
+    maxPartitions = 0;
 
     //dovendo disegnare 3 sfere e la stanza definisco un
     //array di 2 Mesh: nella prima delle due mesh (per

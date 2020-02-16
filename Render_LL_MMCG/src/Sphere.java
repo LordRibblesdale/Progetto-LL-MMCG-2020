@@ -11,11 +11,13 @@ public class Sphere {
 	// posizione (centro)
 	public Point3D p;
 	public ArrayList<Triangle> triangles = new ArrayList<>();
+	public int matId;
 	
 	//costruttore
-	public Sphere(float nrad, Point3D np) {
+	public Sphere(float nrad, Point3D np, int matId) {
 		rad=nrad;
 		p=np;
+		this.matId = matId;
 
 		createTriangles(nrad, np, 50);
 	}
@@ -27,9 +29,9 @@ public class Sphere {
   //spheres di cui si deve settare la posizione
   static void setSpheresPosition() {
     //vettore costruttore delle sfere
-    RenderAction.spheres.add(new Sphere(1, new Point3D(-4.0f,0.0f,0.0f)));
-    RenderAction.spheres.add(new Sphere(1, new Point3D(-7.0f,0.0f,0.0f)));
-    RenderAction.spheres.add(new Sphere(1, new Point3D(-4.0f,0.0f,5.3f)));
+    RenderAction.spheres.add(new Sphere(1, new Point3D(-4.0f,0.0f,0.0f), 1));
+    RenderAction.spheres.add(new Sphere(1, new Point3D(-7.0f,0.0f,0.0f), 1));
+    RenderAction.spheres.add(new Sphere(1, new Point3D(-4.0f,0.0f,5.3f), 1));
   }
 
   //funzione di intersezione con un raggio: Return
@@ -108,6 +110,7 @@ public class Sphere {
 						tpts.get((i * n + j + 1) % (n * n)));
 
 				t.n = p.subtract(c);
+				t.matId = this.matId;
 				triangles.add(t);
 
 				t = new Triangle(tpts.get(((i + 1) * n + j) % (n * n)),
@@ -115,6 +118,7 @@ public class Sphere {
 						tpts.get((i * n + j + 1) % (n * n)));
 
 				t.n = p.subtract(c);
+				t.matId = this.matId;
 				triangles.add(t);
 			}
 		}

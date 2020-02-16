@@ -4,7 +4,29 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Modeler extends JDialog {
+  class ImagePanel extends JPanel {
+    ImagePanel() {
+      super(null);
+
+      repaint();  //TODO ?
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+      super.paintComponent(g);
+
+      for (int i = 0; i < RenderAction.w; i++) {
+        for (int j = 0; j < RenderAction.h; j++) {
+          g.setColor(pixelMatrix[i][j].toColor());
+          g.drawLine(i, j, i, j);
+        }
+      }
+    }
+  }
+
+
   BufferEngine buffer;
+  Point3D[][] pixelMatrix;
 
   JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
   JButton addSphere = new JButton("Aggiung sfere");
@@ -18,6 +40,7 @@ public class Modeler extends JDialog {
     RenderAction.createApproxObjects();
 
     buffer = new BufferEngine(RenderAction.w, RenderAction.h, (int) RenderAction.distfilm);
+    pixelMatrix = buffer.getPixelMatrix();
 
     buttonsPanel.add(addSphere);
     buttonsPanel.add(doRender);
@@ -75,29 +98,9 @@ public class Modeler extends JDialog {
 
     //setPreferredSize(new Dimension(1080, 720));
     pack();
-    setResizable(false);
+    //setResizable(false);
     setLocationRelativeTo(null);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setVisible(true);
-  }
-}
-
-class ImagePanel extends JPanel {
-  ImagePanel() {
-    super(null);
-
-    repaint();  //TODO ?
-  }
-
-  @Override
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-
-    for (int i = 0; i < RenderAction.w; i++) {
-      for (int j = 0; j < RenderAction.h; j++) {
-        g.setColor(RenderAction.image[i+j*RenderAction.w].toColor());
-        g.drawLine(i, j, i, j);
-      }
-    }
   }
 }

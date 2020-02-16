@@ -113,24 +113,8 @@ public class Mesh {
     }
     
     for(int i=0; i<8; i++) {  //dilatazione della luce
-      Lv[i].copy(v[i]);  //copio in Lv i vertici della stanza
-      //faccio poi le dovute dilatazioni nella x
-      //Lv[i].x=Lv[i].x+(Lv[i].x-c.x)*scaleL.x;
-      
-      //frontL e' false quindi entra in questo if (la 
-      //luce non e' frontale): si fanno quindi le 
-      //dovute dilatazioni nella z  
-      
-      /*
-      if(!Main.frontL){
-        //Lv[i].z=Lv[i].z+(Lv[i].z-c.z)*scaleL.z;
-      }
-        else{
-            if( (i==4 )|| (i==5) ){
-                Lv[i].y=Lv[i].y+hroom*scaleL.y;
-            }
-        }
-      */
+      Lv[i].copy(v[i]);
+      //copio in Lv i vertici della stanza
   }
   
     //anche in questo caso copio i valori in delle 
