@@ -1,10 +1,8 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-class RenderAction extends AbstractAction implements Properties {
+class RenderAction implements Properties {
   //vettore costruttore dei materiali
     static Material[] material = {
             //luce
@@ -32,7 +30,6 @@ class RenderAction extends AbstractAction implements Properties {
             StandardMaterial.MATERIAL_DIFFUSIVE_JADE
     };
 
-  //static int mIS=setMatIdSphere();
   // vettore per gli indici dei materiali delle sfere
   // si fa corrispondere alla sfera i-esima del vettore
   // spheres definito poco sotto, il materiale di
@@ -51,13 +48,15 @@ class RenderAction extends AbstractAction implements Properties {
       new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
       new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
   };
+
   //metodo: scegliere una delle due flag per
   //visualizzare il rendering con il metodo di Jacobi
   //stocastico (doJacobi) o con il final gathering(doFinalGathering)
-  static boolean doJacobi = true;
+  static boolean doJacobi = false;
   static boolean doFinalGathering = false;
   static boolean doPhotonFinalGathering = false;
   static boolean doMultiPassPhotonMapping = false;
+
   //translucentJade=true se si vuole una
   //visualizzazione con BSSRDF
   private static boolean translucentJade=false;
@@ -138,47 +137,41 @@ class RenderAction extends AbstractAction implements Properties {
   //campioni del pixel: numero di campioni per ogni pixels.
   //Si tratta dei punti nei pixel attraverso cui faremo
   //passare raggi
-  static int samps = 50;
+  static int samps;
 
   //campioni (numero di raggi) per l'illuminazione indiretta
   //(ricorsivo in global illumination, non ricorsivo in
   //final gathering)
-  static int aosamps = 1;
-
-  static int dirsamps = 1;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
-  static int refSample = 75;	//campioni scelti per le riflessioni e le rifrazioni
-  static int jacobiSamps = 15000;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+  static int aoSamps;
+  static int dirSamps;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
+  static int refSamps;	//campioni scelti per le riflessioni e le rifrazioni
+  static int jacobiSamps;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
 
   static ArrayList<Photon> photons = new ArrayList<>();
   static ArrayList<Photon> caustics = new ArrayList<>();
   static PhotonBox[] KdTree;
   static PhotonBox[] causticTree;
-  //static int nPhoton = 200; // Sample per la massima ricorsività del photon mapping
   static int nPhoton = 100; // Sample per la massima ricorsività del photon mapping
-  //static int causticPhoton = 200; // Sample per la massima ricorsività del photon mapping
   static int causticPhoton = 100; // Sample per la massima ricorsività del photon mapping
-  //static int aoCausticPhoton = 300;
-  static int aoCausticPhoton = 150;
-  //static int ProjectionResolution=600;
-  static int ProjectionResolution=300;
-  static float scaleCausticPower = 1;
-  static int P = 0;
-  static int pbn = 0;
+  static int aoCausticPhoton = 150; //Sample per la massima ricorsività del photon mapping
+  static int projectionResolution = 300;  //Sample per la mappa di proiezione
+  static float scaleCausticPower = 1; //scalamento di potenza del fotone
 
   //distanza al quadrato disco di ricerca dei fotoni
-  static double photond_2=1000;
+  static double photonSearchDisc;
+  static double causticSearchDisc;
 
-  //distanza al quadrato disco di ricerca dei fotoni nell caustiche
-  static double causticd_2=100;
+  static int power = 0;
+  static int photonBoxNum = 0;
 
   //numero di fotoni da ricercare
-  static int nPhotonSearch= 80;
-  static int nCausticSearch= 1500;
+  static int nPhotonSearch;
+  static int nCausticSearch;
 
   static int steps;	//numero di step raggiunti dal processo Jacobi Stocastico
   static float err;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
-  static int maxsteps=15;	//step massimi per le iterazioni di Jacobi Stocastico
-  static float maxerr=0.001f;	//errore massimo nel processo di Jacobi Stocastico
+  static int maxSteps;	//step massimi per le iterazioni di Jacobi Stocastico
+  static double maxErr;	//errore massimo nel processo di Jacobi Stocastico
 
   //soglia dei triangoli dentro ad un box se ce ne sono di
   //meno si ferma la partizione; si puo' regolare in base
@@ -211,55 +204,70 @@ class RenderAction extends AbstractAction implements Properties {
   //parametro per la ricerca sferica su una faccia piana in [0,1]
   static double sphericalSearch = 1;
 
-  private static int[] bool;
-
   private Renderer renderer;
   private Utilities utilities;
 
-  RenderAction(int[] bool) {
-    RenderAction.bool = bool;
-
+  RenderAction() {
     utilities = new Utilities();
     renderer = new Renderer(utilities);
+
+    actionPerformed();
   }
 
-  public void actionPerformed(ActionEvent e) {
-    Main.ok_button.setEnabled(false);
-    Main.tf.setText("Creazione immagine in corso");
+  private void actionPerformed() {
+    Main.editPanel.disableUI();
 
-    //TODO: optimise here
-    //Metodo
-    if (bool[0] == 1) {
-      doFinalGathering =true;
-    } else if (bool[0] == 0) {
-      doFinalGathering =false;
-    } else if(bool[0] == 2) {
-      doFinalGathering = true;
-      doPhotonFinalGathering = true;
-    } else if (bool[0] == 3) {
-      doMultiPassPhotonMapping = true;
+    jacobiSamps = Main.editPanel.jacobiPanel.getSamps();
+    maxSteps = Main.editPanel.jacobiPanel.getMaxSteps();
+    maxErr = Main.editPanel.jacobiPanel.getMaxErr();
+
+    aoSamps = Main.editPanel.finalGatheringPanel.getAOSamples();
+    dirSamps = Main.editPanel.finalGatheringPanel.getDirSamples();
+    refSamps = Main.editPanel.finalGatheringPanel.getRefSamples();
+
+    nPhoton = Main.editPanel.photonPanel.getPhotonNum();
+    causticPhoton = Main.editPanel.photonPanel.getCausticNum();
+    aoCausticPhoton = Main.editPanel.photonPanel.getAOCaustic();
+    projectionResolution = Main.editPanel.photonPanel.getProjectionResolution();
+    photonSearchDisc = Main.editPanel.photonPanel.getPhotonSearchDisc();
+    nPhotonSearch = Main.editPanel.photonPanel.getPhotonSearchNum();
+    causticSearchDisc = Main.editPanel.photonPanel.getCausticSearchDisc();
+    nCausticSearch = Main.editPanel.photonPanel.getCausticSearchNum();
+
+    Main.label.setText("Creazione immagine in corso");
+
+    switch (Main.editPanel.getMethod()) {
+      case JACOBI_PANEL:
+        doJacobi = true;
+        break;
+      case FINAL_GATHERING_PANEL:
+        doFinalGathering = true;
+        break;
+      case PHOTON_PANEL:
+        doPhotonFinalGathering = true;
+        break;
     }
 
-    //Materiale
-    if(bool[1]==1)
-      translucentJade=true;
-    else if(bool[1]==0)
-      translucentJade=false;
-    if(bool[2]==1)
-      diffusiveJade=true;
-    else if(bool[2]==0)
-      diffusiveJade=false;
-    if(bool[3]==1)
-      glass=true;
-    else if(bool[3]==0)
-      glass=false;
+    switch (Main.editPanel.getMaterial()) {
+      case TRANSLUCENT_JADE:
+        translucentJade = true;
+        break;
+      case DIFFUSIVE_JADE:
+        diffusiveJade = true;
+        break;
+      case GLASS:
+        glass = true;
+        break;
+    }
 
-    //Posizione
-    if(bool[4]==1)
-      aligned=true;
-    else if(bool[4]==0)
-      aligned=false;
-
+    switch (Main.editPanel.getPosition()) {
+      case ALIGNED:
+        aligned = true;
+        break;
+      case OVERLAPPED:
+        aligned = false;
+        break;
+    }
 
     int mIS = setMatIdSphere();
     for(int sph = 0; sph < SPHERE_NUM; sph++)
@@ -371,7 +379,7 @@ class RenderAction extends AbstractAction implements Properties {
 
     //inizializzo la variabile S che e' la massima
     //profondita' dell'albero
-    for(int i=1; i<depth; i++){
+    for(int i=1; i < depth; i++){
       maxPartitions +=Math.pow(2,i);
     }
 
@@ -392,7 +400,8 @@ class RenderAction extends AbstractAction implements Properties {
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
     //stocastico
-    if(!doFinalGathering) {
+
+    if(doJacobi) {
       renderer.jacobiStoc(objects.size());
     }
 
@@ -434,8 +443,9 @@ class RenderAction extends AbstractAction implements Properties {
       image[i]=new Point3D();
     }
 
+    /*
     //Stampiamo le varie informazioni
-    System.out.println("Samples: "+samps+" "+aosamps);
+    System.out.println("Samples: "+ samps + " " + aoSamps);
     System.out.println("Origin: x "+cam.eye.x+" y "+
         cam.eye.y+" z "+cam.eye.z);
     System.out.println("Direction: x "+cam.lookAt.x+" y "+
@@ -444,6 +454,7 @@ class RenderAction extends AbstractAction implements Properties {
         " z "+cam.up.z);
     System.out.println("D: "+cam.d+" W: "+cam.width+
         " H: "+cam.height);
+    */
 
     cam.aperturaDiaframma = ap;// =0
 
@@ -515,7 +526,7 @@ class RenderAction extends AbstractAction implements Properties {
       matrix.append(Utilities.toInt(image[i].x)).append(" ").append(Utilities.toInt(image[i].y)).append(" ").append(Utilities.toInt(image[i].z)).append("  ");
     }
 
-    //Main.tf.setText("Immagine completata!");
+    //Main.label.setText("Immagine completata!");
 
     //nome del file in cui si andra' a salvare l'immagine
     //di output

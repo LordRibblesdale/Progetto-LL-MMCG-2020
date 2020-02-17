@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 //classe per definire una mesh: una raccolta di vertici, 
 //lati e facce che definiscono la forma, quindi la
@@ -144,6 +145,8 @@ public class Mesh {
     Lv5.copy(Lv[5]);
     Point3D Lv6=new Point3D();
     Lv6.copy(Lv[6]);
+
+    Triangle Tr;
   
     if(!RenderAction.frontL){
       //definisco i vertici dei triagoli della stanza, 
@@ -151,17 +154,17 @@ public class Mesh {
       //utilities.EPS=0.01f per evitare di avere
       //problemi di aliasing dati dal linee 
       //perfettamente dritte nella fase di rendering
-      translateLL=new Point3D(0,-utilities.EPSILON,0);
+      translateLL=new Point3D(0,-Utilities.EPSILON,0);
       Point3D Lv1tr = (Lv1).add(translateLL);
       Point3D Lv4tr = (Lv4).add(translateLL);
       Point3D Lv5tr = (Lv5).add(translateLL);
       Point3D Lv6tr = (Lv6).add(translateLL);
       //si creano e si aggiungono i triangoli per la 
       //luce
-      Triangle Tr0=new Triangle(Lv4tr,Lv5tr,Lv6tr);
-      Troom.add(0,Tr0);
-      Triangle Tr1=new Triangle(Lv1tr,Lv6tr,Lv5tr);
-      Troom.add(1,Tr1);
+      Tr=new Triangle(Lv4tr,Lv5tr,Lv6tr);
+      Troom.add(Tr);
+      Tr=new Triangle(Lv1tr,Lv6tr,Lv5tr);
+      Troom.add(Tr);
     }
   
     //dilatazione delle pareti
@@ -257,7 +260,7 @@ public class Mesh {
         //carico i vertici del triangolo
         Point3D[] v = object.t.vertices;
         //creo i lati del triangolo
-        Point3D l[] = {v[2].subtract(v[0]),
+        Point3D[] l = {v[2].subtract(v[0]),
             v[0].subtract(v[1]), v[1].
             subtract(v[2])};
         //cerco il lato piu' lungo del triangolo

@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Utilities {
@@ -236,8 +234,8 @@ public class Utilities {
     u = v.crossProduct(w);
 
     //incremento
-    float dTheta = (MATH_PI/2)/(RenderAction.ProjectionResolution);
-    float dPhi=(2*MATH_PI)/ RenderAction.ProjectionResolution;
+    float dTheta = (MATH_PI/2)/(RenderAction.projectionResolution);
+    float dPhi=(2*MATH_PI)/ RenderAction.projectionResolution;
 
     //latitudine
     double Theta=0;
@@ -245,11 +243,11 @@ public class Utilities {
 
     Obj objY = null;
 
-    for(int i = 0; i < RenderAction.ProjectionResolution; i++) {
+    for(int i = 0; i < RenderAction.projectionResolution; i++) {
       //longitudine
       float Phi=0;
 
-      for(int j = 0; j < RenderAction.ProjectionResolution; j++) {
+      for(int j = 0; j < RenderAction.projectionResolution; j++) {
 
         //direzione corrispondente all'angolo in esame
         Point3D dir = u.multiplyScalar((Math.cos(Phi)*Math.sin(Theta))).add(v.multiplyScalar(Math.sin(Phi)*Math.sin(Theta))).add(w.multiplyScalar((Math.cos(Theta))));
@@ -284,8 +282,8 @@ public class Utilities {
 //si verifica che il box index non sia vuoto
     if(Tree[index-1].nph != 0){
 
-      //si verifica che il nuovo indice non abbia ha superato la lunghezza dell'albero (P), in tal caso l'indice corrisponde ad un box all'estremità dell'albero
-      if((2*index)+1< RenderAction.P){
+      //si verifica che il nuovo indice non abbia ha superato la lunghezza dell'albero (power), in tal caso l'indice corrisponde ad un box all'estremità dell'albero
+      if((2*index)+1< RenderAction.power){
 
         //viene caricato il punto di intersezione in un array di 3 elementi
         double[] pos = {iP.x, iP.y, iP.z};

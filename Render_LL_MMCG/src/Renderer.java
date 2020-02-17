@@ -43,9 +43,9 @@ public class Renderer {
       //carico l'area della luce in esame
       float area = RenderAction.lights.get(i).areaObj;
 
-      //per ogni s campione della luce tra i dirsamps
+      //per ogni s campione della luce tra i dirSamps
       //campioni totali per l'illuminazione diretta
-      for (int s = 0; s < RenderAction.dirsamps; s++) {
+      for (int s = 0; s < RenderAction.dirSamps; s++) {
 
         //controllo per decidere se calcolare la
         //BRDF o la BSSRDF, quindi la calcoliamo
@@ -267,7 +267,7 @@ public class Renderer {
 
     //dividiamo per tutti i sample utilizzati nell'
     //estimatore di Monte Carlo
-    radianceOutput = radianceOutput.divideScalar(RenderAction.dirsamps * RenderAction.lights.size());
+    radianceOutput = radianceOutput.divideScalar(RenderAction.dirSamps * RenderAction.lights.size());
     return radianceOutput;
   }
 
@@ -289,9 +289,9 @@ public class Renderer {
 
     //TODO inserire Russian Roulette
 
-    //per ogni s campione della luce tra gli aosamps
+    //per ogni s campione della luce tra gli aoSamps
     //campioni totali per l'illuminazione indiretta
-    for (int s = 0; s < RenderAction.aosamps; s++) {
+    for (int s = 0; s < RenderAction.aoSamps; s++) {
       //quindi distribuito uniformemente sull'emisfero
       Point3D dir;
       float rndX = 0.0f;
@@ -356,7 +356,7 @@ public class Renderer {
       }
     }
 
-    radianceOutput = radianceOutput.divideScalar(RenderAction.aosamps);
+    radianceOutput = radianceOutput.divideScalar(RenderAction.aoSamps);
     return radianceOutput;
   }
 
@@ -490,7 +490,7 @@ public class Renderer {
        //tutti i campioni
        RenderAction.nRay++;
          //per ogni campione
-         for(int s = 0; s< RenderAction.refSample; s++)
+         for(int s = 0; s< RenderAction.refSamps; s++)
          {
            //dichiaro due variabili aleatorie
            float random1;
@@ -579,7 +579,7 @@ public class Renderer {
          }
          RenderAction.nRay--;
          //divido per il numero di raggi che sono stati creati
-         radianceRefl=radianceRefl.divideScalar((float) RenderAction.refSample);
+         radianceRefl=radianceRefl.divideScalar((float) RenderAction.refSamps);
       }
      }
     }
@@ -633,7 +633,7 @@ public class Renderer {
             } else {
               RenderAction.nRay++;
               //per ogni sample
-              for(int s = 0; s < RenderAction.refSample; s++){
+              for(int s = 0; s < RenderAction.refSamps; s++){
                 float random1;
                 float random2;
                 //flag di controllo sulla direzione creata
@@ -702,7 +702,7 @@ public class Renderer {
               //si mediano i contributi di tutti i raggi
               //usati
               radianceRefr=radianceRefr.divideScalar(
-                  (float) RenderAction.refSample);
+                  (float) RenderAction.refSamps);
           }
         }
       } else {
@@ -743,7 +743,7 @@ public class Renderer {
 
             if(utilities.intersect(refrRay[i], objX)){
               t= utilities.inters;
-              utilities.inters = utilities.inf;
+              utilities.inters = Utilities.inf;
               objX= utilities.intersObj;
               utilities.intersObj =null;
               RenderAction.nRay++;
@@ -781,9 +781,9 @@ public class Renderer {
       //photon mapping:
       //if we render with photon mapping
       if(RenderAction.doPhotonFinalGathering) {
-        return photonRadiance(r, o, RenderAction.KdTree, RenderAction.photond_2, RenderAction.nPhotonSearch)
+        return photonRadiance(r, o, RenderAction.KdTree, RenderAction.photonSearchDisc, RenderAction.nPhotonSearch)
             .add(radianceRefr).add(radianceRefl)
-            .add(photonRadiance(r, o, RenderAction.causticTree, RenderAction.causticd_2, RenderAction.nCausticSearch))
+            .add(photonRadiance(r, o, RenderAction.causticTree, RenderAction.causticSearchDisc, RenderAction.nCausticSearch))
             .add(emittedObjRadiance(o));
       }
 
@@ -867,7 +867,7 @@ public class Renderer {
     //scena:
     Point3D[] Pr=new Point3D[nObj];
 
-    //inizializzo a (0,0,0) P e Pr
+    //inizializzo a (0,0,0) power e Pr
     for(int i=0; i<nObj;i++) {
           P[i]=new Point3D();
           Pr[i]=new Point3D();
@@ -906,7 +906,7 @@ public class Renderer {
       //+(potenza emessa dalla patch)
       Prtot=Prtot.add(LP);
 
-      //viene salvata nell'array P la potenza dell'
+      //viene salvata nell'array power la potenza dell'
       //elemento i
       P[i].copy(LP);
 
@@ -928,14 +928,14 @@ public class Renderer {
     //rilasciata non diventa minore di un certo valore
     ///(verificato dalla variabile err)
     //o gli steps superano gli steps massimi (verificato
-    //dalla variabile maxsteps).
+    //dalla variabile maxSteps).
     //Devono essere vere entrambe
 
     RenderAction.steps = 0;
 
-    while ((RenderAction.err > RenderAction.maxerr) && (RenderAction.steps < RenderAction.maxsteps)) {
+    while ((RenderAction.err > RenderAction.maxErr) && (RenderAction.steps < RenderAction.maxSteps)) {
       //percentuale di completamento
-      System.out.println("completamento jacobi "+(RenderAction.steps/(float) RenderAction.maxsteps)*100);
+      System.out.println("completamento jacobi "+(RenderAction.steps/(float) RenderAction.maxSteps)*100);
       //viene inizializzato un seme iniziale casuale
       //da 0 a 30000
       int s =(int) Math.floor(Math.random()*(30001));
@@ -1222,7 +1222,7 @@ public class Renderer {
 
       //una volta terminata la fase di shooting si
       //riaggiornano le componenti di Potenza residua,
-      //Pr, Potenza P, e si azzerano le potenze
+      //Pr, Potenza power, e si azzerano le potenze
       //residue parziali salvate negli oggetti
       //azzeramento della potenza totale:
 
@@ -1242,7 +1242,7 @@ public class Renderer {
     }
 
     //I valori ottenuti vengono salvati su ciascuna
-    //patch nella variabile P (in cui durante il processo
+    //patch nella variabile power (in cui durante il processo
     //veniva salvata la potenza residua parziale)
     for(int i=0; i<nObj; i++) {
       (RenderAction.globalObjects.get(i).P).copy(P[i]);
@@ -1297,7 +1297,7 @@ public class Renderer {
     radianceOutput = radianceOutput.add(photonIndirect(r,o,x,y));
 
     //illuminazione caustiche
-    radianceOutput=radianceOutput.add(photonRadiance(r,o, RenderAction.causticTree, RenderAction.causticd_2, RenderAction.nCausticSearch));
+    radianceOutput=radianceOutput.add(photonRadiance(r,o, RenderAction.causticTree, RenderAction.causticSearchDisc, RenderAction.nCausticSearch));
 
     return radianceOutput;
   }
@@ -1311,7 +1311,7 @@ public class Renderer {
 
     int mId = o.matId;
 
-    for(int s = 0; s < RenderAction.aosamps; s++){
+    for(int s = 0; s < RenderAction.aoSamps; s++){
 
       //quindi distribuito uniformemente sull'emisfero
       Point3D dir;
@@ -1334,7 +1334,7 @@ public class Renderer {
       v = v.getNormalizedPoint();
       u = v.crossProduct(w);
 
-      dir = new Point3D((Math.cos(rndPhi)*Math.sin(rndTeta)), (Math.sin(rndPhi)*Math.sin(rndTeta)), (Math.cos(rndTeta)));
+      dir = u.multiplyScalar(Math.cos(rndPhi)*Math.sin(rndTeta)).add(v.multiplyScalar(Math.sin(rndPhi)*Math.sin(rndTeta))).add(w.multiplyScalar(Math.cos(rndTeta)));
       dir = dir.getNormalizedPoint();
 
       //creo il raggio dal punto di intersezione ad un punto a caso sull'emisfero
@@ -1355,12 +1355,12 @@ public class Renderer {
         Point3D iP = reflRay.o.add(reflRay.d.multiplyScalar(t));
         Ray r2 = new Ray(iP,reflRay.d.multiplyScalar(-1));
         Point3D BRDF= RenderAction.material[mId].C_T_BRDF(reflRay,r,n1);
-        radianceOutput=radianceOutput.add(photonRadiance(r2, objX, RenderAction.KdTree, RenderAction.photond_2, RenderAction.nPhotonSearch).multiplyComponents(BRDF).multiplyScalar(Utilities.MATH_PI));
+        radianceOutput=radianceOutput.add(photonRadiance(r2, objX, RenderAction.KdTree, RenderAction.photonSearchDisc, RenderAction.nPhotonSearch).multiplyComponents(BRDF).multiplyScalar(Utilities.MATH_PI));
 
       }
     }
 
-    radianceOutput=radianceOutput.divideScalar(RenderAction.aosamps);
+    radianceOutput=radianceOutput.divideScalar(RenderAction.aoSamps);
     return radianceOutput;
   }
 
@@ -1369,11 +1369,11 @@ public class Renderer {
 
     //calcola numero di photonbox
     for(int i=1; i < RenderAction.Kdepth; i++){
-      RenderAction.P += Math.pow(2, i);
+      RenderAction.power += Math.pow(2, i);
     }
 
-    RenderAction.KdTree = new PhotonBox[RenderAction.P+1];
-    RenderAction.causticTree = new PhotonBox[RenderAction.P+1];
+    RenderAction.KdTree = new PhotonBox[RenderAction.power +1];
+    RenderAction.causticTree = new PhotonBox[RenderAction.power +1];
 
     //TODO multithread optimisation required
     //vengono emessi i fotoni dalle luci e fatti rimbalzare all'interno della scena
@@ -1718,7 +1718,7 @@ public class Renderer {
       ArrayList<Point3D> ProjectionMap;
 
       //carichiamo la potenza di ciascun fotone
-      Point3D P= RenderAction.material[lid].emittedLight.multiplyScalar(Utilities.MATH_PI* RenderAction.scaleCausticPower*area/(RenderAction.causticPhoton* RenderAction.aoCausticPhoton));
+      Point3D P = RenderAction.material[lid].emittedLight.multiplyScalar(Utilities.MATH_PI* RenderAction.scaleCausticPower*area/(RenderAction.causticPhoton* RenderAction.aoCausticPhoton));
 
       //se la luce è un triangolo
       if(RenderAction.lights.get(l).t != null) {
@@ -1735,8 +1735,8 @@ public class Renderer {
         ProjectionMap = utilities.Projection(point,normal);
 
         //incremento
-        float dTheta= Utilities.MATH_PI/(2*RenderAction.ProjectionResolution);
-        float dPhi=(2*Utilities.MATH_PI)/ RenderAction.ProjectionResolution;
+        float dTheta= Utilities.MATH_PI/(2*RenderAction.projectionResolution);
+        float dPhi=(2*Utilities.MATH_PI)/ RenderAction.projectionResolution;
 
         //angolo solido di ciascuna patch dell'emisfero
         float SolidAngle=dTheta*dPhi;
@@ -1780,8 +1780,8 @@ public class Renderer {
             double rndTheta;
 
             //campiona uniformemente
-            rndPhi = Utilities.generateRandom(RenderAction.ProjectionResolution * RenderAction.ProjectionResolution)*dPhi;
-            rndTheta = Utilities.generateRandom(RenderAction.ProjectionResolution * RenderAction.ProjectionResolution)*((angle.z+dTheta)*Math.sin(angle.z+dTheta)-angle.y);
+            rndPhi = Utilities.generateRandom(RenderAction.projectionResolution * RenderAction.projectionResolution)*dPhi;
+            rndTheta = Utilities.generateRandom(RenderAction.projectionResolution * RenderAction.projectionResolution)*((angle.z+dTheta)*Math.sin(angle.z+dTheta)-angle.y);
 
             //angoli finali per la creazione del raggio
             double Phi= angle.x+rndPhi;
@@ -1999,7 +1999,7 @@ public class Renderer {
           Tree[2*index] = new PhotonBox(new Point3D(min.x,min.y,median), max, ph2);
       }
 
-      RenderAction.pbn += 2;
+      RenderAction.photonBoxNum += 2;
 
       balance(Tree,2*index,liv);
       balance(Tree,(2*index)+1,liv);

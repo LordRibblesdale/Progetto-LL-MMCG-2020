@@ -9,13 +9,6 @@ public class Sphere {
 	// posizione (centro)
 	public Point3D p;
 
-
-	//costruttore di default
-	public Sphere() {
-		rad=0.0f;
-		p=new Point3D();
-	}
-	
 	//costruttore
 	public Sphere(float nrad, Point3D np) {
 		rad=nrad;
