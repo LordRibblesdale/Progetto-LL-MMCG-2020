@@ -782,8 +782,7 @@ public class Renderer {
       //if we render with photon mapping
       if(RenderAction.doPhotonFinalGathering) {
         return photonRadiance(r, o, RenderAction.KdTree, RenderAction.photond_2, RenderAction.nPhotonSearch)
-            .add(radianceRefr)
-            .add(radianceRefl)
+            .add(radianceRefr).add(radianceRefl)
             .add(photonRadiance(r, o, RenderAction.causticTree, RenderAction.causticd_2, RenderAction.nCausticSearch))
             .add(emittedObjRadiance(o));
       }
@@ -945,11 +944,11 @@ public class Renderer {
       //(N*) e una per il numero di sample utilizzati
       //finora (Nprev*)
       int NprevX=0;
-      int NX;
+      int NX=0;
       int NprevY=0;
-      int NY;
+      int NY=0;
       int NprevZ=0;
-      int NZ;
+      int NZ=0;
 
       //potenza residua totale nelle tre componenti
       double Prt= Prtot.x+Prtot.y+Prtot.z;
@@ -996,27 +995,29 @@ public class Renderer {
           //creo 3 variabili randomiche che si basano
           //sul seme iniziale casuale s definito
           //randomicamente
-          float rndX = Utilities.generateRandom(s);
-          float rndY = Utilities.generateRandom(s);
-          float rndZ = Utilities.generateRandom(s);
+          float rndX = utilities.generateRandom(s);
+          float rndY = utilities.generateRandom(s);
+          float rndZ = utilities.generateRandom(s);
 
           //Inverse Cumulative Distribuction Function
           //creiamo la base ortonormale per generare
           //la direzione del raggio ffRay
-          float rndPhi=2* Utilities.MATH_PI *(rndX);
+          float rndPhi=2* utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(
                   rndY));
 
           //dichiaro e inizializzo un punto scelto
           //uniformemente sulla patch i
-          Point3D rndPoint = o.randomPoint(rndX, rndY, rndZ);
+          Point3D rndPoint=null;
+          rndPoint= o.randomPoint(rndX, rndY,rndZ);
 
           //Si crea ora la base ortonormale
           Point3D u;
           Point3D v;
+          Point3D w=null;
           //settiamo w come la normale all'oggetto nel
           //punto rndPoint
-          Point3D w = o.normal(rndPoint);
+          w=o.normal(rndPoint);
 
           //vettore up (simile a (0,1,0))
           Point3D up=new Point3D(0.0015f,1.0f,0.021f);
@@ -1052,7 +1053,7 @@ public class Renderer {
           //creo il raggio per scegliere la patch j
           //con probabilita' uguale al fattore di forma
           //tra la patch i e quella j
-          Ray ffRay = new Ray(rndPoint,dir);
+          Ray ffRay=new Ray(rndPoint,dir);
 
           //inizializzo a null l'oggetto intersecato
           objX[i]=null;
@@ -1066,7 +1067,7 @@ public class Renderer {
             //avere il giusto valore di partenza la
             //prossima volta che si utilizzera' il
             //metodo intersect()
-            utilities.inters = Utilities.inf;
+            utilities.inters = utilities.inf;
             //salvo nell'elemento i-esimo dell'array
             //objX l'elemento intersecato dal raggio
             //ffRay
@@ -1105,21 +1106,23 @@ public class Renderer {
 
           Point3D dir;
 
-          float rndX = Utilities.generateRandom(s);
-          float rndY = Utilities.generateRandom(s);
-          float rndZ = Utilities.generateRandom(s);
+          float rndX = utilities.generateRandom(s);
+          float rndY = utilities.generateRandom(s);
+          float rndZ = utilities.generateRandom(s);
 
-          float rndPhi=2* Utilities.MATH_PI *(rndX);
+          float rndPhi=2* utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(
                   rndY));
 
+          Point3D rndPoint=null;
           //punto scelto uniformemente nella patch i:
-          Point3D rndPoint = o.randomPoint(rndX, rndY, rndZ);
+          rndPoint= o.randomPoint(rndX, rndY,rndZ);
 
           //base ortonormale
           Point3D u,v;
+          Point3D w=null;
 
-          Point3D w = o.normal(rndPoint);
+          w=o.normal(rndPoint);
 
           //vettore up (simile a (0,1,0))
           Point3D up=new Point3D(0.0015f,1.0f,0.021f);
@@ -1144,7 +1147,7 @@ public class Renderer {
           objX[i]=null;
 
           if(utilities.intersect(ffRay, objX[i])) {
-            utilities.inters = Utilities.inf;
+            utilities.inters = utilities.inf;
             objX[i]= utilities.intersObj;
             utilities.intersObj =null;
             objX[i].P.y=objX[i].P.y
@@ -1161,22 +1164,27 @@ public class Renderer {
         //per ogni campione sull'elemento i
         for (int j=0; j<NZ; j++){
           Point3D dir;
+          float rndX=0.0f;
+          float rndY=0.0f;
+          float rndZ=0;
 
-          float rndX = Utilities.generateRandom(s);
-          float rndY = Utilities.generateRandom(s);
-          float rndZ = Utilities.generateRandom(s);
+          rndX= utilities.generateRandom(s);
+          rndY= utilities.generateRandom(s);
+          rndZ= utilities.generateRandom(s);
 
           //direzione casuale
-          float rndPhi=2* Utilities.MATH_PI *(rndX);
+          float rndPhi=2* utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(rndY));
 
           //punto scelto uniformemente nella patch i
-          Point3D rndPoint = o.randomPoint(rndX, rndY, rndZ);
+          Point3D rndPoint=null;
+          rndPoint= o.randomPoint(rndX, rndY,rndZ);
 
           //base ortonormale
           Point3D u,v;
+          Point3D w=null;
 
-          Point3D w = o.normal(rndPoint);
+          w=o.normal(rndPoint);
 
           //vettore up (simile a (0,1,0))
           Point3D up=new Point3D(0.0015f,1.0f,0.021f);
@@ -1197,11 +1205,11 @@ public class Renderer {
           //creo il raggio d'ombra dal punto di
           //intersezione ad un punto a caso sull'
           //emisfero
-          Ray ffRay = new Ray(rndPoint,dir);
-          objX[i] = null;
+          Ray ffRay=new Ray(rndPoint,dir);
+          objX[i]=null;
 
           if(utilities.intersect(ffRay,objX[i])) {
-            utilities.inters = Utilities.inf;
+            utilities.inters = utilities.inf;
             objX[i]= utilities.intersObj;
             utilities.intersObj =null;
             objX[i].P.z = objX[i].P.z

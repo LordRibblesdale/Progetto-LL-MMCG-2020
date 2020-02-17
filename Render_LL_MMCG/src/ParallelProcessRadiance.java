@@ -71,6 +71,7 @@ public class ParallelProcessRadiance implements Runnable {
         }
 
         // prediamo la direzione della fotocamera
+        Point3D ray_direction;
         //ray_direction e' calcolato con l'ONB(base
         //ortonormale) della fotocamera
         //il raggio dalla fotocamera al campione sara'
@@ -81,10 +82,10 @@ public class ParallelProcessRadiance implements Runnable {
         //alla componente in y infine la distanza z
         //tra la fotocamera e il piano e' cam.d
 
-        Point3D ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f * RenderAction.w))
-            .add(cam.V.multiplyScalar(raster_y - 0.5f * RenderAction.h))
+        ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f*RenderAction.w))
+            .add(cam.V.multiplyScalar(raster_y - 0.5f*RenderAction.h))
             .add(cam.W.multiplyScalar(-cam.d));
-        ray_direction = ray_direction.getNormalizedPoint();
+        ray_direction=ray_direction.getNormalizedPoint();
 
         //Ora si crea il raggio della fotocamera
         cameraRay = new Ray(origin, ray_direction);
@@ -157,7 +158,6 @@ public class ParallelProcessRadiance implements Runnable {
       //w*h-esimo
       if(tt<RenderAction.w*RenderAction.h) {
         RenderAction.image[x+y*RenderAction.w].x = Point3D.clamp(sceneRadiance.x);
-        //noinspection SuspiciousNameCombination
         RenderAction.image[x+y*RenderAction.w].y = Point3D.clamp(sceneRadiance.y);
         RenderAction.image[x+y*RenderAction.w].z = Point3D.clamp(sceneRadiance.z);
       }

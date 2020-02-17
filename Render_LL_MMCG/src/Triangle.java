@@ -6,15 +6,15 @@
 //restituisce la normale al triangolo
 public class Triangle {
 	//array dei vertici 
-	public Point3D[] vertices;
+	public Point3D[]vertices;
 	//Normale al triangolo
 	public Point3D n;
-	public Point3D center;
-	public int matId;
 
+	private Utilities utilities;
+	
 	//costruttore di default
 	private Triangle() {
-
+		utilities = new Utilities();
 	}
 	
 	//costruttore:i parametri in input sono i tre vertici
@@ -30,8 +30,6 @@ public class Triangle {
         
 		//calcoliamo la normale con un metodo apposito
 		n=tNormalCalc();
-
-		center = Point3D.average(v0, v1, v2);
 	}
 	
 	//vettore normale e' ottenuto tramite prodotto 
@@ -41,12 +39,14 @@ public class Triangle {
 		//triangolo a e b
 		Point3D a=vertices[1].subtract(vertices[0]);
 		Point3D b=vertices[2].subtract(vertices[0]);
-		return (a.crossProduct(b)).getNormalizedPoint();
+		Point3D n=(a.crossProduct(b)).getNormalizedPoint();
+		return n;
 	}
 	
 	//funzione di intersezione con un raggio: Return 
 	//distanza o -1.0f se non c'e' intersezione
 	float intersect(Ray r) {
+		
 		//risolvo il sistema o+Td=a1+ beta(b1-a1) + 
 		//gamma(c1-a1) => riscritto come [ beta(a1-b1)+
 		//gamma(a-c1)+Td1 = a-o ]  dove T,beta,gamma sono 
@@ -115,7 +115,7 @@ public class Triangle {
 		double e3=a*p-b*r1+d*s;
 		float t=(float) (e3*inv_denom);
 
-		if(t< Utilities.EPSILON)
+		if(t< utilities.EPSILON)
 			return -1.0f;
 		else
 			return t;

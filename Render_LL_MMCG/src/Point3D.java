@@ -7,8 +7,6 @@
 //occupano di varie trasformazioni o operazioni con i
 //float3
 
-import java.awt.*;
-
 public class Point3D {
 	//ha come parametri soltanto le tre componenti di un 
 	//float in uno spazio a 3 dimensioni
@@ -369,52 +367,13 @@ public class Point3D {
 			return x;
 	}
 
-	//costringe un numero in [0,255]
-	public static double clamp255(double x) {
-		if(x<0)
-			return 0;
-		else if (x>255)
-			return 255;
-		else
-			return x;
-	}
-
-	//costringe le componenti di un vettore in R3 in [0,1]
+    //costringe le componenti di un vettore in R3 in [0,1]
   public static Point3D clamp3(Point3D f) {
   	double xf=clamp(f.x);
   	double yf=clamp(f.y);
   	double zf=clamp(f.z);
 		return new Point3D(xf,yf,zf);
   }
-
-  //costringe le componenti di un vettore in R3 in [0,1]
-  public static Point3D clamp3C(Point3D f) {
-  	double xf=clamp255(f.x);
-  	double yf=clamp255(f.y);
-  	double zf=clamp255(f.z);
-		return new Point3D(xf,yf,zf);
-  }
-
-	public Point3D project(double f) {
-		/* project() calcola la proiezione centrale di un punto sul
-		piano z=0 rispetto al centro (0,0,-f)
-		f rappresenta la distanza del viewplane dal punto di
-		vista, in termini fotografici
-		e’ la lunghezza focale */
-		double k = f/(f + z);
-		//della matrice di proiezione, conservo la coordinata z
-		//dello spazio
-		return new Point3D(k*x, k*y, z);
-	}
-
-	public static Point3D average(Point3D P, Point3D Q, Point3D U){
-		// baricentro di tre punti
-		return (P.add(Q).add(U)).multiplyScalar(1/3.0);
-	}
-
-  public Color toColor() {
-		return new Color((int) x, (int) y, (int) z);
-	}
 
   @Override
 	public String toString() {

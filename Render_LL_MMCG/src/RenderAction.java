@@ -32,13 +32,25 @@ class RenderAction extends AbstractAction implements Properties {
             StandardMaterial.MATERIAL_DIFFUSIVE_JADE
     };
 
+  //static int mIS=setMatIdSphere();
   // vettore per gli indici dei materiali delle sfere
   // si fa corrispondere alla sfera i-esima del vettore
   // spheres definito poco sotto, il materiale di
   // indice corrispondente nel vettore material
-  static int[] matIdSphere = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  private static int[] matIdSphere = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-  static ArrayList<Sphere> spheres = new ArrayList<>();
+  private static Sphere[] spheres = {	//vettore costruttore delle sfere
+      new Sphere(1,new Point3D()),
+      new Sphere(1,new Point3D()),
+      new Sphere(1,new Point3D()),
+      new Sphere(1,new Point3D(4.0f,0.1f,1.4f)),
+      new Sphere(1,new Point3D(-3.0f,0.4f,2.3f)),
+      new Sphere(1,new Point3D(-4.0f,2.0f,4.0f)),
+      new Sphere(1,new Point3D(6.0f,5.3f,2.0f)),
+      new Sphere(1,new Point3D(7.0f,3.4f,1.4f)),
+      new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
+      new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
+  };
   //metodo: scegliere una delle due flag per
   //visualizzare il rendering con il metodo di Jacobi
   //stocastico (doJacobi) o con il final gathering(doFinalGathering)
@@ -53,16 +65,14 @@ class RenderAction extends AbstractAction implements Properties {
   //"diffusiva"
   private static boolean diffusiveJade=false;
   private static boolean glass=false;
+  static boolean aligned=false;
 
   static final int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
-  static ArrayList<Mesh> meshes = new ArrayList<>(2);  //array di mesh della scena
+  ArrayList<Mesh> meshes;	//array di mesh della scena
 
   //parametri della fotocamera con sistema di riferimento centrato nella scena:
   //absolutePos e' vero se stiamo guardando proprio al centro della scena
   static boolean absolutePos=false;
-
-  static Camera cam;
-  static Point3D pf;
 
   //punto guardato rispetto al centro della scena (0,0,0)
   //inizialmente coincide  con il centro ma poiche'
@@ -85,7 +95,7 @@ class RenderAction extends AbstractAction implements Properties {
   static float ap=0;	//apertura diaframma della fotocamera
 
   static int sceneDepth= 0;	//densita' triangoli nella stanza
-  static ArrayList<Obj> lights = new ArrayList<>();
+  static ArrayList<Obj> lights;
 
   //liv e' il livello di profondita' all'interno dell'albero
   //per la partizione spaziale della scena
@@ -108,11 +118,6 @@ class RenderAction extends AbstractAction implements Properties {
   //della scena (in modo da poter essere aggionati nei
   //metodi richiamati)
   static ArrayList<Obj> globalObjects;
-
-  //vettori di supporto che conterranno gli oggetti della scena
-  static ArrayList<Obj> objects = new ArrayList<>();
-  static ArrayList<Obj> sceneObjects = new ArrayList<>();
-  static ArrayList<Triangle> approxSceneObjects = new ArrayList<>();
 
   static int[] samplesX=new int[w*h];	//campioni per la fotocamera
   static int[] samplesY=new int[w*h];
@@ -222,9 +227,18 @@ class RenderAction extends AbstractAction implements Properties {
     Main.ok_button.setEnabled(false);
     Main.tf.setText("Creazione immagine in corso");
 
-    int mIS = setMatIdSphere();
-    for(int sph = 0; sph < SPHERE_NUM; sph++)
-      matIdSphere[sph]=mIS;
+    //TODO: optimise here
+    //Metodo
+    if (bool[0] == 1) {
+      doFinalGathering =true;
+    } else if (bool[0] == 0) {
+      doFinalGathering =false;
+    } else if(bool[0] == 2) {
+      doFinalGathering = true;
+      doPhotonFinalGathering = true;
+    } else if (bool[0] == 3) {
+      doMultiPassPhotonMapping = true;
+    }
 
     //Materiale
     if(bool[1]==1)
@@ -240,52 +254,140 @@ class RenderAction extends AbstractAction implements Properties {
     else if(bool[3]==0)
       glass=false;
 
-    for (int i = 0; i < (w*h); i++) {
-      //creiamo i campioni necessari per:
+    //Posizione
+    if(bool[4]==1)
+      aligned=true;
+    else if(bool[4]==0)
+      aligned=false;
 
-      //la fotocamera
-      samplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-      samplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
-      //la luce indiretta
-      aoSamplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-      aoSamplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+    int mIS = setMatIdSphere();
+    for(int sph = 0; sph < SPHERE_NUM; sph++)
+      matIdSphere[sph]=mIS;
 
-      //la luce diretta
-      dirSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-      dirSamples2[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-      dirSamples3[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-
-      //riflessioni/rifrazioni
-      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
-    }
-
-    prepareScene(true);
-
-    //TODO: optimise here
-    //Metodo
-    if (bool[0] == 1) {
-      doFinalGathering = true;
-    } else if (bool[0] == 0) {
-      doFinalGathering = false;
-    } else if(bool[0] == 2) {
-      doPhotonFinalGathering = true;
-    } else if (bool[0] == 3) {
-      doMultiPassPhotonMapping = true;
-    }
-
-    meshes.clear();
-    objects.clear();
-    sceneObjects.clear();
-    loadedBoxes = 0;
-    maxPartitions = 0;
+    Point3D sPos0 = Sphere.setSpheresPosition(0);
+    Point3D sPos1 = Sphere.setSpheresPosition(1);
+    Point3D sPos2 = Sphere.setSpheresPosition(2);
+    //vettore costruttore delle sfere
+    spheres[0] = new Sphere(1,sPos0);
+    spheres[1] = new Sphere(1,sPos1);
+    spheres[2] = new Sphere(1,sPos2);
 
     //dovendo disegnare 3 sfere e la stanza definisco un
     //array di 2 Mesh: nella prima delle due mesh (per
     //meshes[0]) aggiungiamo le 3
-    //sfere richiamando il metodo setSpherePosition
-    prepareScene(false);
+    //sfere richiamando il metodo caricaSphere
+    meshes = new ArrayList<>(2);
+    meshes.add(new Mesh(SPHERE_NUM, spheres, matIdSphere));
+
+    //inizializzo massimo e minimo punto della scena
+
+    //inizializzo dei fittizi massimo e minimo, che mi
+    //serviranno per definire i valori di max e min
+    Point3D oldMin=new Point3D(Float.POSITIVE_INFINITY);
+    Point3D oldMax=new Point3D(Float.NEGATIVE_INFINITY);
+
+    //trovo le dimensioni della scena (tralasciando la
+    //stanza in cui gli oggetti sono contenuti)
+    for (Mesh tmpObjects : meshes) {
+      max = Obj.getBoundMax(tmpObjects.objects, oldMax);
+      min = Obj.getBoundMin(tmpObjects.objects, oldMin);
+    }
+
+    //definisco e calcolo il punto in cui guarda
+    //l'osservatore: il centro della scena
+    Point3D center= (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
+
+    if(!absolutePos) {
+      lookat = lookat.add(center);
+    }
+
+    //l'osservatore si trova nel punto camPosition
+    Point3D camPosition = center.add(eye);
+    //calcolo del punto di messa a fuoco pf
+    Point3D pf = new Point3D();
+    pf.copy(center.add(focusPoint));
+
+    //costruttore della fotocamera
+    //imposto la fotocamera che guarda il centro
+    //dell'oggetto ed e' posizionata davanti
+    Camera cam = new Camera(camPosition, lookat, new Point3D(0.00015f,1.00021f,0.0f), w, h, distfilm);
+
+    //Abbiamo ora a disposizione tutti gli elementi
+    //necessari per costruire la stanza
+    //Creo la stanza in cui mettere l'oggetto (per
+    //visualizzare l'illuminazione globale)
+    //La carico come ultima mesh
+    meshes.add(new Mesh(max,min));
+
+    //nel nostro caso sceneDepth=0, quindi non si entra
+    //mai in questo ciclo
+    for(int q=0;q < sceneDepth; q++) {
+      meshes.get(meshes.size()-1).splitMeshes();
+    }
+
+    //A questo punto consideriamo l'intero array di mesh,
+    //ora composto da oggetti+stanza e aggiorno i valori
+    //della grandezza della stanza, usando di nuovo i
+    //metodi getBoundMin e getBoundMax.
+    oldMax=max;
+    oldMin=min;
+    max=Obj.getBoundMax(meshes.get(meshes.size()-1).objects, oldMax);
+    min=Obj.getBoundMin(meshes.get(meshes.size()-1).objects, oldMin);
+
+    //vettore che conterra' gli oggetti della scena
+    ArrayList<Obj> objects = new ArrayList<>();
+    ArrayList<Obj> sceneObjects = new ArrayList<>();
+    //vettore che contiene solo le luci della scena
+    lights = new ArrayList<>();
+
+    for (Mesh tmpMesh : meshes) {
+      //e carico tutto nella lista globale degli oggetti
+      for (int j = 0; j < tmpMesh.objects.size(); j++) {
+        objects.add(tmpMesh.objects.get(j));
+        sceneObjects.add(tmpMesh.objects.get(j));
+        //se l'oggetto e' una luce la carico dentro
+        //l'array delle luci
+        if (material[tmpMesh.objects.get(j).matId].emittedLight.max() > 0) {
+          lights.add(tmpMesh.objects.get(j));
+        }
+      }
+    }
+
+    //costruzione del Kd-tree che ripartisce la scena
+
+    //l=0: iniziamo a partizionare col piano xy
+    short l=0;
+    //liv e' il livello di profondita' all'interno
+    //dell'albero
+    depthLevel =0;
+
+    //creo il Bounding Box
+    //Bound e' il primo elemento dell'albero che contiene
+    //tutti gli oggetti della scena
+    bound = new Box(min, max, l);
+
+    bound.setObjects(objects);
+
+    //inizializzo la variabile S che e' la massima
+    //profondita' dell'albero
+    for(int i=1; i<depth; i++){
+      maxPartitions +=Math.pow(2,i);
+    }
+
+    //crea il tree: si richiama il metodo setPartition()
+    //per dividere gli oggetti del box padre nei box figli
+    bound = Box.setPartition(bound);
+
+    //salviamo gli oggetti della scena nella variabile
+    //globale globalObjects in modo da poterli aggiornare
+    //in JacobiStoc()
+    globalObjects = new ArrayList<>();
+    globalObjects.addAll(sceneObjects);
+
+    //la definizione di inters mi serve per il metodo
+    //intersectBPS che utilizza questa variabile
+    utilities.inters= Utilities.inf;
 
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
@@ -308,7 +410,29 @@ class RenderAction extends AbstractAction implements Properties {
     //RAND_MAX=2147483647: qua usero'
     //Math.random() * (fine-iniz+1)) + iniz
     //cioe' Math.random()* (2147483648)
+    for (int i = 0; i < (w*h); i++) {
+      //creiamo i campioni necessari per:
 
+      //la fotocamera
+      samplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      samplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+
+      //la luce indiretta
+      aoSamplesX[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      aoSamplesY[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+
+      //la luce diretta
+      dirSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      dirSamples2[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      dirSamples3[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+
+      //riflessioni/rifrazioni
+      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+      refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
+
+      //inizializzo l'immagine nera
+      image[i]=new Point3D();
+    }
 
     //Stampiamo le varie informazioni
     System.out.println("Samples: "+samps+" "+aosamps);
@@ -406,138 +530,6 @@ class RenderAction extends AbstractAction implements Properties {
       fos.close();
     } catch (IOException e1) {
       e1.printStackTrace();
-    }
-  }
-
-  private static void setUpMeshes() {
-    for (Mesh tmpMesh : meshes) {
-      //e carico tutto nella lista globale degli oggetti
-      for (int j = 0; j < tmpMesh.objects.size(); j++) {
-        objects.add(tmpMesh.objects.get(j));
-        sceneObjects.add(tmpMesh.objects.get(j));
-        //se l'oggetto e' una luce la carico dentro
-        //l'array delle luci
-        if (material[tmpMesh.objects.get(j).matId].emittedLight.max() > 0) {
-          lights.add(tmpMesh.objects.get(j));
-        }
-      }
-    }
-  }
-
-  static void prepareScene(boolean isModelerEnabled) {
-    for (int i = 0; i < w*h; i++) {
-      //inizializzo l'immagine nera
-      image[i]=new Point3D();
-    }
-
-    if (!isModelerEnabled) {
-      lookat = new Point3D(0);
-    }
-
-    Sphere.setSpheresPosition();
-
-    meshes.add(new Mesh(SPHERE_NUM, spheres, matIdSphere));
-
-    //inizializzo massimo e minimo punto della scena
-
-    //inizializzo dei fittizi massimo e minimo, che mi
-    //serviranno per definire i valori di max e min
-    Point3D oldMin=new Point3D(Float.POSITIVE_INFINITY);
-    Point3D oldMax=new Point3D(Float.NEGATIVE_INFINITY);
-
-    //trovo le dimensioni della scena (tralasciando la
-    //stanza in cui gli oggetti sono contenuti)
-    for (Mesh tmpObjects : meshes) {
-      max = Obj.getBoundMax(tmpObjects.objects, oldMax);
-      min = Obj.getBoundMin(tmpObjects.objects, oldMin);
-    }
-
-    //definisco e calcolo il punto in cui guarda
-    //l'osservatore: il centro della scena
-    Point3D center = (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
-
-    if(!absolutePos) {
-      lookat = lookat.add(center);
-    }
-
-    //l'osservatore si trova nel punto camPosition
-    Point3D camPosition = center.add(eye);
-    //calcolo del punto di messa a fuoco pf
-    pf = new Point3D();
-    pf.copy(center.add(focusPoint));
-
-    //costruttore della fotocamera
-    //imposto la fotocamera che guarda il centro
-    //dell'oggetto ed e' posizionata davanti
-    cam = new Camera(camPosition, lookat, new Point3D(0.00015f,1.00021f,0.0f), w, h, distfilm);
-
-    //Abbiamo ora a disposizione tutti gli elementi
-    //necessari per costruire la stanza
-    //Creo la stanza in cui mettere l'oggetto (per
-    //visualizzare l'illuminazione globale)
-    //La carico come ultima mesh
-    meshes.add(new Mesh(max,min));
-
-    //nel nostro caso sceneDepth=0, quindi non si entra
-    //mai in questo ciclo
-    for(int q=0;q < sceneDepth; q++) {
-      meshes.get(meshes.size()-1).splitMeshes();
-    }
-
-    //A questo punto consideriamo l'intero array di mesh,
-    //ora composto da oggetti+stanza e aggiorno i valori
-    //della grandezza della stanza, usando di nuovo i
-    //metodi getBoundMin e getBoundMax.
-    oldMax=max;
-    oldMin=min;
-    max=Obj.getBoundMax(meshes.get(meshes.size()-1).objects, oldMax);
-    min=Obj.getBoundMin(meshes.get(meshes.size()-1).objects, oldMin);
-
-    setUpMeshes();  // Setup per il render
-
-    //costruzione del Kd-tree che ripartisce la scena
-
-    //l=0: iniziamo a partizionare col piano xy
-    short l=0;
-    //liv e' il livello di profondita' all'interno
-    //dell'albero
-    depthLevel =0;
-
-    //creo il Bounding Box
-    //Bound e' il primo elemento dell'albero che contiene
-    //tutti gli oggetti della scena
-    bound = new Box(min, max, l);
-
-    bound.setObjects(objects);
-
-    //inizializzo la variabile S che e' la massima
-    //profondita' dell'albero
-    for(int i=1; i<depth; i++){
-      maxPartitions +=Math.pow(2,i);
-    }
-
-    //crea il tree: si richiama il metodo setPartition()
-    //per dividere gli oggetti del box padre nei box figli
-    bound = Box.setPartition(bound);
-
-    //salviamo gli oggetti della scena nella variabile
-    //globale globalObjects in modo da poterli aggiornare
-    //in JacobiStoc()
-    globalObjects = new ArrayList<>();
-    globalObjects.addAll(sceneObjects);
-
-    if (isModelerEnabled) {
-      new Modeler(Main.f);
-    }
-  }
-
-  static void createApproxObjects() {
-    for (Obj o : globalObjects) {
-      if (o.t != null) {
-        approxSceneObjects.add(o.t);
-      } else {
-        approxSceneObjects.addAll(o.s.triangles);
-      }
     }
   }
 }
