@@ -515,7 +515,7 @@ class RenderAction implements Properties {
       //stampiamo la percentuale di completamento per
       //monitorare l'avanzamento della creazione
       //dell'immagine
-      double percent = ((float)i / (float)(w*h)) * 100;
+      double percent = (i / (float)(w*h)) * 100;
       double percentFloor=Math.floor(percent);
       double a=percent-percentFloor;
       if(a==0.0)
@@ -532,7 +532,7 @@ class RenderAction implements Properties {
       matrix.append(Utilities.toInt(image[i].x)).append(" ").append(Utilities.toInt(image[i].y)).append(" ").append(Utilities.toInt(image[i].z)).append("  ");
     }
 
-    //Main.label.setText("Immagine completata!");
+    Main.label.setText("Immagine completata!");
 
     //nome del file in cui si andra' a salvare l'immagine
     //di output
