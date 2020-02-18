@@ -140,7 +140,6 @@ class RenderAction implements Properties {
   static int aoSamps;
   static int dirSamps;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
   static int refSamps;	//campioni scelti per le riflessioni e le rifrazioni
-  static int jacobiSamps;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
 
   static ArrayList<Photon> photons = new ArrayList<>();
   static ArrayList<Photon> caustics = new ArrayList<>();
@@ -167,6 +166,7 @@ class RenderAction implements Properties {
   static double err = 0;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
   static int maxSteps;	//step massimi per le iterazioni di Jacobi Stocastico
   static double maxErr;	//errore massimo nel processo di Jacobi Stocastico
+  static int jacobiSamps;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
 
   //soglia dei triangoli dentro ad un box se ce ne sono di
   //meno si ferma la partizione; si puo' regolare in base
@@ -189,7 +189,7 @@ class RenderAction implements Properties {
 
   //se true la luce e' frontale. Se si cambia in true,
   //deccommentare le parti in createScene()
-  static boolean frontL=false;
+  static boolean frontL = false;
 
   //variabile utilizzata per visualizzare lo stato di
   //caricamento dei box durante la partizione spaziale
@@ -200,11 +200,12 @@ class RenderAction implements Properties {
   static double sphericalSearch = 1;
 
   private Renderer renderer;
-  private Utilities utilities;
+
+  //TODO prepare modeler
+  private boolean isReadyToRender = false;
 
   RenderAction(boolean isModeler) {
-    utilities = new Utilities();
-    renderer = new Renderer(utilities);
+    renderer = new Renderer(new Utilities());
 
     doRender(isModeler);
   }
@@ -281,7 +282,7 @@ class RenderAction implements Properties {
       Point3D sPos = Sphere.setSpheresPosition(sph);
 
       //vettore costruttore delle sfere
-      spheres[sph] = new Sphere(1 ,sPos);
+      spheres[sph] = new Sphere(1, sPos);
     }
 
     //dovendo disegnare 3 sfere e la stanza definisco un
@@ -314,6 +315,8 @@ class RenderAction implements Properties {
     //parametri della fotocamera con sistema di riferimento centrato nella scena:
     //absolutePos e' vero se stiamo guardando proprio al centro della scena
     boolean absolutePos = false;
+
+    //TODO check variable usage
     if(!absolutePos) {
       lookat = lookat.add(center);
     }
@@ -321,8 +324,11 @@ class RenderAction implements Properties {
     //l'osservatore si trova nel punto camPosition
     Point3D camPosition = center.add(eye);
     //calcolo del punto di messa a fuoco pf
+    /*
     Point3D pf = new Point3D();
     pf.copy(center.add(focusPoint));
+
+     */
 
     //costruttore della fotocamera
     //imposto la fotocamera che guarda il centro
@@ -401,10 +407,6 @@ class RenderAction implements Properties {
     globalObjects = new ArrayList<>();
     globalObjects.addAll(sceneObjects);
 
-    //la definizione di inters mi serve per il metodo
-    //intersectBPS che utilizza questa variabile
-    utilities.inters= Utilities.inf;
-
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
     //stocastico
@@ -451,29 +453,13 @@ class RenderAction implements Properties {
       image[i] = new Point3D();
     }
 
-    /*
-    //Stampiamo le varie informazioni
-    System.out.println("Samples: "+ samps + " " + aoSamps);
-    System.out.println("Origin: x "+cam.eye.x+" y "+
-        cam.eye.y+" z "+cam.eye.z);
-    System.out.println("Direction: x "+cam.lookAt.x+" y "+
-        cam.lookAt.y+" z "+cam.lookAt.z);
-    System.out.println("Up: x "+cam.up.x+" y "+cam.up.y+
-        " z "+cam.up.z);
-    System.out.println("D: "+cam.d+" W: "+cam.width+
-        " H: "+cam.height);
-    */
-
-    cam.aperturaDiaframma = ap;// =0
+    cam.aperturaDiaframma = ap;
 
     //l'istruzione seguente calcola il fattore di scala
     //con una trasformazione perospettica che porta
     //l'origine della posizione della fotocamera e il
     //vettore dell'osservatore al vettore della fotocamera
-    cam.fuoco = (pf.z - cam.eye.z) / (cam.W.z*(-cam.d));
-
-    System.out.println("Fuoco: " + cam.fuoco);
-    System.out.println("Apertura diaframma: " + cam.aperturaDiaframma);
+    //cam.fuoco = (pf.z - cam.eye.z) / (cam.W.z*(-cam.d));
 
     renderer.calculateThreadedRadiance(cam);
 
@@ -534,6 +520,7 @@ class RenderAction implements Properties {
       //i valori di radianza devono essere trasformati
       //nell'intervallo [0,255] per rappresentare la
       //gamma cromatica in valori RGB
+      //noinspection SuspiciousNameCombination
       matrix.append(Utilities.toInt(image[i].x)).append(" ").append(Utilities.toInt(image[i].y)).append(" ").append(Utilities.toInt(image[i].z)).append("  ");
     }
 
@@ -580,12 +567,6 @@ class RenderAction implements Properties {
         new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
         new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
     };
-
-    ArrayList<Mesh> meshes = new ArrayList<>();	//array di mesh della scena
-
-    //parametri della fotocamera con sistema di riferimento centrato nella scena:
-    //absolutePos e' vero se stiamo guardando proprio al centro della scena
-    boolean absolutePos=false;
 
     //punto guardato rispetto al centro della scena (0,0,0)
     //inizialmente coincide  con il centro ma poiche'

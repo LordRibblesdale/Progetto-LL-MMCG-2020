@@ -80,7 +80,7 @@ class EditPanel extends JPanel {
   }
 
   String getPosition() {
-    return positions.getItemAt(materials.getSelectedIndex());
+    return positions.getItemAt(positions.getSelectedIndex());
   }
 
   void setUI(boolean isEnabled) {

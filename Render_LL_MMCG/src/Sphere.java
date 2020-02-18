@@ -21,37 +21,29 @@ public class Sphere {
   //Prende come parametro l'indice dell'array
   //spheres di cui si deve settare la posizione
   static Point3D setSpheresPosition(int index) {
-    Point3D ret;
     if(RenderAction.aligned) {
       switch(index) {
         case 0:
-          ret=new Point3D(-1.0f,0.0f,0.0f);
-          break;
+          return new Point3D(-1.0f,0.0f,0.0f);
         case 1:
-          ret=new Point3D(-5.0f,0.3f,0.8f);
-          break;
+          return new Point3D(-5.0f,0.3f,0.8f);
         case 2:
-          ret=new Point3D(3.5f,0.5f,3.3f);
-          break;
+          return new Point3D(3.5f,0.5f,3.3f);
         default:
-          ret=new Point3D(0.0f);
+          return new Point3D(0.0f);
       }
     } else {
       switch(index) {
         case 0:
-          ret=new Point3D(-4.0f,0.0f,0.0f);
-          break;
+          return new Point3D(-4.0f,0.0f,0.0f);
         case 1:
-          ret=new Point3D(-7.0f,0.0f,0.0f);
-          break;
+          return new Point3D(-7.0f,0.0f,0.0f);
         case 2:
-          ret=new Point3D(-4.0f,0.0f,5.3f);
-          break;
-        default: ret=new Point3D(0.0f);
+          return new Point3D(-4.0f,0.0f,5.3f);
+        default:
+          return new Point3D(0.0f);
       }
     }
-
-    return ret;
   }
 
   //funzione di intersezione con un raggio: Return

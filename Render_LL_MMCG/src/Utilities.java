@@ -36,8 +36,6 @@ public class Utilities {
   //considerando, fino a trovare il punto di intersezione
   //b: box da intersecare con il raggio,
   //r: raggio considerato
-
-
   boolean intersectBSP(Box b,Ray r){
     if(b.intersect(r)) {  //controllo che i figli non siano nulli (ovvero che abbia figli)
       if((b.leaf1 != null) && (b.leaf2 != null)) { //se non e' nullo ricomincia con i figli
@@ -86,7 +84,6 @@ public class Utilities {
     //non la consideriamo
     return inters < inf;
   }
-
 
   //metodo che serve a calcolare l'intersezione tra un
   //oggetto e un raggio, che richiama la funzione

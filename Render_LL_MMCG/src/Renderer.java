@@ -35,21 +35,21 @@ public class Renderer {
     int mId = o.matId;
 
     //definizione e inizializzoazione a null dell'oggetto
-      //che si andra' ad intersecare
+    //che si andra' ad intersecare
     Obj objX;
 
-     //per ogni luce
+    //per ogni luce
     for (int i = 0; i < RenderAction.lights.size(); i++) {
       //carico l'area della luce in esame
       float area = RenderAction.lights.get(i).areaObj;
 
-      //per ogni s campione della luce tra i dirSamps
+      //per ogni s campione della luce tra i dirsamps
       //campioni totali per l'illuminazione diretta
       for (int s = 0; s < RenderAction.dirSamps; s++) {
 
         //controllo per decidere se calcolare la
         //BRDF o la BSSRDF, quindi la calcoliamo
-          //nel punto osservato
+        //nel punto osservato
         //inizializziamo B che e' la variabile in
         //cui salviamo il valore di BRDF o la
         //BSSRDF
@@ -64,10 +64,10 @@ public class Renderer {
           float zr=0.0025f;
           float dr;
           dv=(float) (Math.random()*(60) + 90);
-            //lo divido per non avere un numero troppo
-            //grande
+          //lo divido per non avere un numero troppo
+          //grande
           dv /= 10000f;
-            //rispetto la triangolarita'
+          //rispetto la triangolarita'
           float l2=dv*dv-zv*zv;
           float l=(float) Math.sqrt(l2);
           dr=(float) Math.sqrt(l2+zr*zr);
@@ -125,13 +125,13 @@ public class Renderer {
 
           //TODO fix here
           //while(!okdir) {
-            dir.x *= Ftheta.x;
-            dir.y *= Ftheta.y;
-            dir.z *= Ftheta.z;
+          dir.x *= Ftheta.x;
+          dir.y *= Ftheta.y;
+          dir.z *= Ftheta.z;
 
-            if(dir.dotProduct(n1)>0)
-              okdir=true;
-            //altrimenti si cerca una nuova direzione
+          if(dir.dotProduct(n1)>0)
+            okdir=true;
+          //altrimenti si cerca una nuova direzione
           //}//fine while(okdir)
 
           Ray directRay= new Ray(newPoint, dir);
@@ -158,6 +158,7 @@ public class Renderer {
                 cosPsi);
             Point3D one=new Point3D(1.0f);
 
+
             Point3D pi4=new Point3D(4* Utilities.MATH_PI);
             //i valori si sigmas e sigmaa sono specifici per
             //la giada
@@ -172,7 +173,7 @@ public class Renderer {
             Point3D expdr=sigmatr.multiplyScalar(dr*-1.0f);
             float dr3=dr*dr*dr;
             Point3D edivdr=(Point3D.exponent(expdr)).
-                  divideScalar(dr3);
+                divideScalar(dr3);
 
             Point3D expdv=sigmatr.multiplyScalar(dv*-1.0f);
             float dv3=dv*dv*dv;
@@ -186,7 +187,7 @@ public class Renderer {
                 .multiplyComponents(rPart.add(vPart));
 
             B=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
-                      divideScalar(Utilities.MATH_PI);
+                divideScalar(Utilities.MATH_PI);
 
 
             //enfatizzo il colore verde
@@ -199,12 +200,12 @@ public class Renderer {
             //leggibilita' del risultato
             double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
-            radianceOutput = radianceOutput
-                .add(RenderAction.material[lid].emittedLight
-                        .multiplyComponents(B)
-                        .multiplyScalar(area)
-                        .multiplyScalar(dirN1N2))
-                .divideScalar(norma2);
+            radianceOutput = radianceOutput.
+                add(RenderAction.material[lid].emittedLight.
+                    multiplyComponents(B).multiplyScalar(area).
+                    multiplyScalar(dirN1N2)).
+                divideScalar(norma2);
+
           }
         } else {
           //Caso BRDF
@@ -238,8 +239,8 @@ public class Renderer {
 
           //verifica del fattore di visibilita'
           if (utilities.intersect(directRay, objX)) {
-             utilities.inters = Utilities.inf;
-             utilities.intersObj = null;
+            utilities.inters = Utilities.inf;
+            utilities.intersObj = null;
             //vengono caricati i dati della luce:
             //normale nel punto p
             Point3D n2 = RenderAction.lights.get(i).normal(p);
@@ -288,7 +289,7 @@ public class Renderer {
 
     //TODO inserire Russian Roulette
 
-    //per ogni s campione della luce tra gli aoSamps
+    //per ogni s campione della luce tra gli aosamps
     //campioni totali per l'illuminazione indiretta
     for (int s = 0; s < RenderAction.aoSamps; s++) {
       //quindi distribuito uniformemente sull'emisfero
@@ -358,7 +359,6 @@ public class Renderer {
     radianceOutput = radianceOutput.divideScalar(RenderAction.aoSamps);
     return radianceOutput;
   }
-
   //metodo per il Final Gathering, che si serve di una sola
   //iterazione del raytracing stocastico, nella quale si
   //raccolgono (gathering) le informazioni ottenute dalla
@@ -409,10 +409,11 @@ public class Renderer {
     //oggetto considerato
     int mId=o.matId;
     //normale dell'oggetto nel punto osservato
-    Point3D n1 = o.normal(r.o);
+    Point3D n1;
+    n1= o.normal(r.o);
 
     //coseno tra il raggio entrante e la normale
-    double cos_i = r.d.dotProduct(n1);
+    double cos_i= r.d.dotProduct(n1);
 
     //fattore di Fresnel
     Point3D Fresn = RenderAction.material[mId].getFresnelCoefficient(cos_i);
@@ -423,163 +424,163 @@ public class Renderer {
     if((RenderAction.material[mId].reflectionColor.max() > 0) &&
         (RenderAction.nRay < Utilities.MAX_DEPTH +1)) {
 
-     //con questo controllo si evitano le riflessioni interne
-     //al materiale
-     if (cos_i>0) {
-     // riflessione del raggio in entrata rispetto alla
-     //normale n1
-     Point3D refl= Point3D.reflect(r.d,n1);
-     //si verifica che il materiale sia perfettamente
-     //speculare o che non sia la prima riflessione (si evita
-     //in questo modo l'aumento esponenziale dei raggi nel
-     //caso in cui ci siano riflessioni multiple tra specchi
-     //imperfetti)
-     if((RenderAction.material[mId].refImperfection == 0) || (RenderAction.nRay > 0)) {
-        //definisco e inizializzo a (0,0,0) il raggio riflesso
-        Ray reflRay=new Ray();
-        //l'origine e' la stessa del raggio passato come
-        //parametro
-        reflRay.o=r.o;
-        //la direzione e' la riflessa di quella del raggio
-        //passato come parametro
-        reflRay.d=refl;
-        //dichiaro e inizializzo la variabile t in cui
-        //salveremo il punto di intersezione fra l'oggetto
-        //considerato e reflRay
-        double t= Utilities.inf;
-        //definizione e inizializzoazione a null dell'oggetto
-        //che si andra' ad intersecare
-        Obj objX;
-        objX=null;
-        //intersezione del raggio con gli elementi della scena
-        if(utilities.intersect(reflRay,objX)){
-          //pongo t uguale al valore di intersezione
-          //memorizzato nella variabile globale inters
-          t= utilities.inters;
-          //resetto inters uguale a inf in modo da avere
-          //il giusto valore di partenza la prossima volta
-          //che si utilizzera' il metodo intersect()
-          utilities.inters = Utilities.inf;
-          //salvo nell'elemento i-esimo dell'array objX
-          //l'elemento intersecato dal raggio ffRay
-          objX= utilities.intersObj;
-          //resetto intersObj=null in modo da avere il
-          //giusto valore di partenza la prossima volta che
-          //si utilizzera' il metodo intersect()
-          utilities.intersObj =null;
-          //si calcola il punto di intersezione
-          Point3D iP=(reflRay.o).add((reflRay.d).
-                  multiplyScalar(t));
-          //si crea il nuovo raggio
-          Ray r2=new Ray(iP,refl.multiplyScalar(-1));
-          //si aumentano il numero di riflessioni per il
-          //raytracing
+      //con questo controllo si evitano le riflessioni interne
+      //al materiale
+      if (cos_i>0) {
+        // riflessione del raggio in entrata rispetto alla
+        //normale n1
+        Point3D refl= Point3D.reflect(r.d,n1);
+        //si verifica che il materiale sia perfettamente
+        //speculare o che non sia la prima riflessione (si evita
+        //in questo modo l'aumento esponenziale dei raggi nel
+        //caso in cui ci siano riflessioni multiple tra specchi
+        //imperfetti)
+        if((RenderAction.material[mId].refImperfection == 0) || (RenderAction.nRay > 0)) {
+          //definisco e inizializzo a (0,0,0) il raggio riflesso
+          Ray reflRay=new Ray();
+          //l'origine e' la stessa del raggio passato come
+          //parametro
+          reflRay.o=r.o;
+          //la direzione e' la riflessa di quella del raggio
+          //passato come parametro
+          reflRay.d=refl;
+          //dichiaro e inizializzo la variabile t in cui
+          //salveremo il punto di intersezione fra l'oggetto
+          //considerato e reflRay
+          double t= Utilities.inf;
+          //definizione e inizializzoazione a null dell'oggetto
+          //che si andra' ad intersecare
+          Obj objX;
+          objX=null;
+          //intersezione del raggio con gli elementi della scena
+          if(utilities.intersect(reflRay,objX)){
+            //pongo t uguale al valore di intersezione
+            //memorizzato nella variabile globale inters
+            t= utilities.inters;
+            //resetto inters uguale a inf in modo da avere
+            //il giusto valore di partenza la prossima volta
+            //che si utilizzera' il metodo intersect()
+            utilities.inters = Utilities.inf;
+            //salvo nell'elemento i-esimo dell'array objX
+            //l'elemento intersecato dal raggio ffRay
+            objX= utilities.intersObj;
+            //resetto intersObj=null in modo da avere il
+            //giusto valore di partenza la prossima volta che
+            //si utilizzera' il metodo intersect()
+            utilities.intersObj =null;
+            //si calcola il punto di intersezione
+            Point3D iP=(reflRay.o).add((reflRay.d).
+                multiplyScalar(t));
+            //si crea il nuovo raggio
+            Ray r2=new Ray(iP,refl.multiplyScalar(-1));
+            //si aumentano il numero di riflessioni per il
+            //raytracing
+            RenderAction.nRay++;
+            //si calcola la radianza riflessa utilizzando
+            //ricorsivamente la funzione radiance
+            radianceRefl
+                = radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].S_BRDF(Fresn));
+            //si diminuiscono il numero di riflessioni
+            RenderAction.nRay--;
+          }
+        }//fine if per specchi imperfetti
+        else {
+          //si aumenta il numero di riflessioni una volta per
+          //tutti i campioni
           RenderAction.nRay++;
-          //si calcola la radianza riflessa utilizzando
-          //ricorsivamente la funzione radiance
-          radianceRefl
-              = radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].S_BRDF(Fresn));
-          //si diminuiscono il numero di riflessioni
+          //per ogni campione
+          for(int s = 0; s < RenderAction.refSamps; s++)
+          {
+            //dichiaro due variabili aleatorie
+            float random1;
+            float random2;
+
+            //flag per la verifica dell'orientazione del
+            //raggio
+            boolean okdir=true;
+            //direzione del nuovo raggio
+            Point3D dir=new Point3D();
+            //finche' non abbiamo un raggio con giusta
+            //orientazione
+            while(okdir){
+              //creazione delle variabili aleatorie
+              //uniformi usando come semi gli elementi dell'
+              //array refSamples1
+              random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
+              random2= Utilities.generateRandom(RenderAction.refSamples2[x+y* RenderAction.w]);
+
+              //Inverse Cumulative Distribution Function
+              //del coseno modificata
+              //creiamo la base ortonormale per generare
+              //la direzione del raggio riflesso reflRay
+              float rndPhi=2* Utilities.MATH_PI *(random1);
+              float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
+              // creazione della base ortonormale rispetto
+              //alla direzione di riflessione
+              Point3D u,v,w;
+              //inizializzo w uguale alla riflessione del
+              //raggio in entrata
+              w=refl;
+              //vettore up (simile a (0,1,0))
+              Point3D up=new Point3D(0.0015f,1.0f,0.021f);
+              //il prodotto vettoriale tra w e up mi
+              //genera il vettore v normale a entambi, che
+              //normalizzo
+              v=w.crossProduct(up);
+              v=v.getNormalizedPoint();
+              //il prodotto vettoriale tra v e w mi genera
+              //il vettore u normale a entambi dal momento
+              //che i vettori v e w sono gia' normali, non
+              //c'e' bisogno di noemalizzare il vettoe u)
+              u=v.crossProduct(w);
+              //ora che abbiamo la base ortonormale,
+              //possiamo calcolare la direzione dir
+              //salvo in delle cariabili i calori di seno
+              //e coseno necessari per il calcolo di dir
+              float cosPhi=(float) Math.cos(rndPhi);
+              float sinTeta=(float) Math.sin(rndTeta);
+              float sinPhi=(float) Math.sin(rndPhi);
+              float cosTeta=(float) Math.cos(rndTeta);
+              //dir=(u*(cosPhi*sinTeta))+(v*(sinPhi*sinTeta)
+              //)+(w*(cosTeta)) poi normalizzato
+              dir=(u.multiplyScalar(cosPhi*sinTeta)).add(v.multiplyScalar(sinPhi*sinTeta)).add(w.multiplyScalar(cosTeta));
+
+              //si verifica che la direzione formi un angolo
+              //di massimo 90 gradi con la normale
+              if(dir.dotProduct(n1)>0)
+                okdir=false;
+              //altrimenti si cerca una nuova direzione
+            }//fine while(okdir)
+
+            //creazione del raggio riflesso
+            Ray reflRay=new Ray();
+            reflRay.o=r.o;
+            reflRay.d=dir;
+            //massima distanza del raggio
+            double t;
+            Obj objX = null;
+            //intersezione con gli oggetti della scena
+            if(utilities.intersect(reflRay, objX)){
+              t= utilities.inters;
+              utilities.inters = Utilities.inf;
+              objX= utilities.intersObj;
+              utilities.intersObj =null;
+              //punto di intersezione del raggio con
+              //l'oggetto objX:
+              Point3D iP=(reflRay.o).add((reflRay.d).multiplyScalar(t));
+              //nuovo raggio:
+              Ray r2=new Ray(iP,refl.multiplyScalar(-1));
+
+              //calcolo della radianza riflessa
+              radianceRefl
+                  =radianceRefl.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].S_BRDF(Fresn)));
+            }
+          }
           RenderAction.nRay--;
+          //divido per il numero di raggi che sono stati creati
+          radianceRefl=radianceRefl.divideScalar((float) RenderAction.refSamps);
         }
-     }//fine if per specchi imperfetti
-     else {
-       //si aumenta il numero di riflessioni una volta per
-       //tutti i campioni
-       RenderAction.nRay++;
-         //per ogni campione
-         for(int s = 0; s< RenderAction.refSamps; s++)
-         {
-           //dichiaro due variabili aleatorie
-           float random1;
-           float random2;
-
-           //flag per la verifica dell'orientazione del
-           //raggio
-           boolean okdir=true;
-           //direzione del nuovo raggio
-           Point3D dir=new Point3D();
-           //finche' non abbiamo un raggio con giusta
-           //orientazione
-           while(okdir){
-             //creazione delle variabili aleatorie
-             //uniformi usando come semi gli elementi dell'
-             //array refSamples1
-             random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
-             random2= Utilities.generateRandom(RenderAction.refSamples2[x+y* RenderAction.w]);
-
-             //Inverse Cumulative Distribution Function
-             //del coseno modificata
-             //creiamo la base ortonormale per generare
-             //la direzione del raggio riflesso reflRay
-             float rndPhi=2* Utilities.MATH_PI *(random1);
-             float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
-             // creazione della base ortonormale rispetto
-             //alla direzione di riflessione
-             Point3D u,v,w;
-             //inizializzo w uguale alla riflessione del
-             //raggio in entrata
-             w=refl;
-             //vettore up (simile a (0,1,0))
-             Point3D up=new Point3D(0.0015f,1.0f,0.021f);
-             //il prodotto vettoriale tra w e up mi
-             //genera il vettore v normale a entambi, che
-             //normalizzo
-             v=w.crossProduct(up);
-             v=v.getNormalizedPoint();
-             //il prodotto vettoriale tra v e w mi genera
-             //il vettore u normale a entambi dal momento
-             //che i vettori v e w sono gia' normali, non
-             //c'e' bisogno di noemalizzare il vettoe u)
-             u=v.crossProduct(w);
-             //ora che abbiamo la base ortonormale,
-             //possiamo calcolare la direzione dir
-             //salvo in delle cariabili i calori di seno
-             //e coseno necessari per il calcolo di dir
-             float cosPhi=(float) Math.cos(rndPhi);
-             float sinTeta=(float) Math.sin(rndTeta);
-             float sinPhi=(float) Math.sin(rndPhi);
-             float cosTeta=(float) Math.cos(rndTeta);
-             //dir=(u*(cosPhi*sinTeta))+(v*(sinPhi*sinTeta)
-             //)+(w*(cosTeta)) poi normalizzato
-             dir=(u.multiplyScalar(cosPhi*sinTeta)).add(v.multiplyScalar(sinPhi*sinTeta)).add(w.multiplyScalar(cosTeta));
-
-             //si verifica che la direzione formi un angolo
-             //di massimo 90 gradi con la normale
-             if(dir.dotProduct(n1)>0)
-               okdir=false;
-             //altrimenti si cerca una nuova direzione
-           }//fine while(okdir)
-
-           //creazione del raggio riflesso
-           Ray reflRay=new Ray();
-           reflRay.o=r.o;
-           reflRay.d=dir;
-           //massima distanza del raggio
-           double t;
-           Obj objX = null;
-           //intersezione con gli oggetti della scena
-           if(utilities.intersect(reflRay, objX)){
-             t= utilities.inters;
-             utilities.inters = Utilities.inf;
-             objX= utilities.intersObj;
-             utilities.intersObj =null;
-             //punto di intersezione del raggio con
-             //l'oggetto objX:
-             Point3D iP=(reflRay.o).add((reflRay.d).multiplyScalar(t));
-             //nuovo raggio:
-             Ray r2=new Ray(iP,refl.multiplyScalar(-1));
-
-             //calcolo della radianza riflessa
-             radianceRefl
-                 =radianceRefl.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].S_BRDF(Fresn)));
-             }
-         }
-         RenderAction.nRay--;
-         //divido per il numero di raggi che sono stati creati
-         radianceRefl=radianceRefl.divideScalar((float) RenderAction.refSamps);
       }
-     }
     }
 
     //rifrazione
@@ -595,111 +596,111 @@ public class Renderer {
       //semplificato
       if((RenderAction.material[mId].refractionIndexRGB.x == RenderAction.material[mId].refractionIndexRGB.y)
           && (RenderAction.material[mId].refractionIndexRGB.x == RenderAction.material[mId].refractionIndexRGB.z))
-        {
-          //direzione del raggio rifratto:
-          //calcolo della direzione per il raggio rifratto:
-          Point3D dir = Point3D.getRefraction(r.d, n1, RenderAction.material[mId].refractionIndexRGB.x);
-          //se c'e' effettivamente una rifrazione non interna
-          if(!dir.equals(new Point3D(-1.0f))) {
+      {
+        //direzione del raggio rifratto:
+        //calcolo della direzione per il raggio rifratto:
+        Point3D dir = Point3D.getRefraction(r.d, n1, RenderAction.material[mId].refractionIndexRGB.x);
+        //se c'e' effettivamente una rifrazione non interna
+        if(!dir.equals(new Point3D(-1.0f))) {
 
-            //viene creato il raggio rigratto
-            Ray refrRay=new Ray(r.o,dir);
+          //viene creato il raggio rigratto
+          Ray refrRay=new Ray(r.o,dir);
 
-            //si verifica il parametro di imperfezione del
-            //materiale
-            if((RenderAction.material[mId].refImperfection==0)||(RenderAction.nRay>0))
+          //si verifica il parametro di imperfezione del
+          //materiale
+          if((RenderAction.material[mId].refImperfection==0)||(RenderAction.nRay>0))
+          {
+            double t= utilities.inf;
+            Obj objX;
+            objX=null;
+
+            if(utilities.intersect(refrRay, objX))
             {
-              double t= utilities.inf;
-              Obj objX;
-              objX=null;
+              t= utilities.inters;
+              utilities.inters = utilities.inf;
+              objX= utilities.intersObj;
+              utilities.intersObj =null;
+              Point3D iP=(refrRay.o).add(
+                  refrRay.d.multiplyScalar(t));
+              Ray r2=new Ray(iP,dir.multiplyScalar(-1));
 
-              if(utilities.intersect(refrRay, objX))
-              {
-                t= utilities.inters;
-                utilities.inters = utilities.inf;
-                objX= utilities.intersObj;
-                utilities.intersObj =null;
-                Point3D iP=(refrRay.o).add(
-                     refrRay.d.multiplyScalar(t));
-                Ray r2=new Ray(iP,dir.multiplyScalar(-1));
-
-                RenderAction.nRay++;
-                //calcolo della radianza rifratta
-                radianceRefr=radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn));
-                RenderAction.nRay--;
-              }
-            } else {
               RenderAction.nRay++;
-              //per ogni sample
-              for(int s = 0; s < RenderAction.refSamps; s++){
-                float random1;
-                float random2;
-                //flag di controllo sulla direzione creata
-                boolean okdir=true;
-                //float3 dir;
+              //calcolo della radianza rifratta
+              radianceRefr=radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn));
+              RenderAction.nRay--;
+            }
+          } else {
+            RenderAction.nRay++;
+            //per ogni sample
+            for(int s = 0; s < RenderAction.refSamps; s++){
+              float random1;
+              float random2;
+              //flag di controllo sulla direzione creata
+              boolean okdir=true;
+              //float3 dir;
 
-                while(okdir){
-                  //variabili aleatorie uniformi in
-                  //[0,1]
-                  random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
-                  random2= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
+              while(okdir){
+                //variabili aleatorie uniformi in
+                //[0,1]
+                random1= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
+                random2= Utilities.generateRandom(RenderAction.refSamples1[x+y* RenderAction.w]);
 
-                  //distribuisco i numeri random sull'
-                  //emisfero
-                  float rndPhi=2* Utilities.MATH_PI *(random1);
-                  float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
+                //distribuisco i numeri random sull'
+                //emisfero
+                float rndPhi=2* Utilities.MATH_PI *(random1);
+                float rndTeta=(float) Math.acos((float) Math.pow(random2, RenderAction.material[mId].refImperfection));
 
-                  // creazione della base ortonormale
-                  //creata a partire dal raggio rifratto
-                  Point3D u,v,w;
-                  w=refrRay.d;
-                  //vettore up (simile a (0,1,0))
-                  Point3D up=new Point3D(0.0015f,1.0f,0.021f);
-                  v=w.crossProduct(up);
-                  v=v.getNormalizedPoint();
-                  u=v.crossProduct(w);
-                  //si calcola la direzione del raggio
+                // creazione della base ortonormale
+                //creata a partire dal raggio rifratto
+                Point3D u,v,w;
+                w=refrRay.d;
+                //vettore up (simile a (0,1,0))
+                Point3D up=new Point3D(0.0015f,1.0f,0.021f);
+                v=w.crossProduct(up);
+                v=v.getNormalizedPoint();
+                u=v.crossProduct(w);
+                //si calcola la direzione del raggio
 
-                  float cosPhi=(float) Math.cos(rndPhi);
-                  float sinTeta=(float) Math.sin(rndTeta);
-                  float sinPhi=(float) Math.sin(rndPhi);
-                  float cosTeta=(float) Math.cos(rndTeta);
-                  dir=(u.multiplyScalar(cosPhi*sinTeta))
-                      .add(v.multiplyScalar(sinPhi*sinTeta))
-                      .add(w.multiplyScalar(cosTeta));
-                  //si verifica che l'angolo tra la
-                  //normale e la nuova direzione sia
-                  //maggiore di 90 gradi
-                  if(dir.dotProduct(n1.multiplyScalar(-1))>0)
-                    okdir=false;
-                }//fine while(okdir)
+                float cosPhi=(float) Math.cos(rndPhi);
+                float sinTeta=(float) Math.sin(rndTeta);
+                float sinPhi=(float) Math.sin(rndPhi);
+                float cosTeta=(float) Math.cos(rndTeta);
+                dir=(u.multiplyScalar(cosPhi*sinTeta))
+                    .add(v.multiplyScalar(sinPhi*sinTeta))
+                    .add(w.multiplyScalar(cosTeta));
+                //si verifica che l'angolo tra la
+                //normale e la nuova direzione sia
+                //maggiore di 90 gradi
+                if(dir.dotProduct(n1.multiplyScalar(-1))>0)
+                  okdir=false;
+              }//fine while(okdir)
 
-                //nuovo raggio:
-                Ray rRay=new Ray();
-                rRay.o=r.o;
-                rRay.d=dir;
+              //nuovo raggio:
+              Ray rRay=new Ray();
+              rRay.o=r.o;
+              rRay.d=dir;
 
                 double t;
                 Obj objX = null;
 
-                if(utilities.intersect(refrRay, objX)){
-                  t= utilities.inters;
-                  utilities.inters = Utilities.inf;
-                  objX= utilities.intersObj;
-                  utilities.intersObj =null;
-                  //punto di intersezione
-                  Point3D iP=(refrRay.o).add((refrRay.d).multiplyScalar(t));
-                  Ray r2=new Ray(iP,dir.multiplyScalar(-1));
+              if(utilities.intersect(refrRay, objX)){
+                t= utilities.inters;
+                utilities.inters = Utilities.inf;
+                objX= utilities.intersObj;
+                utilities.intersObj =null;
+                //punto di intersezione
+                Point3D iP=(refrRay.o).add((refrRay.d).multiplyScalar(t));
+                Ray r2=new Ray(iP,dir.multiplyScalar(-1));
 
-                  //calcolo della radianca rifratta
-                  radianceRefr=radianceRefr.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn)));
-                }
+                //calcolo della radianca rifratta
+                radianceRefr=radianceRefr.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn)));
               }
-
-              RenderAction.nRay--;
-              //si mediano i contributi di tutti i raggi
-              //usati
-              radianceRefr = radianceRefr.divideScalar(RenderAction.refSamps);
+            }
+            RenderAction.nRay--;
+            //si mediano i contributi di tutti i raggi
+            //usati
+            radianceRefr=radianceRefr.divideScalar(
+                (float) RenderAction.refSamps);
           }
         }
       } else {
@@ -722,7 +723,7 @@ public class Renderer {
 
         //calcolo dei 3 raggi rifratti
         refrRay = Point3D.getRefraction(refrRay,r.d,n1, RenderAction.material[mId].
-                    refractionIndexRGB);
+            refractionIndexRGB);
 
         //carichiamo la brdf sul vettore g[] di 3 elementi
         //cosi da accedervi piu' facilmente
@@ -732,16 +733,17 @@ public class Renderer {
         //per ogni componente RGB
         for(int i=0;i<3;i++) {
           //si verifica che non ci sia stata riflessione
-                //totale
+          //totale
           if(refrRay[i].depth!=0){
-            double t;
-            Obj objX = null;
+            double t= utilities.inf;
+            Obj objX;
+            objX=null;
 
             if(utilities.intersect(refrRay[i], objX)){
               t= utilities.inters;
-              utilities.inters = Utilities.inf;
+              utilities.inters = utilities.inf;
               objX= utilities.intersObj;
-              utilities.intersObj = null;
+              utilities.intersObj =null;
               RenderAction.nRay++;
               Point3D iP=(r.o).add((refrRay[i].d).multiplyScalar(t));
               Ray r2=new Ray(iP,refrRay[i].d.multiplyScalar(-1));
@@ -790,10 +792,12 @@ public class Renderer {
             .add(radianceRefl);
       }
 
-      //metodo di Jacobi stocastico e final gathering:
-      if (RenderAction.doJacobi && RenderAction.doFinalGathering) {
+      //metodo di Final gathering:
+      if (RenderAction.doFinalGathering) {
+        //float areaInverse= (1.0f)/((o).areaObj);
+        //Point3D L=((o).P).multiplyScalar(areaInverse);
         Point3D f= finalGathering(r, x, y, o);
-        return f.add(radianceRefr).add(radianceRefl);
+        return f.add(radianceRefr).add(radianceRefl).add(emittedObjRadiance(o));
       }
 
       //metodo di Jacobi stocastico:
@@ -815,8 +819,8 @@ public class Renderer {
       return new Point3D();
 
     } else {
-    //se il materiale e' riflettente o trasparente
-    return radianceRefl.add(radianceRefr);
+      //se il materiale e' riflettente o trasparente
+      return radianceRefl.add(radianceRefr);
     }
   }
 
@@ -844,8 +848,6 @@ public class Renderer {
 
   void calculateThreadedRadiance(Camera cam) {
     new Runner(cam);
-
-
   }
 
   //funzione per il calcolo della radiosita' della scena:

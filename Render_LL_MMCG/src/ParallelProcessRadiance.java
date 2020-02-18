@@ -35,7 +35,8 @@ public class ParallelProcessRadiance implements Runnable {
         float raster_y = (float)y;
 
         //origine del raggio della fotocamera
-        Point3D origin=new Point3D();
+        //TODO analyse declaration
+        Point3D origin = new Point3D();
         origin.copy(cam.eye);
 
         //se ho piu' di un campione allora
@@ -51,11 +52,11 @@ public class ParallelProcessRadiance implements Runnable {
           //sarebbe fuori dal range (ricordo che la
           //misura e' w*h ma gli indici vanno da 0 a
           //w*h-1)
-          int tt =x+y*RenderAction.w;
+          int tt = x+y*RenderAction.w;
           //allora faccio l'if per tt<w*h cosi' da
           //accertarmi che non sia considerato l'indice
           //w*h-esimo
-          if(tt<RenderAction.w*RenderAction.h) {
+          if(tt < RenderAction.w*RenderAction.h) {
             // gli passo il numero random da cui
             //siamo partiti all'interno del pixel
             rndX = Utilities.generateRandom(RenderAction.samplesX[tt]);
@@ -71,7 +72,6 @@ public class ParallelProcessRadiance implements Runnable {
         }
 
         // prediamo la direzione della fotocamera
-        Point3D ray_direction;
         //ray_direction e' calcolato con l'ONB(base
         //ortonormale) della fotocamera
         //il raggio dalla fotocamera al campione sara'
@@ -81,9 +81,8 @@ public class ParallelProcessRadiance implements Runnable {
         //sottraendo w/2 alla componente in x e h/2
         //alla componente in y infine la distanza z
         //tra la fotocamera e il piano e' cam.d
-
-        ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f*RenderAction.w))
-            .add(cam.V.multiplyScalar(raster_y - 0.5f*RenderAction.h))
+        Point3D ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f * RenderAction.w))
+            .add(cam.V.multiplyScalar(raster_y - 0.5f * RenderAction.h))
             .add(cam.W.multiplyScalar(-cam.d));
         ray_direction=ray_direction.getNormalizedPoint();
 
@@ -136,7 +135,7 @@ public class ParallelProcessRadiance implements Runnable {
       }
 
       //divido per il numero di campioni del pixel
-      sceneRadiance = sceneRadiance.divideScalar((float) RenderAction.samps);
+      sceneRadiance = sceneRadiance.divideScalar( RenderAction.samps);
       sceneRadiance.multiplyScalar(0.3f);
       // A questo punto si crea un'immagine basata sui
       //valori di radianza r

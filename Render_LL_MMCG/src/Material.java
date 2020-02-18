@@ -18,11 +18,11 @@ public class Material {
 	public Point3D refractionColor = new Point3D();
 	    
 	//potenza luce emessa dall'oggetto
-	public Point3D emittedLight = new Point3D();
+	public Point3D emittedLight;
 	    
 	// IOR (eta): indice di rifrazione rispetto alle 
 	//lunghezza d'onda RGB
-	public Point3D refractionIndexRGB = new Point3D();
+	public Point3D refractionIndexRGB;
 	    
 	//coefficente di assorbimento per materiali conduttori
 	//(anche esso varia in base alla lunghezza d'onda RGB)
@@ -49,12 +49,9 @@ public class Material {
 	//necessario calcolare la BRDF o la BSSRDF
 	public boolean translucent=false;
 
-	private Utilities utilities;
-	
 	//materiale di default: diffusivo bianco senza 
 	//riflessione
 	public Material() {
-		utilities = new Utilities();
 		diffusionColor =new Point3D(1.0f);
 		reflectionColor =new Point3D(0.0f);
 		refractionColor =new Point3D(0.0f);
@@ -65,7 +62,6 @@ public class Material {
 	//costruttore materiale 1: materiali diffusivi e 
 	//riflessivi 
 	public Material(Point3D diffusionColor, Point3D reflectionColor) {
-		utilities = new Utilities();
 		this.diffusionColor = diffusionColor;
 		this.reflectionColor = reflectionColor;
 		refractionColor =new Point3D(0.0f);
@@ -77,8 +73,6 @@ public class Material {
 	//costruttore materiali lucidi (tramite il modello di 
 	//Cook-Torrance)
 	public Material(Point3D diffusionColor, Point3D refractionIndexRGB, float slope_) {
-		utilities = new Utilities();
-
 		this.diffusionColor = diffusionColor;
 		slope = slope_;
 		this.refractionIndexRGB =refractionIndexRGB;
@@ -89,7 +83,6 @@ public class Material {
 	public Material(Point3D diffusionColor, Point3D reflectionColor, Point3D refractionColor,
 									Point3D refractionIndexRGB, Point3D absorptionCoefficient, float slope_,
 									float refImperfection_, boolean translucent_) {
-		utilities = new Utilities();
 
 		emittedLight =new Point3D(0.0f);
 		//normalizzazione: Kd+Kr deve essere <1
@@ -113,8 +106,6 @@ public class Material {
 	//materiali che emettono luce: Le corrisponde al colore
 	//della luce emessa
 	public Material(Point3D emittedLight) {
-		utilities = new Utilities();
-
 		diffusionColor =new Point3D(0.0f);
 		reflectionColor =new Point3D(0.0f);
 		refractionColor =new Point3D(0.0f);

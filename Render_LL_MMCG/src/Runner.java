@@ -16,7 +16,7 @@ public class Runner {
     int threads =
         Runtime.getRuntime().availableProcessors() == 1 || Runtime.getRuntime().availableProcessors() == 2
             ? 1
-            : Runtime.getRuntime().availableProcessors() - 2;
+            : Runtime.getRuntime().availableProcessors() - 1;
 
     for (int c = 0; c < threads; c++) {
       parallelisation.add(new Thread(new ParallelProcessRadiance(y++, cam, new Renderer(new Utilities()))));
