@@ -6,10 +6,14 @@ import java.awt.event.ActionListener;
 class EditPanel extends JPanel {
   private JButton renderButton;
 
+  private JPanel centralPanel;
   private JPanel bottomPanel;
   private JTabbedPane tabs = null;
   private JComboBox<String> materials;
   private JComboBox<String> positions;
+
+  //sample per il rendering dell'immagine
+  private JSpinner samples;
 
   JacobiPanel jacobiPanel;
   FinalGatheringPanel finalGatheringPanel;
@@ -38,23 +42,33 @@ class EditPanel extends JPanel {
         new Thread(new Runnable() {
           @Override
           public void run() {
-            new RenderAction();
+            new RenderAction(false);
           }
         }).start();
       }
     });
 
+    add(centralPanel);
     add(bottomPanel, BorderLayout.PAGE_END);
   }
 
   void initialise() {
+    centralPanel = new JPanel(new BorderLayout());
+
     tabs = new JTabbedPane();
 
     tabs.add(jacobiPanel = new JacobiPanel(), "Jacobi");
     tabs.add(finalGatheringPanel = new FinalGatheringPanel(), "Final Gathering");
     tabs.add(photonPanel = new PhotonPanel(), "Photon Mapping");
 
-    add(tabs);
+    centralPanel.add(tabs);
+
+    samples = new JSpinner(new SpinnerNumberModel(50, 1, 1000, 1));
+
+    JPanel panel = new JPanel();
+    panel.add(new JLabel("Campioni per pixel (raggi)"));
+    panel.add(samples);
+    centralPanel.add(panel, BorderLayout.PAGE_END);
   }
 
   int getMethod() {
@@ -69,12 +83,13 @@ class EditPanel extends JPanel {
     return positions.getItemAt(materials.getSelectedIndex());
   }
 
-  void disableUI() {
-    this.setEnabled(false);
+  void setUI(boolean isEnabled) {
+    this.setEnabled(isEnabled);
 
-    jacobiPanel.setEnabled(false);
-    finalGatheringPanel.setEnabled(false);
-    photonPanel.setEnabled(false);
+    samples.setEnabled(isEnabled);
+    jacobiPanel.setEnabled(isEnabled);
+    finalGatheringPanel.setEnabled(isEnabled);
+    photonPanel.setEnabled(isEnabled);
   }
 
   @Override
@@ -85,5 +100,9 @@ class EditPanel extends JPanel {
     positions.setEnabled(isEnabled);
     tabs.setEnabled(isEnabled);
     renderButton.setEnabled(isEnabled);
+  }
+
+  int getSamps() {
+    return (Integer) samples.getValue();
   }
 }

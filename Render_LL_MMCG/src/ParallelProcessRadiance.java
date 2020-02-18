@@ -93,7 +93,7 @@ public class ParallelProcessRadiance implements Runnable {
         //dichiaro e inizializzo la variabile t in cui
         //salveremo il punto di intersezione fra
         //l'oggetto considerato  e cameraRay
-        double t = Utilities.inf;
+        double t;
         //inizializzo a null l'oggetto intersecato
         //dal raggio
         Obj o=null;
@@ -102,7 +102,7 @@ public class ParallelProcessRadiance implements Runnable {
         if(utilities.intersect(cameraRay, o)) {
           //pongo t uguale al valore di intersezione
           //memorizzato nella variabile globale inters
-          t= utilities.inters;
+          t = utilities.inters;
           //resetto inters uguale a inf in modo da
           //avere il giusto valore di partenza la
           //prossima volta che si utilizzera'
@@ -110,7 +110,7 @@ public class ParallelProcessRadiance implements Runnable {
           utilities.inters = Utilities.inf;
           //salvo nella variabile o objX l'elemento
           //intersecato dal raggio cameraRay
-          o= utilities.intersObj;
+          o = utilities.intersObj;
           //resetto intersObj=null in modo da avere
           //il giusto valore di partenza la prossima
           //volta che si utilizzera' il metodo
@@ -158,6 +158,7 @@ public class ParallelProcessRadiance implements Runnable {
       //w*h-esimo
       if(tt<RenderAction.w*RenderAction.h) {
         RenderAction.image[x+y*RenderAction.w].x = Point3D.clamp(sceneRadiance.x);
+        //noinspection SuspiciousNameCombination
         RenderAction.image[x+y*RenderAction.w].y = Point3D.clamp(sceneRadiance.y);
         RenderAction.image[x+y*RenderAction.w].z = Point3D.clamp(sceneRadiance.z);
       }

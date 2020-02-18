@@ -231,8 +231,9 @@ public class Mesh {
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
       for(int i=0; i < n; i++){
-          objects.add(new Obj(spheres[i], matIdSphere[i]));
+        objects.add(new Obj(spheres[i], matIdSphere[i]));
       }
+
       nome = "sfere";
       //viene restituita una mesh delle sfere create
   }

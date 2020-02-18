@@ -48,6 +48,7 @@ public class Main extends JFrame implements StandardMaterial {
 
     editPanel = new EditPanel();
     add(editPanel);
+    add(label, BorderLayout.PAGE_END);
 
     setMinimumSize(new Dimension(650, 400));
     setResizable(false);

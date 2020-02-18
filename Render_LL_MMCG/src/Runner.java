@@ -27,11 +27,10 @@ public class Runner {
       for (int i = 0; i < parallelisation.size(); i++) {
         if (!parallelisation.get(i).isAlive()) {
           parallelisation.get(i).interrupt();
-          y++;
 
           try {
             synchronized (Runner.this) {
-              parallelisation.set(i, new Thread(new ParallelProcessRadiance(y, cam, new Renderer(new Utilities()))));
+              parallelisation.set(i, new Thread(new ParallelProcessRadiance(++y, cam, new Renderer(new Utilities()))));
               parallelisation.get(i).start();
 
             }
@@ -44,7 +43,7 @@ public class Runner {
 
     try {
       synchronized (Runner.this) {
-        wait(100);
+        wait(250);
       }
     } catch (InterruptedException e) {
       e.printStackTrace();

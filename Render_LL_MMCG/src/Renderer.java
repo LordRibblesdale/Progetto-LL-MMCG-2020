@@ -158,7 +158,6 @@ public class Renderer {
                 cosPsi);
             Point3D one=new Point3D(1.0f);
 
-
             Point3D pi4=new Point3D(4* Utilities.MATH_PI);
             //i valori si sigmas e sigmaa sono specifici per
             //la giada
@@ -200,12 +199,12 @@ public class Renderer {
             //leggibilita' del risultato
             double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
-            radianceOutput = radianceOutput.
-                    add(RenderAction.material[lid].emittedLight.
-                            multiplyComponents(B).multiplyScalar(area).
-                            multiplyScalar(dirN1N2)).
-                    divideScalar(norma2);
-
+            radianceOutput = radianceOutput
+                .add(RenderAction.material[lid].emittedLight
+                        .multiplyComponents(B)
+                        .multiplyScalar(area)
+                        .multiplyScalar(dirN1N2))
+                .divideScalar(norma2);
           }
         } else {
           //Caso BRDF
@@ -410,11 +409,10 @@ public class Renderer {
     //oggetto considerato
     int mId=o.matId;
     //normale dell'oggetto nel punto osservato
-    Point3D n1;
-    n1= o.normal(r.o);
+    Point3D n1 = o.normal(r.o);
 
     //coseno tra il raggio entrante e la normale
-    double cos_i= r.d.dotProduct(n1);
+    double cos_i = r.d.dotProduct(n1);
 
     //fattore di Fresnel
     Point3D Fresn = RenderAction.material[mId].getFresnelCoefficient(cos_i);
@@ -674,35 +672,34 @@ public class Renderer {
                   //maggiore di 90 gradi
                   if(dir.dotProduct(n1.multiplyScalar(-1))>0)
                     okdir=false;
-                 }//fine while(okdir)
+                }//fine while(okdir)
 
-                 //nuovo raggio:
-                 Ray rRay=new Ray();
-                 rRay.o=r.o;
-                 rRay.d=dir;
+                //nuovo raggio:
+                Ray rRay=new Ray();
+                rRay.o=r.o;
+                rRay.d=dir;
 
-                 double t= Utilities.inf;
-                 Obj objX;
-                 objX=null;
+                double t;
+                Obj objX = null;
 
-                 if(utilities.intersect(refrRay, objX)){
-                   t= utilities.inters;
-                   utilities.inters = utilities.inf;
-                   objX= utilities.intersObj;
-                   utilities.intersObj =null;
-                   //punto di intersezione
-                   Point3D iP=(refrRay.o).add((refrRay.d).multiplyScalar(t));
-                   Ray r2=new Ray(iP,dir.multiplyScalar(-1));
+                if(utilities.intersect(refrRay, objX)){
+                  t= utilities.inters;
+                  utilities.inters = Utilities.inf;
+                  objX= utilities.intersObj;
+                  utilities.intersObj =null;
+                  //punto di intersezione
+                  Point3D iP=(refrRay.o).add((refrRay.d).multiplyScalar(t));
+                  Ray r2=new Ray(iP,dir.multiplyScalar(-1));
 
-                   //calcolo della radianca rifratta
-                   radianceRefr=radianceRefr.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn)));
-                 }
+                  //calcolo della radianca rifratta
+                  radianceRefr=radianceRefr.add(radiance(r2,objX,x,y).multiplyComponents(RenderAction.material[mId].T_BRDF(Fresn)));
+                }
               }
+
               RenderAction.nRay--;
               //si mediano i contributi di tutti i raggi
               //usati
-              radianceRefr=radianceRefr.divideScalar(
-                  (float) RenderAction.refSamps);
+              radianceRefr = radianceRefr.divideScalar(RenderAction.refSamps);
           }
         }
       } else {
@@ -737,15 +734,14 @@ public class Renderer {
           //si verifica che non ci sia stata riflessione
                 //totale
           if(refrRay[i].depth!=0){
-            double t= utilities.inf;
-            Obj objX;
-            objX=null;
+            double t;
+            Obj objX = null;
 
             if(utilities.intersect(refrRay[i], objX)){
               t= utilities.inters;
               utilities.inters = Utilities.inf;
               objX= utilities.intersObj;
-              utilities.intersObj =null;
+              utilities.intersObj = null;
               RenderAction.nRay++;
               Point3D iP=(r.o).add((refrRay[i].d).multiplyScalar(t));
               Ray r2=new Ray(iP,refrRay[i].d.multiplyScalar(-1));
@@ -848,6 +844,8 @@ public class Renderer {
 
   void calculateThreadedRadiance(Camera cam) {
     new Runner(cam);
+
+
   }
 
   //funzione per il calcolo della radiosita' della scena:
@@ -890,7 +888,7 @@ public class Renderer {
       float area= RenderAction.globalObjects.get(i).areaObj;
       //se l'area e' piu' piccola della precisione di
       //calcolo allora impostiamo l'area a 0
-      if(area< Utilities.EPSILON) {
+      if(area < Utilities.EPSILON) {
         area=0;
       }
 
@@ -916,12 +914,11 @@ public class Renderer {
 
       //viene calcolato l'errore di approssimazione
       //(con cui e' possibile fermare il metodo)
-      RenderAction.err=(float) (RenderAction.err+Math.pow(LP.average(),2));
+      RenderAction.err += Math.pow(LP.average(),2);
     }//fine for
 
     //dopo aver aggiunto dei quadrati dobbiamo fare la
     //radice del risultato finale
-    RenderAction.err= (float) Math.sqrt(RenderAction.err);
 
     //iterazioni del metodo di Jacobi:
     //Si continuano le iterazioni finche' l'energia
@@ -995,14 +992,14 @@ public class Renderer {
           //creo 3 variabili randomiche che si basano
           //sul seme iniziale casuale s definito
           //randomicamente
-          float rndX = utilities.generateRandom(s);
-          float rndY = utilities.generateRandom(s);
-          float rndZ = utilities.generateRandom(s);
+          float rndX = Utilities.generateRandom(s);
+          float rndY = Utilities.generateRandom(s);
+          float rndZ = Utilities.generateRandom(s);
 
           //Inverse Cumulative Distribuction Function
           //creiamo la base ortonormale per generare
           //la direzione del raggio ffRay
-          float rndPhi=2* utilities.MATH_PI *(rndX);
+          float rndPhi=2* Utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(
                   rndY));
 
@@ -1067,7 +1064,7 @@ public class Renderer {
             //avere il giusto valore di partenza la
             //prossima volta che si utilizzera' il
             //metodo intersect()
-            utilities.inters = utilities.inf;
+            utilities.inters = Utilities.inf;
             //salvo nell'elemento i-esimo dell'array
             //objX l'elemento intersecato dal raggio
             //ffRay
@@ -1106,11 +1103,11 @@ public class Renderer {
 
           Point3D dir;
 
-          float rndX = utilities.generateRandom(s);
-          float rndY = utilities.generateRandom(s);
-          float rndZ = utilities.generateRandom(s);
+          float rndX = Utilities.generateRandom(s);
+          float rndY = Utilities.generateRandom(s);
+          float rndZ = Utilities.generateRandom(s);
 
-          float rndPhi=2* utilities.MATH_PI *(rndX);
+          float rndPhi=2* Utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(
                   rndY));
 
@@ -1168,12 +1165,12 @@ public class Renderer {
           float rndY=0.0f;
           float rndZ=0;
 
-          rndX= utilities.generateRandom(s);
-          rndY= utilities.generateRandom(s);
-          rndZ= utilities.generateRandom(s);
+          rndX= Utilities.generateRandom(s);
+          rndY= Utilities.generateRandom(s);
+          rndZ= Utilities.generateRandom(s);
 
           //direzione casuale
-          float rndPhi=2* utilities.MATH_PI *(rndX);
+          float rndPhi=2* Utilities.MATH_PI *(rndX);
           float rndTeta=(float) Math.acos(Math.sqrt(rndY));
 
           //punto scelto uniformemente nella patch i
@@ -1209,7 +1206,7 @@ public class Renderer {
           objX[i]=null;
 
           if(utilities.intersect(ffRay,objX[i])) {
-            utilities.inters = utilities.inf;
+            utilities.inters = Utilities.inf;
             objX[i]= utilities.intersObj;
             utilities.intersObj =null;
             objX[i].P.z = objX[i].P.z
@@ -1233,7 +1230,7 @@ public class Renderer {
         //il processo)
         P[i]=P[i].add(RenderAction.globalObjects.get(i).P);
         Pr[i].copy(RenderAction.globalObjects.get(i).P);  //aggiornamento delle potenze residue totali
-        RenderAction.err=(float) (RenderAction.err + Math.pow(Pr[i].average(),2));  //calcolo dell'errore
+        RenderAction.err += Math.pow(Pr[i].average(),2);  //calcolo dell'errore
         Prtot=Prtot.add(Pr[i]); //calcolo dell'energia residua totale
         RenderAction.globalObjects.get(i).P.copy(new Point3D());  //azzeramento della potenza residua parziale contenuta nella patch
       }

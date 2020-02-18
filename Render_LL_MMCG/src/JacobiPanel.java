@@ -14,12 +14,12 @@ public class JacobiPanel extends JPanel {
   JacobiPanel() {
     super(new GridLayout(0, 1));
 
-    samples = new JSpinner(new SpinnerNumberModel(50, 1, 1000, 1));
+    samples = new JSpinner(new SpinnerNumberModel(15000, 1, 1000000, 1));
     maxSteps = new JSpinner(new SpinnerNumberModel(15, 1, 50, 1));
     maxErr = new JSpinner(new SpinnerNumberModel(3, 0, 10, 1));
 
     JPanel panel = new JPanel();
-    panel.add(new JLabel("Campioni per pixel (raggi)"));
+    panel.add(new JLabel("Campioni per Jacobi stocastico (Montecarlo)"));
     panel.add(samples);
     add(panel);
 

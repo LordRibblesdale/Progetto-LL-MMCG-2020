@@ -66,34 +66,29 @@ class RenderAction implements Properties {
   private static boolean glass=false;
   static boolean aligned=false;
 
-  static final int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
-  ArrayList<Mesh> meshes;	//array di mesh della scena
-
-  //parametri della fotocamera con sistema di riferimento centrato nella scena:
-  //absolutePos e' vero se stiamo guardando proprio al centro della scena
-  static boolean absolutePos=false;
+  private static final int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
 
   //punto guardato rispetto al centro della scena (0,0,0)
   //inizialmente coincide  con il centro ma poiche'
   //absolutePos=false lo cambieremo in seguito
-  static Point3D lookat=new Point3D(0.0f);
+  private static Point3D lookat=new Point3D(0.0f);
 
   //punto in cui e' posizionata la fotocamera rispetto al
   //centro della scena (0,0,0)
-  static Point3D eye=new Point3D(0.0f,2.0f,12.0f);
+  private static Point3D eye=new Point3D(0.0f,2.0f,12.0f);
 
   //punto messo a fuoco rispetto al centro della scena
   //(0,0,0): inizialmente coincide  con il centro ma lo
   //cambieremo in seguito
-  static Point3D focusPoint=new Point3D(0.0f);
+  private static Point3D focusPoint=new Point3D(0.0f);
 
   static int w=1080;	//larghezza dell'immagine
   static int h=720;	//altezza dell'immagine
 
-  static float distfilm=700.0f;	//distanza dal centro della fotocamera al viewplane
-  static float ap=0;	//apertura diaframma della fotocamera
+  private static float distfilm = 700;	//distanza dal centro della fotocamera al viewplane
+  private static float ap = 0;	//apertura diaframma della fotocamera
 
-  static int sceneDepth= 0;	//densita' triangoli nella stanza
+  private static int sceneDepth = 0;	//densita' triangoli nella stanza
   static ArrayList<Obj> lights;
 
   //liv e' il livello di profondita' all'interno dell'albero
@@ -107,7 +102,7 @@ class RenderAction implements Properties {
   static Box bound;	//primo elemento della lista di Box (usato per la BSP)
   static int depth=14;	//profondita' dell'octree
 
-  static int Kdepth = 17;
+  static int Kdepth = 17; //TODO add this variable to a specific menu
 
   //massimi box (cioe' massima profondita') nell'albero
   //per la partizione spaziale della scena
@@ -151,11 +146,11 @@ class RenderAction implements Properties {
   static ArrayList<Photon> caustics = new ArrayList<>();
   static PhotonBox[] KdTree;
   static PhotonBox[] causticTree;
-  static int nPhoton = 100; // Sample per la massima ricorsività del photon mapping
-  static int causticPhoton = 100; // Sample per la massima ricorsività del photon mapping
-  static int aoCausticPhoton = 150; //Sample per la massima ricorsività del photon mapping
-  static int projectionResolution = 300;  //Sample per la mappa di proiezione
-  static float scaleCausticPower = 1; //scalamento di potenza del fotone
+  static int nPhoton; // Sample per la massima ricorsività del photon mapping
+  static int causticPhoton; // Sample per la massima ricorsività del photon mapping
+  static int aoCausticPhoton; //Sample per la massima ricorsività del photon mapping
+  static int projectionResolution;  //Sample per la mappa di proiezione
+  static float scaleCausticPower = 1; //scalamento di potenza del fotone  TODO add this variable in PhotonPanel
 
   //distanza al quadrato disco di ricerca dei fotoni
   static double photonSearchDisc;
@@ -168,8 +163,8 @@ class RenderAction implements Properties {
   static int nPhotonSearch;
   static int nCausticSearch;
 
-  static int steps;	//numero di step raggiunti dal processo Jacobi Stocastico
-  static float err;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
+  static int steps = 0;	//numero di step raggiunti dal processo Jacobi Stocastico
+  static double err = 0;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
   static int maxSteps;	//step massimi per le iterazioni di Jacobi Stocastico
   static double maxErr;	//errore massimo nel processo di Jacobi Stocastico
 
@@ -181,7 +176,7 @@ class RenderAction implements Properties {
   //nRay indica il numero di rimbalzi all'interno della
   //scena; e' una variabile globale in modo da potersi
   //aggiornare all'interno del metodo radiance()
-  static int nRay;
+  static int nRay = 0;
 
   //peso che gestisce la distanza delle pareti dall'oggetto:
   //1 se distanza = diametro oggetto
@@ -207,45 +202,56 @@ class RenderAction implements Properties {
   private Renderer renderer;
   private Utilities utilities;
 
-  RenderAction() {
+  RenderAction(boolean isModeler) {
     utilities = new Utilities();
     renderer = new Renderer(utilities);
 
-    actionPerformed();
+    doRender(isModeler);
   }
 
-  private void actionPerformed() {
-    Main.editPanel.disableUI();
-
-    jacobiSamps = Main.editPanel.jacobiPanel.getSamps();
-    maxSteps = Main.editPanel.jacobiPanel.getMaxSteps();
-    maxErr = Main.editPanel.jacobiPanel.getMaxErr();
-
-    aoSamps = Main.editPanel.finalGatheringPanel.getAOSamples();
-    dirSamps = Main.editPanel.finalGatheringPanel.getDirSamples();
-    refSamps = Main.editPanel.finalGatheringPanel.getRefSamples();
-
-    nPhoton = Main.editPanel.photonPanel.getPhotonNum();
-    causticPhoton = Main.editPanel.photonPanel.getCausticNum();
-    aoCausticPhoton = Main.editPanel.photonPanel.getAOCaustic();
-    projectionResolution = Main.editPanel.photonPanel.getProjectionResolution();
-    photonSearchDisc = Main.editPanel.photonPanel.getPhotonSearchDisc();
-    nPhotonSearch = Main.editPanel.photonPanel.getPhotonSearchNum();
-    causticSearchDisc = Main.editPanel.photonPanel.getCausticSearchDisc();
-    nCausticSearch = Main.editPanel.photonPanel.getCausticSearchNum();
-
+  private void doRender(boolean isModeler) {
     Main.label.setText("Creazione immagine in corso");
+    Main.editPanel.setUI(false);
 
-    switch (Main.editPanel.getMethod()) {
-      case JACOBI_PANEL:
-        doJacobi = true;
-        break;
-      case FINAL_GATHERING_PANEL:
-        doFinalGathering = true;
-        break;
-      case PHOTON_PANEL:
-        doPhotonFinalGathering = true;
-        break;
+    if (isModeler) {
+      samps = 20;
+
+      doJacobi = true;
+
+      jacobiSamps = 500;
+      maxSteps = 7;
+      maxErr = 0.01f;
+    } else {
+      samps = Main.editPanel.getSamps();
+
+      switch (Main.editPanel.getMethod()) {
+        case JACOBI_PANEL:
+          doJacobi = true;
+
+          jacobiSamps = Main.editPanel.jacobiPanel.getSamps();
+          maxSteps = Main.editPanel.jacobiPanel.getMaxSteps();
+          maxErr = Main.editPanel.jacobiPanel.getMaxErr();
+          break;
+        case FINAL_GATHERING_PANEL:
+          doFinalGathering = true;
+
+          aoSamps = Main.editPanel.finalGatheringPanel.getAOSamples();
+          dirSamps = Main.editPanel.finalGatheringPanel.getDirSamples();
+          refSamps = Main.editPanel.finalGatheringPanel.getRefSamples();
+          break;
+        case PHOTON_PANEL:
+          doPhotonFinalGathering = true;
+
+          nPhoton = Main.editPanel.photonPanel.getPhotonNum();
+          causticPhoton = Main.editPanel.photonPanel.getCausticNum();
+          aoCausticPhoton = Main.editPanel.photonPanel.getAOCaustic();
+          projectionResolution = Main.editPanel.photonPanel.getProjectionResolution();
+          photonSearchDisc = Main.editPanel.photonPanel.getPhotonSearchDisc();
+          nPhotonSearch = Main.editPanel.photonPanel.getPhotonSearchNum();
+          causticSearchDisc = Main.editPanel.photonPanel.getCausticSearchDisc();
+          nCausticSearch = Main.editPanel.photonPanel.getCausticSearchNum();
+          break;
+      }
     }
 
     switch (Main.editPanel.getMaterial()) {
@@ -270,22 +276,21 @@ class RenderAction implements Properties {
     }
 
     int mIS = setMatIdSphere();
-    for(int sph = 0; sph < SPHERE_NUM; sph++)
+    for(int sph = 0; sph < SPHERE_NUM; sph++) {
       matIdSphere[sph]=mIS;
+      Point3D sPos = Sphere.setSpheresPosition(sph);
 
-    Point3D sPos0 = Sphere.setSpheresPosition(0);
-    Point3D sPos1 = Sphere.setSpheresPosition(1);
-    Point3D sPos2 = Sphere.setSpheresPosition(2);
-    //vettore costruttore delle sfere
-    spheres[0] = new Sphere(1,sPos0);
-    spheres[1] = new Sphere(1,sPos1);
-    spheres[2] = new Sphere(1,sPos2);
+      //vettore costruttore delle sfere
+      spheres[sph] = new Sphere(1 ,sPos);
+    }
 
     //dovendo disegnare 3 sfere e la stanza definisco un
     //array di 2 Mesh: nella prima delle due mesh (per
     //meshes[0]) aggiungiamo le 3
     //sfere richiamando il metodo caricaSphere
-    meshes = new ArrayList<>(2);
+
+    //array di mesh della scena
+    ArrayList<Mesh> meshes = new ArrayList<>(2);
     meshes.add(new Mesh(SPHERE_NUM, spheres, matIdSphere));
 
     //inizializzo massimo e minimo punto della scena
@@ -304,8 +309,11 @@ class RenderAction implements Properties {
 
     //definisco e calcolo il punto in cui guarda
     //l'osservatore: il centro della scena
-    Point3D center= (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
+    Point3D center = (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
 
+    //parametri della fotocamera con sistema di riferimento centrato nella scena:
+    //absolutePos e' vero se stiamo guardando proprio al centro della scena
+    boolean absolutePos = false;
     if(!absolutePos) {
       lookat = lookat.add(center);
     }
@@ -440,7 +448,7 @@ class RenderAction implements Properties {
       refSamples1[i] = (int) (Math.random()*(Integer.MAX_VALUE) +1);
 
       //inizializzo l'immagine nera
-      image[i]=new Point3D();
+      image[i] = new Point3D();
     }
 
     /*
@@ -471,6 +479,9 @@ class RenderAction implements Properties {
 
     //Ora viene creata l'immagine
     createImage();
+
+    resetVariables();
+    Main.editPanel.setUI(true);
   }
 
   //metodo che imposta, a seconda della scelta
@@ -542,5 +553,123 @@ class RenderAction implements Properties {
     } catch (IOException e1) {
       e1.printStackTrace();
     }
+  }
+
+  private void resetVariables() {
+    doJacobi = false;
+    doFinalGathering = false;
+    doPhotonFinalGathering = false;
+    doMultiPassPhotonMapping = false;
+
+    translucentJade=false;
+    diffusiveJade=false;
+    glass=false;
+    aligned=false;
+
+    matIdSphere = new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+    spheres = new Sphere[] {
+        new Sphere(1,new Point3D()),
+        new Sphere(1,new Point3D()),
+        new Sphere(1,new Point3D()),
+        new Sphere(1,new Point3D(4.0f,0.1f,1.4f)),
+        new Sphere(1,new Point3D(-3.0f,0.4f,2.3f)),
+        new Sphere(1,new Point3D(-4.0f,2.0f,4.0f)),
+        new Sphere(1,new Point3D(6.0f,5.3f,2.0f)),
+        new Sphere(1,new Point3D(7.0f,3.4f,1.4f)),
+        new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
+        new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
+    };
+
+    ArrayList<Mesh> meshes = new ArrayList<>();	//array di mesh della scena
+
+    //parametri della fotocamera con sistema di riferimento centrato nella scena:
+    //absolutePos e' vero se stiamo guardando proprio al centro della scena
+    boolean absolutePos=false;
+
+    //punto guardato rispetto al centro della scena (0,0,0)
+    //inizialmente coincide  con il centro ma poiche'
+    //absolutePos=false lo cambieremo in seguito
+    lookat=new Point3D(0.0f);
+
+    //punto in cui e' posizionata la fotocamera rispetto al
+    //centro della scena (0,0,0)
+    eye=new Point3D(0.0f,2.0f,12.0f);
+
+    //punto messo a fuoco rispetto al centro della scena
+    //(0,0,0): inizialmente coincide  con il centro ma lo
+    //cambieremo in seguito
+    focusPoint=new Point3D(0.0f);
+
+    w=1080;	//larghezza dell'immagine
+    h=720;	//altezza dell'immagine
+
+    distfilm=700.0f;	//distanza dal centro della fotocamera al viewplane
+    ap=0;	//apertura diaframma della fotocamera
+
+    sceneDepth= 0;	//densita' triangoli nella stanza
+    lights = new ArrayList<>();
+
+    //liv e' il livello di profondita' all'interno dell'albero
+    //per la partizione spaziale della scena
+    depthLevel = 0;
+
+    /// vettore in cui carichero' le luci (sono dei semplici
+    //Obj che hanno pero' come materiale una luce)
+    max = null;
+    min = null;
+    depth=14;	//profondita' dell'octree
+
+    Kdepth = 17;
+
+    //massimi box (cioe' massima profondita') nell'albero
+    //per la partizione spaziale della scena
+    maxPartitions = 0;
+
+    //variabile globale in cui verranno salvati gli oggetti
+    //della scena (in modo da poter essere aggionati nei
+    //metodi richiamati)
+    globalObjects = new ArrayList<>();
+
+    samplesX=new int[w*h];	//campioni per la fotocamera
+    samplesY=new int[w*h];
+
+    aoSamplesX=new int[w*h];	//campioni per la luce indiretta
+    aoSamplesY=new int[w*h];
+
+    dirSamples1=new int[w*h];	//campioni per la luce diretta
+    dirSamples2=new int[w*h];
+    dirSamples3=new int[w*h];
+
+    refSamples1=new int[w*h];	//campioni riflessioni/rifrazioni
+    refSamples2=new int[w*h];
+
+    image = new Point3D[w*h];	//array che contiene tutti i pixel (rgb) dell'immagine
+    background = new Point3D(1.0f,1.0f,1.0f);	// Background: lo impostiamo come nero
+
+    photons = new ArrayList<>();
+    caustics = new ArrayList<>();
+
+
+    scaleCausticPower = 1; //scalamento di potenza del fotone
+
+    power = 0;
+    photonBoxNum = 0;
+
+    steps = 0;
+    nRay = 0;
+    err = 0;
+
+    sogliaBox=4;
+
+    scaleX=1.5f;
+    scaleZ=1.5f;
+
+    hroom=1.2f;
+
+    matIdL=0;	//indice del materiale della luce della stanza
+    frontL=false;
+    loadedBoxes = 0;
+    sphericalSearch = 1;
   }
 }
