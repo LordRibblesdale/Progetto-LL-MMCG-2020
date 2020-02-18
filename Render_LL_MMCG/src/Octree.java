@@ -35,7 +35,6 @@ public class Octree {
             }
             if(objects[i].s!=null){
                 center=center.add(objects[i].s.p.multiplyScalar(1.0f).divideScalar(nObj));
-        		System.out.println("il centro e' x: "+center.x+" y: "+center.y+" z: "+center.z);
             }
         }
     }
@@ -243,7 +242,6 @@ public class Octree {
             for(int k=0; k<8; k++){
             	if(inleaf[k]) { 
                 	leaf_Objects.get(k).add(leaf_Objects.get(k).size(), objects[i]);
-                	System.out.println("oggetto "+i+" e' nel box leaf "+k);
                 }
             }
             

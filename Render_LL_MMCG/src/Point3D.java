@@ -7,6 +7,8 @@
 //occupano di varie trasformazioni o operazioni con i
 //float3
 
+import java.awt.*;
+
 public class Point3D {
 	//ha come parametri soltanto le tre componenti di un 
 	//float in uno spazio a 3 dimensioni
@@ -378,5 +380,9 @@ public class Point3D {
   @Override
 	public String toString() {
 		return x + " " + y + " " + z;
+	}
+
+	public Color toColor() {
+		return new Color((int) x, (int) y, (int) z);
 	}
 }

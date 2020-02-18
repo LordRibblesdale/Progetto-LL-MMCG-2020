@@ -99,15 +99,12 @@ public class PhotonBox {
 
             //il fotone che ci interessa e' quello a meta' di questo array
             int mpos= (int) Math.floor(this.nph /2);
-            System.out.println("mpos"+mpos);
 
             //la mediana e' costituita proprio dalla posizione di questo fotone
             median.copy(ph.get(mpos).position);
-            System.out.println("median x: "+median.x+" y: "+median.y+" z: "+median.z);
             //viene quindi assegnata la posizione del piano in base al parametro dim
             double[] m={median.x,median.y,median.z};
             planePos=m[dim];
-            System.out.println("planePos"+planePos);
 
         }
     }

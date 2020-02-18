@@ -114,10 +114,11 @@ public class Box {
       //variabile utilizzata per visualizzare lo stato
       //di caricamento dei box
       RenderAction.loadedBoxes++;
-      System.out.println("box caricati:  "+ RenderAction.loadedBoxes
-              +"  su un massimo di  "+ RenderAction.maxPartitions
-              +"  (ogni box contenente minimo  "
-              + RenderAction.sogliaBox+"  oggetti)");
+
+      Main.label.setText("box caricati:  "+ RenderAction.loadedBoxes
+          +"  su un massimo di  "+ RenderAction.maxPartitions
+          +"  (ogni box contenente minimo  "
+          + RenderAction.sogliaBox+"  oggetti)");
       //una volta finita la partizione dei figli
       //ritorna al livello iniziale
       RenderAction.depthLevel--;

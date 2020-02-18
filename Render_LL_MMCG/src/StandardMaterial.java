@@ -1,5 +1,5 @@
 public interface StandardMaterial {
-  Material MATERIAL_LIGHT_WHITE = new Material(new Point3D(10.0f));
+  Material MATERIAL_LIGHT_WHITE = new Material(new Point3D(5.0f));
 
   Material MATERIAL_DIFFUSIVE_RED = new Material(
       new Point3D(0.1f,0.0f,0.0f),

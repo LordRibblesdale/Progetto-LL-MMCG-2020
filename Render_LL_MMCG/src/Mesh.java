@@ -34,9 +34,9 @@ public class Mesh {
     utilities = new Utilities();
   }
 
-  Mesh(int nSpheres, Sphere[] spheres, int[] matIdSphere) {
+  Mesh(ArrayList<Sphere> spheres, ArrayList<Integer> matIdSphere) {
     this();
-    loadSphere(nSpheres, spheres, matIdSphere);
+    loadSphere(spheres, matIdSphere);
   }
 
   Mesh(Point3D max, Point3D min) {
@@ -218,17 +218,17 @@ public class Mesh {
 
   }
 
-  void loadSphere(int n, Sphere[] spheres, int[] matIdSphere) {
+  void loadSphere(ArrayList<Sphere> spheres, ArrayList<Integer> matIdSphere) {
     //crea una mesh costituita da n sfere
     //creo un array di Obj di n elementi
-      objects = new ArrayList<>(n);
+      objects = new ArrayList<>();
 
       //per ogni elemento creo un oggetto che ha l'elemento
       //i-esimo dell'array di Sphere[] spheres e l'elemento
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
-      for(int i=0; i < n; i++){
-          objects.add(new Obj(spheres[i], matIdSphere[i]));
+      for(int i=0; i < spheres.size(); i++){
+          objects.add(new Obj(spheres.get(i), matIdSphere.get(i)));
       }
       nome = "sfere";
       //viene restituita una mesh delle sfere create
@@ -238,8 +238,8 @@ public class Mesh {
   //presenti nella mesh
   
   void setMaterial(int m){
-    for(int i=0; i< objects.size(); i++){
-      objects.get(i).setMaterial(m);
+    for (Obj object : objects) {
+      object.setMaterial(m);
     }
   }
     

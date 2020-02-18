@@ -934,7 +934,7 @@ public class Renderer {
 
     while ((RenderAction.err > RenderAction.maxErr) && (RenderAction.steps < RenderAction.maxSteps)) {
       //percentuale di completamento
-      System.out.println("completamento jacobi "+(RenderAction.steps/(float) RenderAction.maxSteps)*100);
+      Main.label.setText("Completamento jacobi "+(RenderAction.steps/(float) RenderAction.maxSteps)*100);
       //viene inizializzato un seme iniziale casuale
       //da 0 a 30000
       int s =(int) Math.floor(Math.random()*(30001));
@@ -1702,7 +1702,7 @@ public class Renderer {
 
     int nP=0;
     while(nP < RenderAction.causticPhoton) {    //per ogni campione
-      System.out.println("Calcolo campioni caustiche: " + nP);
+      Main.label.setText("Calcolo campioni caustiche: " + nP);
 
       rnd1= Utilities.generateRandom(RenderAction.loadedBoxes)*(RenderAction.lights.size());
 

@@ -43,6 +43,7 @@ class EditPanel extends JPanel {
           @Override
           public void run() {
             new RenderAction(false);
+
           }
         }).start();
       }

@@ -357,8 +357,6 @@ public class Material {
     	dv=dv/10000f;
     	float l2=dv*dv-zv*zv;
     	dr=(float) Math.sqrt(l2+zr*zr);
-    	//System.out.println("dv+ "+dv);
-    	//pi4=4*3.14
     	Point3D pi4=new Point3D(4* Utilities.MATH_PI);
     	//i valori si sigmas e sigmaa sono specifici per 
     	//la giada

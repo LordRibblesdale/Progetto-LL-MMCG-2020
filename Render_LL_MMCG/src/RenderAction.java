@@ -34,20 +34,9 @@ class RenderAction implements Properties {
   // si fa corrispondere alla sfera i-esima del vettore
   // spheres definito poco sotto, il materiale di
   // indice corrispondente nel vettore material
-  private static int[] matIdSphere = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  private static ArrayList<Integer> matIdSphere = new ArrayList<>();
 
-  private static Sphere[] spheres = {	//vettore costruttore delle sfere
-      new Sphere(1,new Point3D()),
-      new Sphere(1,new Point3D()),
-      new Sphere(1,new Point3D()),
-      new Sphere(1,new Point3D(4.0f,0.1f,1.4f)),
-      new Sphere(1,new Point3D(-3.0f,0.4f,2.3f)),
-      new Sphere(1,new Point3D(-4.0f,2.0f,4.0f)),
-      new Sphere(1,new Point3D(6.0f,5.3f,2.0f)),
-      new Sphere(1,new Point3D(7.0f,3.4f,1.4f)),
-      new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
-      new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
-  };
+  private static ArrayList<Sphere> spheres;
 
   //metodo: scegliere una delle due flag per
   //visualizzare il rendering con il metodo di Jacobi
@@ -66,7 +55,7 @@ class RenderAction implements Properties {
   private static boolean glass=false;
   static boolean aligned=false;
 
-  private static final int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
+  private static int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
 
   //punto guardato rispetto al centro della scena (0,0,0)
   //inizialmente coincide  con il centro ma poiche'
@@ -207,10 +196,16 @@ class RenderAction implements Properties {
   RenderAction(boolean isModeler) {
     renderer = new Renderer(new Utilities());
 
-    doRender(isModeler);
+    doRender(isModeler, null);
   }
 
-  private void doRender(boolean isModeler) {
+  RenderAction(boolean isModeler, ArrayList<Sphere> additionalSpheres) {
+    renderer = new Renderer(new Utilities());
+
+    doRender(isModeler, additionalSpheres);
+  }
+
+  private void doRender(boolean isModeler, ArrayList<Sphere> additionalSpheres) {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
@@ -276,13 +271,22 @@ class RenderAction implements Properties {
         break;
     }
 
+    matIdSphere = new ArrayList<>();
+    SPHERE_NUM += (additionalSpheres != null ? additionalSpheres.size() : 0);
+
+    for (int i = 0; i < SPHERE_NUM; i++) {
+      matIdSphere.add(1);
+    }
+
+    spheres = new ArrayList<>();
+
     int mIS = setMatIdSphere();
     for(int sph = 0; sph < SPHERE_NUM; sph++) {
-      matIdSphere[sph]=mIS;
+      matIdSphere.set(sph, mIS);
       Point3D sPos = Sphere.setSpheresPosition(sph);
 
       //vettore costruttore delle sfere
-      spheres[sph] = new Sphere(1, sPos);
+      spheres.add(new Sphere(1, sPos));
     }
 
     //dovendo disegnare 3 sfere e la stanza definisco un
@@ -292,7 +296,12 @@ class RenderAction implements Properties {
 
     //array di mesh della scena
     ArrayList<Mesh> meshes = new ArrayList<>(2);
-    meshes.add(new Mesh(SPHERE_NUM, spheres, matIdSphere));
+    meshes.add(new Mesh(spheres, matIdSphere));
+
+    if (additionalSpheres != null) {
+      //TODO fix matIdSphere selection
+      meshes.add(new Mesh(additionalSpheres, matIdSphere));
+    }
 
     //inizializzo massimo e minimo punto della scena
 
@@ -511,8 +520,7 @@ class RenderAction implements Properties {
       double a=percent-percentFloor;
       if(a==0.0)
       {
-        System.out.println("percentuale di completamento "
-            + "immagine: "+percent);
+        Main.label.setText("Percentuale di completamento immagine: " + percent);
       }
 
       //StringBuilder matrix
@@ -553,20 +561,9 @@ class RenderAction implements Properties {
     glass=false;
     aligned=false;
 
-    matIdSphere = new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    matIdSphere = new ArrayList<>();
 
-    spheres = new Sphere[] {
-        new Sphere(1,new Point3D()),
-        new Sphere(1,new Point3D()),
-        new Sphere(1,new Point3D()),
-        new Sphere(1,new Point3D(4.0f,0.1f,1.4f)),
-        new Sphere(1,new Point3D(-3.0f,0.4f,2.3f)),
-        new Sphere(1,new Point3D(-4.0f,2.0f,4.0f)),
-        new Sphere(1,new Point3D(6.0f,5.3f,2.0f)),
-        new Sphere(1,new Point3D(7.0f,3.4f,1.4f)),
-        new Sphere(1,new Point3D(-7.0f,4.0f,2.1f)),
-        new Sphere(1,new Point3D(-4.0f,0.9f,0.5f))
-    };
+    spheres = new ArrayList<>();
 
     //punto guardato rispetto al centro della scena (0,0,0)
     //inizialmente coincide  con il centro ma poiche'
