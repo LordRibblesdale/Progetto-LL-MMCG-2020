@@ -5,7 +5,6 @@
 //sara' una stanza nello spazio R3, questa classe sara'
 //molto utilizzata, insieme anche alle sue funzioni che si
 //occupano di varie trasformazioni o operazioni con i
-//float3
 
 import java.awt.*;
 
@@ -383,6 +382,6 @@ public class Point3D {
 	}
 
 	public Color toColor() {
-		return new Color((int) x, (int) y, (int) z);
+		return new Color(Utilities.toInt(x), Utilities.toInt(y), Utilities.toInt(z));
 	}
 }

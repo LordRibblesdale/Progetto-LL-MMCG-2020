@@ -42,8 +42,7 @@ class EditPanel extends JPanel {
         new Thread(new Runnable() {
           @Override
           public void run() {
-            new RenderAction(false);
-
+            new RenderAction(true);
           }
         }).start();
       }
@@ -53,7 +52,7 @@ class EditPanel extends JPanel {
     add(bottomPanel, BorderLayout.PAGE_END);
   }
 
-  void initialise() {
+  private void initialise() {
     centralPanel = new JPanel(new BorderLayout());
 
     tabs = new JTabbedPane();

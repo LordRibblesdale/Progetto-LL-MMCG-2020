@@ -1,10 +1,6 @@
-//import java.util.*;
-
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 //questo codice calcola la radiosita' di una scena in
 //base al metodo iterativo di Jacobi stocastico.

@@ -439,7 +439,7 @@ public class Utilities {
 	//piu' problemmi. Moltiplicando infine per 255 si 
 	//estende per il range di bit preso in esame e la 
 	//funzione ritorna l'approssimazione ad intero
-	static int toInt(double x){
-		return (int) (Math.pow(clamp(x), 1/2.2)*255);
+	static int toInt(double value){
+		return (int) (Math.pow(clamp(value), 1/2.2)*255);
 	}
 }

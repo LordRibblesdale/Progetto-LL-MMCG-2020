@@ -1,3 +1,7 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -190,34 +194,29 @@ class RenderAction implements Properties {
 
   private Renderer renderer;
 
-  //TODO prepare modeler
-  private boolean isReadyToRender = false;
+  static ArrayList<Sphere> additionalSpheres;
 
   RenderAction(boolean isModeler) {
     renderer = new Renderer(new Utilities());
 
-    doRender(isModeler, null);
+    doRender(isModeler);
   }
 
-  RenderAction(boolean isModeler, ArrayList<Sphere> additionalSpheres) {
-    renderer = new Renderer(new Utilities());
-
-    doRender(isModeler, additionalSpheres);
-  }
-
-  private void doRender(boolean isModeler, ArrayList<Sphere> additionalSpheres) {
+  private void doRender(boolean isModeler) {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
     if (isModeler) {
-      samps = 20;
+      samps = 5;
 
       doJacobi = true;
 
-      jacobiSamps = 500;
-      maxSteps = 7;
+      jacobiSamps = 300;
+      maxSteps = 5;
       maxErr = 0.01f;
     } else {
+      resetVariables();
+
       samps = Main.editPanel.getSamps();
 
       switch (Main.editPanel.getMethod()) {
@@ -473,10 +472,69 @@ class RenderAction implements Properties {
     renderer.calculateThreadedRadiance(cam);
 
     //Ora viene creata l'immagine
-    createImage();
 
-    resetVariables();
+    if (isModeler) {
+      showImage();
+    } else {
+      createImage();
+    }
+
     Main.editPanel.setUI(true);
+  }
+
+  void showImage() {
+    JFrame frame = new JFrame();
+    frame.setLocationRelativeTo(Main.editPanel);
+    frame.setMinimumSize(new Dimension(w, h));
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    JPanel panel = new JPanel(null) {
+      @Override
+      public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        for (int i = 0; i < h; i++) {
+          for (int j = 0; j < w; j++) {
+            g.setColor(image[j + i*w].toColor());
+            //g.fillRect(j, i, j, i);
+            g.drawLine(j, i, j, i);
+          }
+        }
+      }
+    };
+
+    JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    JButton insert = new JButton("Aggiungi sfere");
+    insert.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+      }
+    });
+
+    JButton button = new JButton("Avvia render");
+    button.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        frame.dispose();
+
+        new Thread(new Runnable() {
+          @Override
+          public void run() {
+            new RenderAction(false);
+          }
+        }).start();
+      }
+    });
+
+    bottomPanel.add(insert);
+    bottomPanel.add(button);
+
+    frame.add(panel);
+    frame.add(bottomPanel, BorderLayout.PAGE_END);
+
+    //panel.repaint();
+
+    frame.setVisible(true);
   }
 
   //metodo che imposta, a seconda della scelta
@@ -528,7 +586,6 @@ class RenderAction implements Properties {
       //i valori di radianza devono essere trasformati
       //nell'intervallo [0,255] per rappresentare la
       //gamma cromatica in valori RGB
-      //noinspection SuspiciousNameCombination
       matrix.append(Utilities.toInt(image[i].x)).append(" ").append(Utilities.toInt(image[i].y)).append(" ").append(Utilities.toInt(image[i].z)).append("  ");
     }
 
@@ -627,7 +684,6 @@ class RenderAction implements Properties {
 
     photons = new ArrayList<>();
     caustics = new ArrayList<>();
-
 
     scaleCausticPower = 1; //scalamento di potenza del fotone
 

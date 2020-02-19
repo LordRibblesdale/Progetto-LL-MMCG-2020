@@ -135,7 +135,7 @@ public class ParallelProcessRadiance implements Runnable {
       }
 
       //divido per il numero di campioni del pixel
-      sceneRadiance = sceneRadiance.divideScalar( RenderAction.samps);
+      sceneRadiance = sceneRadiance.divideScalar(RenderAction.samps);
       sceneRadiance.multiplyScalar(0.3f);
       // A questo punto si crea un'immagine basata sui
       //valori di radianza r

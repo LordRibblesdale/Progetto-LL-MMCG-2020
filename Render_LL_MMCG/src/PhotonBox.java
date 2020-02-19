@@ -105,7 +105,6 @@ public class PhotonBox {
             //viene quindi assegnata la posizione del piano in base al parametro dim
             double[] m={median.x,median.y,median.z};
             planePos=m[dim];
-
         }
     }
 }

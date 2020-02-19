@@ -897,9 +897,9 @@ public class Renderer {
       //potenza della luce
       //Potenza emessa dalla patch i:
       //(potenza emessa)*(pi greco)*(area)
-      Point3D LP= RenderAction.material[RenderAction.globalObjects.get(i).matId].emittedLight.
-                      multiplyScalar(Utilities.MATH_PI).
-                      multiplyScalar(area);
+      Point3D LP= RenderAction.material[RenderAction.globalObjects.get(i).matId].emittedLight
+                      .multiplyScalar(Utilities.MATH_PI)
+                      .multiplyScalar(area);
 
       //viene calcolata la potenza totale iniziale:
       //(potenza residua della patch)+
