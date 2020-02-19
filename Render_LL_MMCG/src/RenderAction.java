@@ -40,7 +40,7 @@ class RenderAction implements Properties {
   // indice corrispondente nel vettore material
   private static ArrayList<Integer> matIdSphere = new ArrayList<>();
 
-  private static ArrayList<Sphere> spheres;
+  static ArrayList<Sphere> spheres;
 
   //metodo: scegliere una delle due flag per
   //visualizzare il rendering con il metodo di Jacobi
@@ -194,7 +194,7 @@ class RenderAction implements Properties {
 
   private Renderer renderer;
 
-  static ArrayList<Sphere> additionalSpheres;
+  static ArrayList<Sphere> additionalSpheres = new ArrayList<>();
 
   RenderAction(boolean isModeler) {
     renderer = new Renderer(new Utilities());
@@ -206,17 +206,17 @@ class RenderAction implements Properties {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
+    resetVariables();
+
     if (isModeler) {
-      samps = 5;
+      samps = 1;
 
       doJacobi = true;
 
-      jacobiSamps = 300;
+      jacobiSamps = 200;
       maxSteps = 5;
       maxErr = 0.01f;
     } else {
-      resetVariables();
-
       samps = Main.editPanel.getSamps();
 
       switch (Main.editPanel.getMethod()) {
@@ -483,9 +483,9 @@ class RenderAction implements Properties {
   }
 
   void showImage() {
-    JFrame frame = new JFrame();
-    frame.setLocationRelativeTo(Main.editPanel);
+    JFrame frame = new JFrame("Anteprima");
     frame.setMinimumSize(new Dimension(w, h));
+    frame.setLocationRelativeTo(Main.editPanel);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     JPanel panel = new JPanel(null) {
       @Override
@@ -495,7 +495,6 @@ class RenderAction implements Properties {
         for (int i = 0; i < h; i++) {
           for (int j = 0; j < w; j++) {
             g.setColor(image[j + i*w].toColor());
-            //g.fillRect(j, i, j, i);
             g.drawLine(j, i, j, i);
           }
         }
@@ -507,7 +506,7 @@ class RenderAction implements Properties {
     insert.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-
+        new Modeler(frame);
       }
     });
 
@@ -608,6 +607,8 @@ class RenderAction implements Properties {
   }
 
   private void resetVariables() {
+    //TODO fix initialisations here
+
     doJacobi = false;
     doFinalGathering = false;
     doPhotonFinalGathering = false;
@@ -621,6 +622,7 @@ class RenderAction implements Properties {
     matIdSphere = new ArrayList<>();
 
     spheres = new ArrayList<>();
+    additionalSpheres = new ArrayList<>();
 
     //punto guardato rispetto al centro della scena (0,0,0)
     //inizialmente coincide  con il centro ma poiche'
