@@ -475,9 +475,9 @@ class RenderAction implements Properties {
       showImage();
     } else {
       createImage();
-    }
 
-    Main.editPanel.setUI(true);
+      Main.editPanel.setUI(true);
+    }
   }
 
   void showImage() {
