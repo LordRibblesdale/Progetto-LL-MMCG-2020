@@ -1,3 +1,5 @@
+import java.text.DecimalFormat;
+
 public class ParallelProcessRadiance implements Runnable {
   private int y;
   private Camera cam;
@@ -14,7 +16,7 @@ public class ParallelProcessRadiance implements Runnable {
   @Override
   public void run() {
     double percentY = (y*100 / (float) RenderAction.h);
-    Main.label.setText("Percentuale di completamento " + "radianza:	 " + percentY);
+    Main.label.setText("Percentuale di completamento " + "radianza:	 " + new DecimalFormat("###.##").format(percentY));
 
     //per tutte le colonne
     for(int x = 0; x <= RenderAction.w; x++) {

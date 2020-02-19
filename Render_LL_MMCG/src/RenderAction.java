@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 class RenderAction implements Properties {
@@ -82,7 +83,6 @@ class RenderAction implements Properties {
   private static float ap = 0;	//apertura diaframma della fotocamera
 
   private static int sceneDepth = 0;	//densita' triangoli nella stanza
-  static ArrayList<Obj> lights;
 
   //liv e' il livello di profondita' all'interno dell'albero
   //per la partizione spaziale della scena
@@ -105,6 +105,7 @@ class RenderAction implements Properties {
   //della scena (in modo da poter essere aggionati nei
   //metodi richiamati)
   static ArrayList<Obj> globalObjects;
+  static ArrayList<Obj> lights;
 
   static int[] samplesX=new int[w*h];	//campioni per la fotocamera
   static int[] samplesY=new int[w*h];
@@ -206,6 +207,28 @@ class RenderAction implements Properties {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
+    int mIS = setMatIdSphere();
+    matIdSphere = new ArrayList<>();
+    spheres = new ArrayList<>();
+
+    for(int sph = 0; sph < SPHERE_NUM; sph++) {
+      matIdSphere.add(mIS);
+      Point3D sPos = Sphere.setSpheresPosition(sph);
+
+      //vettore costruttore delle sfere
+      spheres.add(new Sphere(1, sPos));
+    }
+
+    if (additionalSpheres != null && !additionalSpheres.isEmpty()) {
+      spheres.addAll(additionalSpheres);
+      SPHERE_NUM = spheres.size();
+
+      for (int i = 0; i < additionalSpheres.size(); i++) {
+        matIdSphere.add(mIS);
+      }
+    }
+
+
     resetVariables();
 
     if (isModeler) {
@@ -213,8 +236,8 @@ class RenderAction implements Properties {
 
       doJacobi = true;
 
-      jacobiSamps = 200;
-      maxSteps = 5;
+      jacobiSamps = 175;
+      maxSteps = 6;
       maxErr = 0.01f;
     } else {
       samps = Main.editPanel.getSamps();
@@ -270,24 +293,6 @@ class RenderAction implements Properties {
         break;
     }
 
-    matIdSphere = new ArrayList<>();
-    SPHERE_NUM += (additionalSpheres != null ? additionalSpheres.size() : 0);
-
-    for (int i = 0; i < SPHERE_NUM; i++) {
-      matIdSphere.add(1);
-    }
-
-    spheres = new ArrayList<>();
-
-    int mIS = setMatIdSphere();
-    for(int sph = 0; sph < SPHERE_NUM; sph++) {
-      matIdSphere.set(sph, mIS);
-      Point3D sPos = Sphere.setSpheresPosition(sph);
-
-      //vettore costruttore delle sfere
-      spheres.add(new Sphere(1, sPos));
-    }
-
     //dovendo disegnare 3 sfere e la stanza definisco un
     //array di 2 Mesh: nella prima delle due mesh (per
     //meshes[0]) aggiungiamo le 3
@@ -296,11 +301,6 @@ class RenderAction implements Properties {
     //array di mesh della scena
     ArrayList<Mesh> meshes = new ArrayList<>(2);
     meshes.add(new Mesh(spheres, matIdSphere));
-
-    if (additionalSpheres != null) {
-      //TODO fix matIdSphere selection
-      meshes.add(new Mesh(additionalSpheres, matIdSphere));
-    }
 
     //inizializzo massimo e minimo punto della scena
 
@@ -332,11 +332,9 @@ class RenderAction implements Properties {
     //l'osservatore si trova nel punto camPosition
     Point3D camPosition = center.add(eye);
     //calcolo del punto di messa a fuoco pf
-    /*
+
     Point3D pf = new Point3D();
     pf.copy(center.add(focusPoint));
-
-     */
 
     //costruttore della fotocamera
     //imposto la fotocamera che guarda il centro
@@ -483,10 +481,10 @@ class RenderAction implements Properties {
   }
 
   void showImage() {
-    JFrame frame = new JFrame("Anteprima");
+    JDialog frame = new JDialog(Main.mainFrame, "Anteprima", true);
     frame.setMinimumSize(new Dimension(w, h));
     frame.setLocationRelativeTo(Main.editPanel);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     JPanel panel = new JPanel(null) {
       @Override
       public void paintComponent(Graphics g) {
@@ -577,7 +575,7 @@ class RenderAction implements Properties {
       double a=percent-percentFloor;
       if(a==0.0)
       {
-        Main.label.setText("Percentuale di completamento immagine: " + percent);
+        Main.label.setText("Percentuale di completamento immagine: " + new DecimalFormat("###.##").format(percent));
       }
 
       //StringBuilder matrix
@@ -618,11 +616,6 @@ class RenderAction implements Properties {
     diffusiveJade=false;
     glass=false;
     aligned=false;
-
-    matIdSphere = new ArrayList<>();
-
-    spheres = new ArrayList<>();
-    additionalSpheres = new ArrayList<>();
 
     //punto guardato rispetto al centro della scena (0,0,0)
     //inizialmente coincide  con il centro ma poiche'

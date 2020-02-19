@@ -227,9 +227,10 @@ public class Mesh {
       //i-esimo dell'array di Sphere[] spheres e l'elemento
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
-      for(int i=0; i < spheres.size(); i++){
-          objects.add(new Obj(spheres.get(i), matIdSphere.get(i)));
+      for(int i=0; i < spheres.size(); i++) {
+        objects.add(new Obj(spheres.get(i), matIdSphere.get(i)));
       }
+
       nome = "sfere";
       //viene restituita una mesh delle sfere create
   }

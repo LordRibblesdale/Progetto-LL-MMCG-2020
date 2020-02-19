@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
@@ -934,7 +935,7 @@ public class Renderer {
 
     while ((RenderAction.err > RenderAction.maxErr) && (RenderAction.steps < RenderAction.maxSteps)) {
       //percentuale di completamento
-      Main.label.setText("Completamento jacobi "+(RenderAction.steps/(float) RenderAction.maxSteps)*100);
+      Main.label.setText("Completamento Jacobi " + new DecimalFormat("###.##").format((RenderAction.steps/(float) RenderAction.maxSteps)*100));
       //viene inizializzato un seme iniziale casuale
       //da 0 a 30000
       int s =(int) Math.floor(Math.random()*(30001));

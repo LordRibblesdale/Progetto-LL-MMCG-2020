@@ -25,7 +25,8 @@ import java.awt.*;
 //comunque apportare le volute modifiche sui 
 //materiali, sulla posizione delle sfere, etc.
 
-public class Main extends JFrame implements StandardMaterial {
+public class Main implements StandardMaterial {
+  static JFrame mainFrame;
 	static final JLabel label = new JLabel();
 	static EditPanel editPanel;
 
@@ -38,19 +39,19 @@ public class Main extends JFrame implements StandardMaterial {
 	//di cio' che l'osservatore vede.
 
   Main() {
-    super("Renderer");
+    mainFrame = new JFrame("Renderer");
     //inizialmente imposto la finestra con le varie
     //scelte per l'utente
 
     editPanel = new EditPanel();
-    add(editPanel);
-    add(label, BorderLayout.PAGE_END);
+    mainFrame.add(editPanel);
+    mainFrame.add(label, BorderLayout.PAGE_END);
 
-    setMinimumSize(new Dimension(650, 400));
-    setResizable(false);
-    setLocationRelativeTo(null);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setVisible(true);
+    mainFrame.setMinimumSize(new Dimension(650, 400));
+    mainFrame.setResizable(false);
+    mainFrame.setLocationRelativeTo(null);
+    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    mainFrame.setVisible(true);
   }
 
   public static void main(String[] args) {

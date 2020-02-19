@@ -44,7 +44,7 @@ class Modeler extends JDialog {
 
   ImagePanel imagePanel = new ImagePanel();
 
-  Modeler(JFrame frame) {
+  Modeler(JDialog frame) {
     super(frame, "Modellatore", true);
 
     deleteButton.addActionListener(new ActionListener() {
@@ -72,12 +72,10 @@ class Modeler extends JDialog {
         super.mouseClicked(e);
 
         if (e.getButton() == MouseEvent.BUTTON1) {
-          System.out.println("Adding...");
-
           //TODO add slider to manage sphere radius
           //TODO fix -8 & -31 parameters (incorrect position from MouseEvent e)
           imagePanel.ellipse2DS.add(new Ellipse2D.Double(e.getX() - (radius/ (double) 2) -8, e.getY()- (radius/ (double) 2) -31, radius, radius));
-          Point3D newPoint = new Point3D(((e.getX()/ (double) 100) - SIZE), 0, e.getY()/100);
+          Point3D newPoint = new Point3D(((e.getX() - SIZE)/ (double) 40), 0, e.getY()/ (double) 75);
           RenderAction.additionalSpheres.add(new Sphere(1, newPoint));
 
           repaint();
