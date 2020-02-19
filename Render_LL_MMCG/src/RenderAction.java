@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -228,7 +230,6 @@ class RenderAction implements Properties {
       }
     }
 
-
     resetVariables();
 
     if (isModeler) {
@@ -382,6 +383,10 @@ class RenderAction implements Properties {
       }
     }
 
+    Obj triangle = new Obj(new Triangle(new Point3D(-5.5, 0, 2.5), new Point3D(-6.2, 0, 3), new Point3D(-5.75, 1, 2.75)), 7);
+    objects.add(triangle);
+    sceneObjects.add(triangle);
+
     //costruzione del Kd-tree che ripartisce la scena
 
     //l=0: iniziamo a partizionare col piano xy
@@ -481,6 +486,8 @@ class RenderAction implements Properties {
   }
 
   void showImage() {
+    final boolean[] isRunning = {false};  //TODO fix here
+
     JDialog frame = new JDialog(Main.mainFrame, "Anteprima", true);
     frame.setMinimumSize(new Dimension(w, h));
     frame.setLocationRelativeTo(Main.editPanel);
@@ -512,6 +519,8 @@ class RenderAction implements Properties {
     button.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        isRunning[0] = true;
+
         frame.dispose();
 
         new Thread(new Runnable() {
@@ -529,9 +538,20 @@ class RenderAction implements Properties {
     frame.add(panel);
     frame.add(bottomPanel, BorderLayout.PAGE_END);
 
-    //panel.repaint();
-
     frame.setVisible(true);
+
+    frame.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosed(WindowEvent e) {
+        super.windowClosed(e);
+
+        if (isRunning[0]) {
+          frame.dispose();
+        } else {
+          System.exit(0);
+        }
+      }
+    });
   }
 
   //metodo che imposta, a seconda della scelta

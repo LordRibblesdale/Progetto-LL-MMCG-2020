@@ -45,7 +45,7 @@ public class Mesh {
   }
 
   // costruttore Mesh
-  Mesh(RenderAction renderAction, String n, ArrayList<Obj> o){
+  Mesh(String n, ArrayList<Obj> o){
     nome= n;
     //array di oggetti contenuti nella mesh 
     objects=o;
