@@ -202,14 +202,16 @@ public class Renderer {
             double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
             radianceOutput = radianceOutput.
-                add(RenderAction.material[lid].emittedLight.
+                add((RenderAction.material[lid].emittedLight.
                     multiplyComponents(B).multiplyScalar(area).
-                    multiplyScalar(dirN1N2)).
-                divideScalar(norma2);
+                    multiplyScalar(dirN1N2).multiplyScalar(5)).
+                divideScalar(norma2));
 
           }
-        } else {
-          //Caso BRDF
+        } 
+		
+		//TODO fix indentation here
+		  //Caso BRDF
           int tt =x+y* RenderAction.w;
           if(tt < RenderAction.w * RenderAction.h) {
             rnd1 = Utilities.generateRandom(RenderAction.dirSamples1[tt]);
@@ -256,13 +258,12 @@ public class Renderer {
             double dirN1N2=(-dir.dotProduct(n1))*(dir.dotProduct(n2));
             float norma2=(float) Math.pow(norma, 2);
             radianceOutput = radianceOutput
-                .add(RenderAction.material[lid].emittedLight
+                .add((RenderAction.material[lid].emittedLight
                     .multiplyComponents(B)
                     .multiplyScalar(area)
-                    .multiplyScalar(dirN1N2))
+                    .multiplyScalar(dirN1N2)).multiplyScalar(RenderAction.material[mId].translucent ? 0.35 : 1))
                 .divideScalar(norma2);
           }
-        }
       }
     }
 
