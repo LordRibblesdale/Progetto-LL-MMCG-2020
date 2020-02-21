@@ -14,8 +14,6 @@ import java.util.ArrayList;
 //due parti uguali ogni triangolo della mesh (e' ovvio che 
 //il metodo non funziona per mesh di sfere) 
 public class Mesh {
-	//nome della mesh
-  String nome;
   Utilities utilities;
   
   //array di puntatori ad oggetti
@@ -45,9 +43,8 @@ public class Mesh {
   }
 
   // costruttore Mesh
-  Mesh(String n, ArrayList<Obj> o){
-    nome= n;
-    //array di oggetti contenuti nella mesh 
+  Mesh(ArrayList<Obj> o){
+    //array di oggetti contenuti nella mesh
     objects=o;
   }
 
@@ -151,7 +148,7 @@ public class Mesh {
       //utilities.EPS=0.01f per evitare di avere
       //problemi di aliasing dati dal linee 
       //perfettamente dritte nella fase di rendering
-      translateLL=new Point3D(0,-Utilities.EPSILON,0);
+      translateLL = new Point3D(0, -Utilities.EPSILON, 0);
       Point3D Lv1tr = (Lv1).add(translateLL);
       Point3D Lv4tr = (Lv4).add(translateLL);
       Point3D Lv5tr = (Lv5).add(translateLL);
@@ -165,9 +162,9 @@ public class Mesh {
     }
   
     //dilatazione delle pareti
-    for(int i=0; i<8; i++) {
-      v[i].x=v[i].x+(v[i].x-c.x)* RenderAction.scaleX;
-      v[i].z=v[i].z+(v[i].z-c.z)*(RenderAction.scaleZ);
+    for (int i = 0; i < 8; i++) {
+      v[i].x=v[i].x+(v[i].x-c.x)*1.5f;
+      v[i].z=v[i].z+(v[i].z-c.z)*1.5f;
     }
   
     //si creano e si aggiungono i triangoli per le 
@@ -212,8 +209,7 @@ public class Mesh {
     objects.add(new Obj(Troom.get(10), matIdRoom[4]));
     objects.add(new Obj(Troom.get(11), matIdRoom[4]));
 
-    nome ="room";
-    //viene resituita una mesh che contiene i triangoli 
+    //viene resituita una mesh che contiene i triangoli
     //che costituiscono la stanza e la luce
 
   }
@@ -231,7 +227,6 @@ public class Mesh {
         objects.add(new Obj(spheres.get(i), matIdSphere.get(i)));
       }
 
-      nome = "sfere";
       //viene restituita una mesh delle sfere create
   }
 

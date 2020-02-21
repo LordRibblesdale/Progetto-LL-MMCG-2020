@@ -2,13 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class JacobiPanel extends JPanel {
-  //sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+  // Sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
   private JSpinner samples;
 
-  //step massimi per le iterazioni di Jacobi Stocastico
+  // Step massimi per le iterazioni di Jacobi Stocastico
   private JSpinner maxSteps;
 
-  //errore massimo nel processo di Jacobi Stocastico
+  // Errore massimo nel processo di Jacobi Stocastico
   private JSpinner maxErr;
 
   JacobiPanel() {

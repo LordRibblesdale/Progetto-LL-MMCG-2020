@@ -1,4 +1,7 @@
 public interface StandardMaterial {
+  /* Interfaccia per la selezione di materiali
+   * Cruciale per la scelta di un materiale senza doverlo ricreare e nella selezione del materiale dal modellatore
+   */
   Material MATERIAL_LIGHT_WHITE = new Material(new Point3D(5.0f));
 
   Material MATERIAL_DIFFUSIVE_RED = new Material(

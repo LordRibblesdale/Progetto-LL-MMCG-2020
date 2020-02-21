@@ -59,8 +59,7 @@ public class Material {
 		emittedLight =new Point3D(0.0f);
 	}
 	
-	//costruttore materiale 1: materiali diffusivi e 
-	//riflessivi 
+	//costruttore materiale 1: materiali diffusivi e riflessivi
 	public Material(Point3D diffusionColor, Point3D reflectionColor) {
 		this.diffusionColor = diffusionColor;
 		this.reflectionColor = reflectionColor;
@@ -70,8 +69,7 @@ public class Material {
 		refImperfection=0;
 	}
 	
-	//costruttore materiali lucidi (tramite il modello di 
-	//Cook-Torrance)
+	//costruttore materiali lucidi (tramite il modello di Cook-Torrance)
 	public Material(Point3D diffusionColor, Point3D refractionIndexRGB, float slope_) {
 		this.diffusionColor = diffusionColor;
 		slope = slope_;
@@ -103,8 +101,7 @@ public class Material {
 		translucent=translucent_;
 	}
 	
-	//materiali che emettono luce: Le corrisponde al colore
-	//della luce emessa
+	//materiali che emettono luce: Le corrisponde al colore della luce emessa
 	public Material(Point3D emittedLight) {
 		diffusionColor =new Point3D(0.0f);
 		reflectionColor =new Point3D(0.0f);
@@ -251,145 +248,143 @@ public class Material {
 		return refractionColor .multiplyComponents(one.subtract(fresnel));
 	}
 	
-	//BRDF di cook e torrance=kd+(F*D*G)/(pigreco*<psi,n>
-	//*<teta,n>)
-	//psi e' il raggio in ingresso, theta e' il raggio in 
-	//uscita, n e' la normale dell'oggetto
-    Point3D C_T_BRDF(Ray psi, Ray theta, Point3D n) {
-    	//parte diffusiva
-    	Point3D fr= diffusionColor.multiplyScalar(Utilities.MATH_1_DIV_PI);
-        
-    	//la parte riflettente viene considerata solo se 
-    	//lo slope e' stato inizializzato (ovvero e' 
-    	//diverso da 0)
-    	if(slope!=0) {
-				//dati:
+	//BRDF di Cook-Torrance=kd+(F*D*G)/(pi*<psi,n>*<teta,n>)
+	//psi e' il raggio in ingresso, theta e' il raggio in uscita, n e' la normale dell'oggetto
+	Point3D C_T_BRDF(Ray psi, Ray theta, Point3D n) {
+		//parte diffusiva
+		Point3D fr= diffusionColor.multiplyScalar(Utilities.MATH_1_DIV_PI);
 
-				//halfway vector
-				Point3D H = (psi.d.add(theta.d)).getNormalizedPoint();
+		//la parte riflettente viene considerata solo se
+		//lo slope e' stato inizializzato (ovvero e'
+		//diverso da 0)
+		if(slope!=0) {
+			//dati:
 
-				//<psi,H>=<theta,H>
-				double c = psi.d.dotProduct(H);
-				//<n,H>
-				double cNH = n.dotProduct(H);
-				//<psi,n>
-				double cPsiN = psi.d.dotProduct(n);
-				//<teta,n>
-				double cThetaN = theta.d.dotProduct(n);
+			//halfway vector
+			Point3D H = (psi.d.add(theta.d)).getNormalizedPoint();
+
+			//<psi,H>=<theta,H>
+			double c = psi.d.dotProduct(H);
+			//<n,H>
+			double cNH = n.dotProduct(H);
+			//<psi,n>
+			double cPsiN = psi.d.dotProduct(n);
+			//<teta,n>
+			double cThetaN = theta.d.dotProduct(n);
 
 
-				//calcolo coefficiente di Fresnel
-				// !!! si potrebbe anche fare con il metodo
-				//getFresn(cos_i) !!!
+			//calcolo coefficiente di Fresnel
+			// !!! si potrebbe anche fare con il metodo
+			//getFresn(cos_i) !!!
 
-				Point3D F;
+			Point3D F;
 
-				Point3D ior2 = new Point3D(refractionIndexRGB.x * refractionIndexRGB.x, refractionIndexRGB.y * refractionIndexRGB.y,
+			Point3D ior2 = new Point3D(refractionIndexRGB.x * refractionIndexRGB.x, refractionIndexRGB.y * refractionIndexRGB.y,
 								refractionIndexRGB.z * refractionIndexRGB.z);
 
-				Point3D g = ior2.add(new Point3D(c * c - 1));
-				g.abs();
+			Point3D g = ior2.add(new Point3D(c * c - 1));
+			g.abs();
 
-				//g+c
-				Point3D c3 = new Point3D(c, c, c);
-				Point3D gc = g.add(c3);
-				//g-c
-				Point3D g_c = g.subtract(c3);
+			//g+c
+			Point3D c3 = new Point3D(c, c, c);
+			Point3D gc = g.add(c3);
+			//g-c
+			Point3D g_c = g.subtract(c3);
 
-				// (g-c)^2/(g+c)^2
-				Point3D a = ((g_c).multiplyComponents(g_c)).divideComponents(gc.multiplyComponents(gc));
+			// (g-c)^2/(g+c)^2
+			Point3D a = ((g_c).multiplyComponents(g_c)).divideComponents(gc.multiplyComponents(gc));
 
-				//(c*(g+c)-1)/(c*(g+c)+1)
-				Point3D one = new Point3D(1.0f);
-				Point3D b = ((gc.multiplyScalar(c)).subtract(
-								one)).divideComponents((gc.multiplyScalar(c)).
-								add(one));
+			//(c*(g+c)-1)/(c*(g+c)+1)
+			Point3D one = new Point3D(1.0f);
+			Point3D b = ((gc.multiplyScalar(c)).subtract(
+					one)).divideComponents((gc.multiplyScalar(c)).
+					add(one));
 
-				//F= 1/2 * ((g-c)^2/(g+c)^2) * (1+ ((c*(g+c)-
-				//-1)/(c*(g+c)+1))^2)
-				F = a.multiplyComponents(one.add(b.multiplyComponents(b))).
-								multiplyScalar(0.5f);
+			//F= 1/2 * ((g-c)^2/(g+c)^2) * (1+ ((c*(g+c)-
+			//-1)/(c*(g+c)+1))^2)
+			F = a.multiplyComponents(one.add(b.multiplyComponents(b))).
+					multiplyScalar(0.5f);
 
 
-				//Distribuzione di Beckmann
-				double sNH = Math.sqrt(1 - Math.pow(cNH, 2));
+			//Distribuzione di Beckmann
+			double sNH = Math.sqrt(1 - Math.pow(cNH, 2));
 
-				double tan = sNH / (cNH * slope);
-				double e = Math.exp(Math.pow(tan, 2));
-				double _D = e * (slope * slope * Math.pow(cNH, 4));
-				double D = 1 / _D;
-				float Df = (float) D;
-				//fattore geometrico
+			double tan = sNH / (cNH * slope);
+			double e = Math.exp(Math.pow(tan, 2));
+			double _D = e * (slope * slope * Math.pow(cNH, 4));
+			double D = 1 / _D;
+			float Df = (float) D;
+			//fattore geometrico
 
-				double G = 1;
-				if (2 * cPsiN * cNH / c < G) {
-					G = 2 * cPsiN * cNH / c;
-				}
-				if (2 * cThetaN * cNH / c < G) {
-					G = 2 * cThetaN * cNH / c;
-				}
-				float Gf = (float) G;
-
-				//modello di Cook-Torrance
-				fr = fr.add(F.multiplyScalar(Df * Gf *
-						Utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
+			double G = 1;
+			if (2 * cPsiN * cNH / c < G) {
+				G = 2 * cPsiN * cNH / c;
 			}
+			if (2 * cThetaN * cNH / c < G) {
+				G = 2 * cThetaN * cNH / c;
+			}
+			float Gf = (float) G;
 
-    	return fr;
-    }
+			//modello di Cook-Torrance
+			fr = fr.add(F.multiplyScalar(Df * Gf *
+					Utilities.MATH_1_DIV_PI * 1 / (cPsiN * cThetaN)));
+		}
 
-    //metodo empirico (non fotorealistico) per avere
-    //un valore per la BSSRDF
-    //Fpsi e Ftheta sono i coefficente di Fresnel passati 
-    //come parametro, calcolati nel main considerando 
-    //come psi il raggio in ingresso e theta quello in 
-    //uscita
-    Point3D BSSRDF(Point3D Fpsi, Point3D Ftheta) {
+		return fr;
+	}
+
+	//metodo empirico (non fotorealistico) per avere
+	//un valore per la BSSRDF
+	//Fpsi e Ftheta sono i coefficente di Fresnel passati
+	//come parametro, calcolati nel main considerando
+	//come psi il raggio in ingresso e theta quello in
+	//uscita
+	Point3D BSSRDF(Point3D Fpsi, Point3D Ftheta) {
 	
-    	Point3D result;
-    	Point3D one=new Point3D(1.0f);
-    	
-    	float zv=0.005f;
-    	float dv;//=0.0125f;
-    	float zr=0.0025f;
-    	float dr;//=0.01030f;
-    	dv=(float) (Math.random() * (150-90)+90);
-    	dv=dv/10000f;
-    	float l2=dv*dv-zv*zv;
-    	dr=(float) Math.sqrt(l2+zr*zr);
-    	Point3D pi4=new Point3D(4* Utilities.MATH_PI);
-    	//i valori si sigmas e sigmaa sono specifici per 
-    	//la giada
-    	Point3D sigmas=new Point3D(0.657f,0.786f,0.9f);
-    	Point3D sigmaa=new Point3D(0.2679f,0.3244f,0.1744f);
-    	Point3D sigmat=sigmaa.add(sigmas);
-    	Point3D sigmatr=(sigmaa.multiplyComponents(sigmat)).
-							multiplyScalar(3.0f);
-    	sigmatr= Point3D.getSquareCompPoint(sigmatr);
-    	Point3D alpha=sigmas.divideComponents(sigmat);
-    	
-    	Point3D expdr=sigmatr.multiplyScalar(dr*-1.0f);
-    	float dr3=dr*dr*dr;
-    	Point3D edivdr=(Point3D.exponent(expdr)).
-    			divideScalar(dr3);
-    	
-    	Point3D expdv=sigmatr.multiplyScalar(dv*-1.0f);
-    	float dv3=dv*dv*dv;
-    	Point3D edivdv=(Point3D.exponent(expdv)).
-    			divideScalar(dv3);
-    	Point3D rPart=(((sigmatr.multiplyScalar(dr)).
-							add(one)).multiplyComponents(edivdr)).
-							multiplyScalar(zr);
-    	Point3D vPart=(((sigmatr.multiplyScalar(dv)).
-							add(one)).multiplyComponents(edivdv)).
-							multiplyScalar(zv);
-    	
-    	Point3D Rd=(alpha.divideComponents(pi4)).multiplyComponents(rPart.
-							add(vPart));
-    	
-    	result=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
-							divideScalar(Utilities.MATH_PI);
-    	
-    	return result;
-    }
+		Point3D result;
+		Point3D one=new Point3D(1.0f);
+
+		float zv=0.005f;
+		float dv;//=0.0125f;
+		float zr=0.0025f;
+		float dr;//=0.01030f;
+		dv=(float) (Math.random() * (150-90)+90);
+		dv=dv/10000f;
+		float l2=dv*dv-zv*zv;
+		dr=(float) Math.sqrt(l2+zr*zr);
+		Point3D pi4=new Point3D(4* Utilities.MATH_PI);
+		//i valori si sigmas e sigmaa sono specifici per
+		//la giada
+		Point3D sigmas=new Point3D(0.657f,0.786f,0.9f);
+		Point3D sigmaa=new Point3D(0.2679f,0.3244f,0.1744f);
+		Point3D sigmat=sigmaa.add(sigmas);
+		Point3D sigmatr=(sigmaa.multiplyComponents(sigmat)).
+				multiplyScalar(3.0f);
+		sigmatr= Point3D.getSquareCompPoint(sigmatr);
+		Point3D alpha=sigmas.divideComponents(sigmat);
+
+		Point3D expdr=sigmatr.multiplyScalar(dr*-1.0f);
+		float dr3=dr*dr*dr;
+		Point3D edivdr=(Point3D.exponent(expdr)).
+				divideScalar(dr3);
+
+		Point3D expdv=sigmatr.multiplyScalar(dv*-1.0f);
+		float dv3=dv*dv*dv;
+		Point3D edivdv=(Point3D.exponent(expdv)).
+				divideScalar(dv3);
+		Point3D rPart=(((sigmatr.multiplyScalar(dr)).
+				add(one)).multiplyComponents(edivdr)).
+				multiplyScalar(zr);
+		Point3D vPart=(((sigmatr.multiplyScalar(dv)).
+				add(one)).multiplyComponents(edivdv)).
+				multiplyScalar(zv);
+
+		Point3D Rd=(alpha.divideComponents(pi4)).multiplyComponents(rPart.
+				add(vPart));
+
+		result=(Rd.multiplyComponents(Fpsi).multiplyComponents(Ftheta)).
+				divideScalar(Utilities.MATH_PI);
+
+		return result;
+	}
 }

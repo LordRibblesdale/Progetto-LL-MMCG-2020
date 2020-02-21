@@ -6,9 +6,9 @@
 //restituisce la normale al triangolo
 public class Triangle {
 	//array dei vertici 
-	public Point3D[]vertices;
+	Point3D[]vertices;
 	//Normale al triangolo
-	public Point3D n;
+	private Point3D n;
 	
 	//costruttore:i parametri in input sono i tre vertici
 	//del triangolo
@@ -30,8 +30,7 @@ public class Triangle {
 		//triangolo a e b
 		Point3D a=vertices[1].subtract(vertices[0]);
 		Point3D b=vertices[2].subtract(vertices[0]);
-		Point3D n=(a.crossProduct(b)).getNormalizedPoint();
-		return n;
+		return (a.crossProduct(b)).getNormalizedPoint();
 	}
 	
 	//funzione di intersezione con un raggio: Return 
@@ -46,34 +45,34 @@ public class Triangle {
 	       
 		//Componenti note:
 		
-	    //componenti X
-	        
-	    // (a1-b1).x
+		//componenti X
+
+		// (a1-b1).x
 		double a = vertices[0].x-vertices[1].x;
-	    // (a1-c1).x
+		// (a1-c1).x
 		double b=vertices[0].x-vertices[2].x;
-	    //d1.x
+		//d1.x
 		double c=r.d.x;
-	    // (a-o).x
+		// (a-o).x
 		double d=vertices[0].x-r.o.x;
 
-	    //componenti Y
+		//componenti Y
 		double e=vertices[0].y-vertices[1].y;
 		double f=vertices[0].y-vertices[2].y;
 		double g=r.d.y;
 		double h=vertices[0].y-r.o.y;
 
-	    //componenti Z
+		//componenti Z
 		double i=vertices[0].z-vertices[1].z;
 		double j=vertices[0].z-vertices[2].z;
 		double k=r.d.z;
 		double l=vertices[0].z-r.o.z;
 
-	    //ora ho tutte le componenti del sistema , lo 
+		//ora ho tutte le componenti del sistema , lo
 		//risolvo (inizio a calcolare beta, gamma e t)
-	    // | a  b   c  ||d|
-	    // | e  f   g  ||h|
-	    // | i  j   k  ||l|
+		// | a  b   c  ||d|
+		// | e  f   g  ||height|
+		// | i  j   k  ||l|
 	            
 		double m=f*k-g*j;
 		double n=h*k-g*l;
@@ -95,7 +94,7 @@ public class Triangle {
 		double e2=a*n+d*q+c*r1;
 		double gamma=e2*inv_denom;
 
-		if(gamma<0.0){
+		if(gamma<0.0) {
 			return(-1.0f);
 		}
 

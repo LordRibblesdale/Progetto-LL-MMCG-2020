@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 class RenderAction implements Properties {
-  //vettore costruttore dei materiali
+  // Vettore dei materiali, per i modelli predefiniti di scena
     static Material[] material = {
             //luce
             StandardMaterial.MATERIAL_LIGHT_WHITE,
@@ -41,165 +41,194 @@ class RenderAction implements Properties {
   // si fa corrispondere alla sfera i-esima del vettore
   // spheres definito poco sotto, il materiale di
   // indice corrispondente nel vettore material
+
+  /* Questo fattore può essere ottimizzato assegnando a ogni oggetto
+   *  (in questo caso sfere), l'indice o addirittura l'oggetto Material
+   *  all'oggetto stesso e far richiamare il materiale dell'oggetto
+   *  invece di chiamare l'indice di un array
+   */
   private static ArrayList<Integer> matIdSphere = new ArrayList<>();
 
   static ArrayList<Sphere> spheres;
 
-  //metodo: scegliere una delle due flag per
-  //visualizzare il rendering con il metodo di Jacobi
-  //stocastico (doJacobi) o con il final gathering(doFinalGathering)
+  /* Controlli booleani per accedere ai vari metodi per la scelta del
+   *  tipo di rendering da effettuare
+   *  -> Jacobi stocastico
+   *  -> Final Gathering
+   *  -> Photon Mapping
+   */
   static boolean doJacobi = false;
   static boolean doFinalGathering = false;
-  static boolean doPhotonFinalGathering = false;
-  static boolean doMultiPassPhotonMapping = false;
+  static boolean doPhotonMapping = false;
 
-  //translucentJade=true se si vuole una
-  //visualizzazione con BSSRDF
-  private static boolean translucentJade=false;
-  //diffusiveJade=true se vogliamo una giada
-  //"diffusiva"
-  private static boolean diffusiveJade=false;
-  private static boolean glass=false;
-  static boolean aligned=false;
+  /* Queste variabili assegnano solo agli oggetti predefiniti (e quelli aggiunti nel modellatore)
+   *  lo stesso tipo di materiale senza poter scegliere il tipo di materiale
+   * Può essere corretto creando una variabile di controllo nell'oggetto (Material)
+   *  dato che il Renderer già è capace di determinare le proprietà del materiale selettivamente
+   *  (per la presenza della variabile matId nell'oggetto)
+   */
+  // Giada traslucente
+  private static boolean translucentJade = false;
+  // Giada diffusiva
+  private static boolean diffusiveJade = false;
+  // Vetro
+  private static boolean glass = false;
 
-  private static int SPHERE_NUM = 3;	//numero delle sfere effettivamente considerate tra quelle definite in spheres[]
+  // Variabile di controllo per il posizionamento delle sfere
+  /* Questa variabile può essere eliminata nel momento in cui il modellatore può
+   *  gestire autonomamente la presenza e la posizione degli oggetti creati
+   *  dall'utente
+   */
+  static boolean aligned = false;
 
-  //punto guardato rispetto al centro della scena (0,0,0)
-  //inizialmente coincide  con il centro ma poiche'
-  //absolutePos=false lo cambieremo in seguito
-  private static Point3D lookat=new Point3D(0.0f);
+  private static int SPHERES = 3;	// Numero delle sfere create in via predefinita
 
-  //punto in cui e' posizionata la fotocamera rispetto al
-  //centro della scena (0,0,0)
-  private static Point3D eye=new Point3D(0.0f,2.0f,12.0f);
+  // Direzione dal punto di vista (eye) verso l'oggetto
+  // La variabile verrà definita in corso d'opera
+  private static Point3D lookAt = new Point3D();
 
-  //punto messo a fuoco rispetto al centro della scena
-  //(0,0,0): inizialmente coincide  con il centro ma lo
-  //cambieremo in seguito
-  private static Point3D focusPoint=new Point3D(0.0f);
+  // Posizione della camera rispetto al centro della scena (0, 0, 0)
+  private static Point3D eye = new Point3D(0.0f, 2.0f, 12.0f);
 
-  static int w=1080;	//larghezza dell'immagine
-  static int h=720;	//altezza dell'immagine
+  /* Punto di messa a fuoco della camera (può essere modificato per definire la
+   *  posizione della messa a fuoco
+   */
+  //TODO define focal point position
+  private static Point3D focusPoint = new Point3D(0.0f);
 
-  private static float distfilm = 700;	//distanza dal centro della fotocamera al viewplane
-  private static float ap = 0;	//apertura diaframma della fotocamera
+  //TODO add variables in UI
+  static int width = 1080;	//larghezza dell'immagine
+  static int height = 720;	//altezza dell'immagine
+  private static float filmDistance = 700;	// Lunghezza focale
+  /* Per una resa visiva del motore, la lunghezza focale impostata a 700 fa si che l'apertura
+   *  del diaframma sia molto bassa per avere un piano di messa a fuoco più esteso
+   */
+  private static float aperture = 5;  // Apertura diaframma della fotocamera
 
-  private static int sceneDepth = 0;	//densita' triangoli nella stanza
+  /* Densità triangoli nella stanza
+   * Variabile che gestisce il grado di tassellazione della scena suddividendo le mesh con
+   *  splitMeshes()
+   */
+  private static int scenePrecision = 0;
 
-  //liv e' il livello di profondita' all'interno dell'albero
-  //per la partizione spaziale della scena
+  // Contatore di suddivisione della scena (che dovrà essere <= maxDepth
   static int depthLevel = 0;
+  // Profondità massima di suddivisione dell'OCTree
+  static int maxDepth = 14;	//TODO add this variable to a specific menu
 
-  /// vettore in cui carichero' le luci (sono dei semplici
-  //Obj che hanno pero' come materiale una luce)
+  // Punti per il calcolo delle dimensioni della scena (creata dinamicamente in base al numero di oggetti)
   static Point3D max = null;
   static Point3D min = null;
-  static Box bound;	//primo elemento della lista di Box (usato per la BSP)
-  static int depth=14;	//profondita' dell'octree
 
-  static int Kdepth = 17; //TODO add this variable to a specific menu
+  // Variabile per la suddivisione della scena tramite BSP
+  // BSP: suddivisione dello spazio binaria secondo una struttura ad albero
+  static Box bound;
 
-  //massimi box (cioe' massima profondita') nell'albero
-  //per la partizione spaziale della scena
-  static int maxPartitions = 0;
-
-  //variabile globale in cui verranno salvati gli oggetti
-  //della scena (in modo da poter essere aggionati nei
-  //metodi richiamati)
+  // Variabile globale in cui verranno salvati gli oggetti della scena
   static ArrayList<Obj> globalObjects;
+
+  // Variabile globale per le luci della scena
   static ArrayList<Obj> lights;
 
-  static int[] samplesX=new int[w*h];	//campioni per la fotocamera
-  static int[] samplesY=new int[w*h];
+  // Array che contiene tutti i pixel (RGB) dell'immagine
+  /* E' possibile modificare l'array come array bidimensionale per una implementazione
+   *  piu semplice nei cicli
+   */
+  static Point3D[] image = new Point3D[width * height];
 
-  static int[] aoSamplesX=new int[w*h];	//campioni per la luce indiretta
-  static int[] aoSamplesY=new int[w*h];
+  static int[] samplesX = new int[width * height];	  // Vettori per i campioni casuali per la fotocamera (x, y)
+  static int[] samplesY = new int[width * height];
 
-  static int[] dirSamples1=new int[w*h];	//campioni per la luce diretta
-  static int[] dirSamples2=new int[w*h];
-  static int[] dirSamples3=new int[w*h];
+  static int[] dirSamples1 = new int[width * height];	// Vettori per i campioni casuali per l'illuminazione diretta
+  static int[] dirSamples2 = new int[width * height];
+  static int[] dirSamples3 = new int[width * height];
 
-  static int[] refSamples1=new int[w*h];	//campioni riflessioni/rifrazioni
-  static int[] refSamples2=new int[w*h];
+  static int[] aoSamplesX = new int[width * height];	// Vettori per i campioni casuali per l'illuminazione indiretta
+  static int[] aoSamplesY = new int[width * height];
 
-  static Point3D[] image = new Point3D[w*h];	//array che contiene tutti i pixel (rgb) dell'immagine
-  static Point3D background = new Point3D(1.0f,1.0f,1.0f);	// Background: lo impostiamo come nero
+  static int[] refSamples1 = new int[width * height];	// Vettori per i campioni di riflessione e rifrazione
+  static int[] refSamples2 = new int[width * height];
 
-  //campioni del pixel: numero di campioni per ogni pixels.
-  //Si tratta dei punti nei pixel attraverso cui faremo
-  //passare raggi
+  static Point3D background = new Point3D(1.0f,1.0f,1.0f);	// Background: lo impostiamo come bianco
+
+  // Campioni del pixel: numero di campioni per ogni pixels
+  // Si tratta dei punti nei pixel attraverso cui faremo passare raggi
   static int samps;
 
-  //campioni (numero di raggi) per l'illuminazione indiretta
-  //(ricorsivo in global illumination, non ricorsivo in
-  //final gathering)
-  static int aoSamps;
-  static int dirSamps;	//campioni (numero di raggi) illuminazione diretta (non ricorsivo)
-  static int refSamps;	//campioni scelti per le riflessioni e le rifrazioni
+  static int aoSamps;   // Campioni per l'illuminazione indiretta
+  static int dirSamps;	// Campioni illuminazione diretta (non ricorsivo)
+  static int refSamps;	// Campioni scelti per le riflessioni e le rifrazioni
 
-  static ArrayList<Photon> photons = new ArrayList<>();
-  static ArrayList<Photon> caustics = new ArrayList<>();
-  static PhotonBox[] KdTree;
-  static PhotonBox[] causticTree;
-  static int nPhoton; // Sample per la massima ricorsività del photon mapping
-  static int causticPhoton; // Sample per la massima ricorsività del photon mapping
-  static int aoCausticPhoton; //Sample per la massima ricorsività del photon mapping
-  static int projectionResolution;  //Sample per la mappa di proiezione
-  static float scaleCausticPower = 1; //scalamento di potenza del fotone  TODO add this variable in PhotonPanel
+  static ArrayList<Photon> photons = new ArrayList<>();   // Lista di fotoni "sparati"
+  static ArrayList<Photon> caustics = new ArrayList<>();  // Lista di fotoni per caustiche "sparati"
+  static PhotonBox[] kdTree;        // Suddivisione dello spazio secondo KDTree per la mappa fotonica
+  static PhotonBox[] causticTree;   // Suddivisione dello spazio secondo KDTree per la mappa di caustiche
+  // KDTree: suddivisione dello spazio in sezioni K-dimensionali in una struttura ad albero
+  static int kDepth = 17;             //Profondità della suddivisione dello spazio per la mappa fotonica //TODO add this variable to a specific menu
+  static int nPhoton;                 // Numero di fotoni da inviare nello spazio
+  static int causticPhoton;           // Numero di fotoni specifici per le caustiche da inviare agli oggetti trasparenti o traslucidi
+  static int aoCausticPhoton;         // Numero di fotoni per le caustiche per l'illuminazione indiretta
+  static int projectionResolution;    // Risoluzione della proiezione della mappa fotonica
+  static float scaleCausticPower = 1; // Scalamento di potenza del fotone
+  //TODO add this variable in PhotonPanel
 
-  //distanza al quadrato disco di ricerca dei fotoni
+  // Distanza al quadrato disco di ricerca dei fotoni
   static double photonSearchDisc;
   static double causticSearchDisc;
 
-  static int power = 0;
-  static int photonBoxNum = 0;
-
-  //numero di fotoni da ricercare
+  // Numero di fotoni da ricercare
   static int nPhotonSearch;
   static int nCausticSearch;
 
-  static int steps = 0;	//numero di step raggiunti dal processo Jacobi Stocastico
-  static double err = 0;	//stima dell'errore raggiunto dal processo Jacobi Stocastico
-  static int maxSteps;	//step massimi per le iterazioni di Jacobi Stocastico
-  static double maxErr;	//errore massimo nel processo di Jacobi Stocastico
-  static int jacobiSamps;	//sample per lo Stochastic Jacobi, utilizzati per il calcolo con Monte Carlo
+  // Contatore di potenza del fotone in base alla suddivisione kDepth
+  static int power = 0;
+
+  static int steps = 0;	    // Contatore di step raggiunti dal processo Jacobi Stocastico
+  static double err = 0;    // Stima dell'errore raggiunto dal processo Jacobi Stocastico
+  static int maxSteps;	    // Step massimi per le iterazioni di Jacobi Stocastico
+  static double maxErr;     // Errore massimo nel processo di Jacobi Stocastico
+  static int jacobiSamps;   // Sample per Jacobi Stocastico, utilizzati per il calcolo con Monte Carlo
 
   //soglia dei triangoli dentro ad un box se ce ne sono di
   //meno si ferma la partizione; si puo' regolare in base
   //al numero totale dei triangoli della scena
-  static int sogliaBox=4;
+  static int boxThreshold = 4;
 
-  //nRay indica il numero di rimbalzi all'interno della
-  //scena; e' una variabile globale in modo da potersi
-  //aggiornare all'interno del metodo radiance()
+  /* nRay indica il numero di rimbalzi all'interno della scena
+   * E' una variabile globale in modo da potersi aggiornare all'interno del metodo radiance()
+   * Sarebbe anche possibile dare ricorsivamente il numero di raggi raggiunto nel metodo stesso
+   */
   static int nRay = 0;
 
-  //peso che gestisce la distanza delle pareti dall'oggetto:
-  //1 se distanza = diametro oggetto
-  static float scaleX=1.5f;
-  static float scaleZ=1.5f;
+  static float hroom=1.2f;	// Altezza da aggiungere alla stanza in fase di rendering
 
-  static float hroom=1.2f;	//altezza da aggiungere alla stanza
-
-  static int matIdL=0;	//indice del materiale della luce della stanza
+  static int matIdL=0;	// Indice del materiale della luce della stanza (secondo il vettore material)
 
   //se true la luce e' frontale. Se si cambia in true,
   //deccommentare le parti in createScene()
   static boolean frontL = false;
 
-  //variabile utilizzata per visualizzare lo stato di
-  //caricamento dei box durante la partizione spaziale
-  //della scena
-  static int loadedBoxes = 0;	//rappresenta i box che sono stati caricati
+  // Contatore per le box caricate durante la partizione spaziale della scena
+  static int loadedBoxes = 0;
 
-  //parametro per la ricerca sferica su una faccia piana in [0,1]
+  // Parametro per la ricerca sferica su una faccia piana in [0,1]
   static double sphericalSearch = 1;
 
+  /* Oggetto che contiene tutti i metodi di rendering e gestisce la fase di multithreading
+   * E' necessario avere questa classe come oggetto invece di una statica per permettere
+   *  di gestire variabili statiche e non statiche e di poter progettare la fase di MT
+   */
   private Renderer renderer;
 
+  /* Array di oggetti da inserire su scelta dell'utente
+   * Array riempito all'interno del modellatore
+   * Al momento sono aggiungibili solo sfere, ma se si estende il modellatore anche ad altri
+   *  oggetti, è possibile estendere questo array a più oggetti
+   */
   static ArrayList<Sphere> additionalSpheres = new ArrayList<>();
 
   RenderAction(boolean isModeler) {
+    // Il valore booleano fa sapere al programma in che modo deve partire il render (se semplice o quello finale)
     renderer = new Renderer(new Utilities());
 
     doRender(isModeler);
@@ -209,11 +238,16 @@ class RenderAction implements Properties {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
+    // Inizializzo l'array nei quali conservare gli oggetti di scena e l'array di indici
+    /* L'array di indici può essere cancellato in favore di una riscrittura di Sphere nel quale al posto
+     *  dell'indice è presente il materiale, che verrà richiamato dai metodi vari
+     */
     int mIS = setMatIdSphere();
     matIdSphere = new ArrayList<>();
     spheres = new ArrayList<>();
 
-    for(int sph = 0; sph < SPHERE_NUM; sph++) {
+    // Oggetti predefiniti
+    for(int sph = 0; sph < SPHERES; sph++) {
       matIdSphere.add(mIS);
       Point3D sPos = Sphere.setSpheresPosition(sph);
 
@@ -221,18 +255,24 @@ class RenderAction implements Properties {
       spheres.add(new Sphere(1, sPos));
     }
 
+    // Aggiunta di oggetti dal modellatore
     if (additionalSpheres != null && !additionalSpheres.isEmpty()) {
       spheres.addAll(additionalSpheres);
-      SPHERE_NUM = spheres.size();
+      SPHERES = spheres.size();
 
       for (int i = 0; i < additionalSpheres.size(); i++) {
         matIdSphere.add(mIS);
       }
     }
 
+    /* Reimposta le variabili utilizzate
+     * Il metodo risulta utile quando si avvia il render dopo aver utilizzato il modellatore (ripristino una condizione
+     *  originale) e in caso si volesse rieseguire un render dopo averne effettuato uno in precedenza
+     */
     resetVariables();
 
     if (isModeler) {
+      // Impostazioni per un render veloce ma aggiungere altri metodi (ad esempio uno zBuffer sarebbe l'ideale)
       samps = 1;
 
       doJacobi = true;
@@ -241,6 +281,7 @@ class RenderAction implements Properties {
       maxSteps = 6;
       maxErr = 0.01f;
     } else {
+      // Impostazioni per il rendering effettivo
       samps = Main.editPanel.getSamps();
 
       switch (Main.editPanel.getMethod()) {
@@ -259,7 +300,7 @@ class RenderAction implements Properties {
           refSamps = Main.editPanel.finalGatheringPanel.getRefSamples();
           break;
         case PHOTON_PANEL:
-          doPhotonFinalGathering = true;
+          doPhotonMapping = true;
 
           nPhoton = Main.editPanel.photonPanel.getPhotonNum();
           causticPhoton = Main.editPanel.photonPanel.getCausticNum();
@@ -273,6 +314,7 @@ class RenderAction implements Properties {
       }
     }
 
+    // Impostazione del materiale predefinito
     switch (Main.editPanel.getMaterial()) {
       case TRANSLUCENT_JADE:
         translucentJade = true;
@@ -285,6 +327,7 @@ class RenderAction implements Properties {
         break;
     }
 
+    // Impostazione delle posizioni predefinite
     switch (Main.editPanel.getPosition()) {
       case ALIGNED:
         aligned = true;
@@ -293,6 +336,7 @@ class RenderAction implements Properties {
         aligned = false;
         break;
     }
+    //TODO le opzioni predefinite possono essere modificate per raggiungere un livello di creazione dinamico
 
     //dovendo disegnare 3 sfere e la stanza definisco un
     //array di 2 Mesh: nella prima delle due mesh (per
@@ -302,8 +346,6 @@ class RenderAction implements Properties {
     //array di mesh della scena
     ArrayList<Mesh> meshes = new ArrayList<>(2);
     meshes.add(new Mesh(spheres, matIdSphere));
-
-    //inizializzo massimo e minimo punto della scena
 
     //inizializzo dei fittizi massimo e minimo, che mi
     //serviranno per definire i valori di max e min
@@ -327,20 +369,19 @@ class RenderAction implements Properties {
 
     //TODO check variable usage
     if(!absolutePos) {
-      lookat = lookat.add(center);
+      lookAt = lookAt.add(center);
     }
 
     //l'osservatore si trova nel punto camPosition
     Point3D camPosition = center.add(eye);
-    //calcolo del punto di messa a fuoco pf
 
-    Point3D pf = new Point3D();
-    pf.copy(center.add(focusPoint));
+    // Inizializzo il punto di messa a fuoco
+    Point3D focalPoint = center.add(focusPoint);
 
     //costruttore della fotocamera
     //imposto la fotocamera che guarda il centro
     //dell'oggetto ed e' posizionata davanti
-    Camera cam = new Camera(camPosition, lookat, new Point3D(0.00015f,1.00021f,0.0f), w, h, distfilm);
+    Camera cam = new Camera(camPosition, lookAt, new Point3D(0.00015f,1.00021f,0.0f), width, height, filmDistance);
 
     //Abbiamo ora a disposizione tutti gli elementi
     //necessari per costruire la stanza
@@ -349,9 +390,9 @@ class RenderAction implements Properties {
     //La carico come ultima mesh
     meshes.add(new Mesh(max,min));
 
-    //nel nostro caso sceneDepth=0, quindi non si entra
+    //nel nostro caso scenePrecision=0, quindi non si entra
     //mai in questo ciclo
-    for(int q=0;q < sceneDepth; q++) {
+    for(int q = 0; q < scenePrecision; q++) {
       meshes.get(meshes.size()-1).splitMeshes();
     }
 
@@ -366,7 +407,6 @@ class RenderAction implements Properties {
 
     //vettore che conterra' gli oggetti della scena
     ArrayList<Obj> objects = new ArrayList<>();
-    ArrayList<Obj> sceneObjects = new ArrayList<>();
     //vettore che contiene solo le luci della scena
     lights = new ArrayList<>();
 
@@ -374,7 +414,6 @@ class RenderAction implements Properties {
       //e carico tutto nella lista globale degli oggetti
       for (int j = 0; j < tmpMesh.objects.size(); j++) {
         objects.add(tmpMesh.objects.get(j));
-        sceneObjects.add(tmpMesh.objects.get(j));
         //se l'oggetto e' una luce la carico dentro
         //l'array delle luci
         if (material[tmpMesh.objects.get(j).matId].emittedLight.max() > 0) {
@@ -383,30 +422,18 @@ class RenderAction implements Properties {
       }
     }
 
-    Obj triangle = new Obj(new Triangle(new Point3D(-5.5, 0, 2.5), new Point3D(-6.2, 0, 3), new Point3D(-5.75, 1, 2.75)), 7);
-    objects.add(triangle);
-    sceneObjects.add(triangle);
-
-    //costruzione del Kd-tree che ripartisce la scena
-
-    //l=0: iniziamo a partizionare col piano xy
-    short l=0;
+    // Aggiungo un oggetto (triangolo) predefinito nella scena, uno specchio
+    objects.add(new Obj(new Triangle(new Point3D(-5.5, 0, 1.5), new Point3D(-6.2, 0, 2), new Point3D(-5.75, 1, 1.75)), 7));
+;
     //liv e' il livello di profondita' all'interno
     //dell'albero
-    depthLevel =0;
+    depthLevel = 0;
 
     //creo il Bounding Box
     //Bound e' il primo elemento dell'albero che contiene
     //tutti gli oggetti della scena
-    bound = new Box(min, max, l);
-
+    bound = new Box(min, max, 0);
     bound.setObjects(objects);
-
-    //inizializzo la variabile S che e' la massima
-    //profondita' dell'albero
-    for(int i=1; i < depth; i++){
-      maxPartitions +=Math.pow(2,i);
-    }
 
     //crea il tree: si richiama il metodo setPartition()
     //per dividere gli oggetti del box padre nei box figli
@@ -416,31 +443,24 @@ class RenderAction implements Properties {
     //globale globalObjects in modo da poterli aggiornare
     //in JacobiStoc()
     globalObjects = new ArrayList<>();
-    globalObjects.addAll(sceneObjects);
+    globalObjects.addAll(objects);
 
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
     //stocastico
 
     if(doJacobi) {
+      // Avvio il calcolo dell'energia uscente dal metodo di Jacobi stocastico
       renderer.jacobiStoc(objects.size());
     }
 
-    //aggiorno la variabile locale sceneObjects con i
-    //valori ora contenuti in globalObjects
-    sceneObjects.clear();
-    sceneObjects.addAll(globalObjects);
-
-    // Aggiunta del photon mapping
-    if (doPhotonFinalGathering || doMultiPassPhotonMapping) {
+    if (doPhotonMapping) {
+      // Avvio il calcolo dell'energia ottenuta dai fotoni
       renderer.calculatePhotonMapping();
     }
 
-    //nota: rand() in C++ e' un numero random tra 0 e
-    //RAND_MAX=2147483647: qua usero'
-    //Math.random() * (fine-iniz+1)) + iniz
-    //cioe' Math.random()* (2147483648)
-    for (int i = 0; i < (w*h); i++) {
+    // Calcolo delle direzioni dei sample in anticipo
+    for (int i = 0; i < (width * height); i++) {
       //creiamo i campioni necessari per:
 
       //la fotocamera
@@ -464,18 +484,17 @@ class RenderAction implements Properties {
       image[i] = new Point3D();
     }
 
-    cam.aperturaDiaframma = ap;
+    cam.aperture = aperture;
 
-    //l'istruzione seguente calcola il fattore di scala
-    //con una trasformazione perospettica che porta
-    //l'origine della posizione della fotocamera e il
-    //vettore dell'osservatore al vettore della fotocamera
-    //cam.fuoco = (pf.z - cam.eye.z) / (cam.W.z*(-cam.d));
+    // Fattore di scala per la messa a fuoco in base al punto focale e alla camera tramite trasformazione prospettica
+    cam.fuoco = (focalPoint.z-cam.eye.z)/(cam.W.z*(-cam.d));
 
+    /* Avvio il render effettivo (automaticamente effettuerà un render completo o meno a seconda dei calcoli
+     * effettuati nelle righe precedenti
+     */
     renderer.calculateThreadedRadiance(cam);
 
-    //Ora viene creata l'immagine
-
+    //Ora viene creata l'immagine (per il modellatore viene solo mostrata, per il render invece viene salvata)
     if (isModeler) {
       showImage();
     } else {
@@ -486,10 +505,11 @@ class RenderAction implements Properties {
   }
 
   void showImage() {
-    final boolean[] isRunning = {false};  //TODO fix here
+    // Interfaccia per mostrare l'immagine effettiva su schermo,
+    boolean[] isRunning = {false};
 
     JDialog frame = new JDialog(Main.mainFrame, "Anteprima", true);
-    frame.setMinimumSize(new Dimension(w, h));
+    frame.setMinimumSize(new Dimension(width, height));
     frame.setLocationRelativeTo(Main.editPanel);
     frame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     JPanel panel = new JPanel(null) {
@@ -497,9 +517,9 @@ class RenderAction implements Properties {
       public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for (int i = 0; i < h; i++) {
-          for (int j = 0; j < w; j++) {
-            g.setColor(image[j + i*w].toColor());
+        for (int i = 0; i < height; i++) {
+          for (int j = 0; j < width; j++) {
+            g.setColor(image[j + i* width].toColor());
             g.drawLine(j, i, j, i);
           }
         }
@@ -574,31 +594,26 @@ class RenderAction implements Properties {
   }
 
   private void createImage() {
-    //stringa contenente le informazioni da scrivere nel
-    //file immagine image.ppm
+    //stringa contenente le informazioni da scrivere nel file immagine image.ppm
     StringBuilder matrix = new StringBuilder();
 
-    //iniziamo la stringa matrix con valori di settaggio
-    //richiesti
-    matrix.append("P3\n").append(w).append("\n").append(h).append("\n255\n");
+    //iniziamo la stringa matrix con valori di settaggi richiesti
+    matrix.append("P3\n").append(width).append("\n").append(height).append("\n255\n");
 
     //Ora si disegna l'immagine: si procede aggiungendo
     //alla stringa matrix le informazioni contenute
     //nell'array image in cui abbiamo precedentemente
     //salvato tutti i valori di radianza
-    for(int i = 0; i <w*h; i++) {
+    for(int i = 0; i < width * height; i++) {
       //stampiamo la percentuale di completamento per
       //monitorare l'avanzamento della creazione
       //dell'immagine
-      double percent = (i / (float)(w*h)) * 100;
+      double percent = (i / (float)(width * height)) * 100;
       double percentFloor=Math.floor(percent);
       double a=percent-percentFloor;
-      if(a==0.0)
-      {
+      if(a==0.0) {
         Main.label.setText("Percentuale di completamento immagine: " + new DecimalFormat("###.##").format(percent));
       }
-
-      //StringBuilder matrix
 
       //i valori di radianza devono essere trasformati
       //nell'intervallo [0,255] per rappresentare la
@@ -625,98 +640,54 @@ class RenderAction implements Properties {
   }
 
   private void resetVariables() {
-    //TODO fix initialisations here
-
+    // Reimpostazione delle variabili allo stato originale
     doJacobi = false;
     doFinalGathering = false;
-    doPhotonFinalGathering = false;
-    doMultiPassPhotonMapping = false;
+    doPhotonMapping = false;
 
     translucentJade=false;
     diffusiveJade=false;
     glass=false;
     aligned=false;
 
-    //punto guardato rispetto al centro della scena (0,0,0)
-    //inizialmente coincide  con il centro ma poiche'
-    //absolutePos=false lo cambieremo in seguito
-    lookat=new Point3D(0.0f);
+    lookAt =new Point3D(0.0f);
 
-    //punto in cui e' posizionata la fotocamera rispetto al
-    //centro della scena (0,0,0)
-    eye=new Point3D(0.0f,2.0f,12.0f);
-
-    //punto messo a fuoco rispetto al centro della scena
-    //(0,0,0): inizialmente coincide  con il centro ma lo
-    //cambieremo in seguito
     focusPoint=new Point3D(0.0f);
 
-    w=1080;	//larghezza dell'immagine
-    h=720;	//altezza dell'immagine
-
-    distfilm=700.0f;	//distanza dal centro della fotocamera al viewplane
-    ap=0;	//apertura diaframma della fotocamera
-
-    sceneDepth= 0;	//densita' triangoli nella stanza
+    scenePrecision = 0;
     lights = new ArrayList<>();
 
-    //liv e' il livello di profondita' all'interno dell'albero
-    //per la partizione spaziale della scena
     depthLevel = 0;
 
-    /// vettore in cui carichero' le luci (sono dei semplici
-    //Obj che hanno pero' come materiale una luce)
     max = null;
     min = null;
-    depth=14;	//profondita' dell'octree
 
-    Kdepth = 17;
-
-    //massimi box (cioe' massima profondita') nell'albero
-    //per la partizione spaziale della scena
-    maxPartitions = 0;
-
-    //variabile globale in cui verranno salvati gli oggetti
-    //della scena (in modo da poter essere aggionati nei
-    //metodi richiamati)
     globalObjects = new ArrayList<>();
 
-    samplesX=new int[w*h];	//campioni per la fotocamera
-    samplesY=new int[w*h];
+    samplesX=new int[width * height];
+    samplesY=new int[width * height];
 
-    aoSamplesX=new int[w*h];	//campioni per la luce indiretta
-    aoSamplesY=new int[w*h];
+    aoSamplesX=new int[width * height];
+    aoSamplesY=new int[width * height];
 
-    dirSamples1=new int[w*h];	//campioni per la luce diretta
-    dirSamples2=new int[w*h];
-    dirSamples3=new int[w*h];
+    dirSamples1=new int[width * height];
+    dirSamples2=new int[width * height];
+    dirSamples3=new int[width * height];
 
-    refSamples1=new int[w*h];	//campioni riflessioni/rifrazioni
-    refSamples2=new int[w*h];
+    refSamples1=new int[width * height];
+    refSamples2=new int[width * height];
 
-    image = new Point3D[w*h];	//array che contiene tutti i pixel (rgb) dell'immagine
-    background = new Point3D(1.0f,1.0f,1.0f);	// Background: lo impostiamo come nero
+    image = new Point3D[width * height];
 
     photons = new ArrayList<>();
     caustics = new ArrayList<>();
-
-    scaleCausticPower = 1; //scalamento di potenza del fotone
-
-    power = 0;
-    photonBoxNum = 0;
 
     steps = 0;
     nRay = 0;
     err = 0;
 
-    sogliaBox=4;
+    boxThreshold =4;
 
-    scaleX=1.5f;
-    scaleZ=1.5f;
-
-    hroom=1.2f;
-
-    matIdL=0;	//indice del materiale della luce della stanza
     frontL=false;
     loadedBoxes = 0;
     sphericalSearch = 1;

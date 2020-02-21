@@ -4,6 +4,10 @@ import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
+/* Metodo che inizializza una finestra per un semplice modellatore
+ * La finestra è strutturata sulla falsa riga di una proiezione ortogonale dall'alto, posizionando sfere nello
+ *  spazio
+ */
 class Modeler extends JDialog {
   private final double SIZE = Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2;
   private int radius = 75;

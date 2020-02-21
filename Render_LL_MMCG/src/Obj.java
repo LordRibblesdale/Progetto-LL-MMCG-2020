@@ -14,7 +14,6 @@ import java.util.ArrayList;
 //dell'oggetto: i due valori min e max delimitano il
 //volume entro cui e' contenuto l'oggetto in questione
 public class Obj {
-	
 	Sphere s=null;
 	Triangle t=null;
 	
@@ -23,7 +22,7 @@ public class Obj {
 	Point3D max=new Point3D();
 	    
 	//area dell'oggetto
-	float areaObj=0;
+	float areaObj;
 	    
 	//potenza emessa dall'oggetto: viene utilizzata 
 	//all'interno dell'algoritmo che calcola la radiosita'
@@ -33,16 +32,8 @@ public class Obj {
     //dei materiali, quindi determina il materiale dell'Obj
 	int matId;
 
-	private Utilities utilities;
-
-	private Obj() {
-		utilities = new Utilities();
-	}
-
 	//costruttore per Obj sfera
 	public Obj(Sphere sp,int nmatId) {
-		this();
-
 		s=sp;
 		t=null;
 		matId=nmatId;
@@ -58,8 +49,6 @@ public class Obj {
     
 	//costruttore per Obj triangolo
 	public Obj(Triangle tr,int nmatId){
-		this();
-
 		s=null;
 		t=tr;
 		matId=nmatId;
@@ -105,9 +94,9 @@ public class Obj {
 		}
 		else if(t!=null){
 			float d=rnd1+rnd2+rnd3;
-			rnd1/=d;
-			rnd2/=d;
-			rnd3/=d;
+			rnd1 /= d;
+			rnd2 /= d;
+			rnd3 /= d;
 			Point3D ret1=t.vertices[0].multiplyScalar(rnd1);
 			Point3D ret2=t.vertices[1].multiplyScalar(rnd2);
 			Point3D ret3=t.vertices[2].multiplyScalar(rnd3);
@@ -124,7 +113,7 @@ public class Obj {
 	float area(){
 		if(s!=null){
 			//area sfera: 4*pigreco*r
-			return 4* utilities.MATH_PI *s.rad;
+			return 4* Utilities.MATH_PI *s.rad;
 		}
 		else if(t!=null){
 			//prendo i vertici del triangolo

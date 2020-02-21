@@ -1,5 +1,10 @@
 import java.text.DecimalFormat;
 
+/* La classe ParallelProcessRadiance presenta il blocco di codice che si occupa di reindirizzare il rendering del
+ *  pixel nei metodi interessati (scelti nella classe Render)
+ * Tutte queste azioni avvengono in un thread apposito, creato nella clase Runner
+ */
+
 public class ParallelProcessRadiance implements Runnable {
   private int y;
   private Camera cam;
@@ -15,11 +20,11 @@ public class ParallelProcessRadiance implements Runnable {
 
   @Override
   public void run() {
-    double percentY = (y*100 / (float) RenderAction.h);
-    Main.label.setText("Percentuale di completamento " + "radianza:	 " + new DecimalFormat("###.##").format(percentY));
+    double percentY = (y*100 / (float) RenderAction.height);
+    Main.label.setText("Percentuale di completamento radianza: " + new DecimalFormat("###.##").format(percentY));
 
     //per tutte le colonne
-    for(int x = 0; x <= RenderAction.w; x++) {
+    for(int x = 0; x <= RenderAction.width; x++) {
       // Ora siamo nel pixel
       // r e' la radianza: in questo caso e' tutto nero
       // Radianza della scena
@@ -37,9 +42,7 @@ public class ParallelProcessRadiance implements Runnable {
         float raster_y = (float)y;
 
         //origine del raggio della fotocamera
-        //TODO analyse declaration
-        Point3D origin = new Point3D();
-        origin.copy(cam.eye);
+        Point3D origin = cam.eye;
 
         //se ho piu' di un campione allora
         //distribuisco gli altri campioni in modo
@@ -49,24 +52,25 @@ public class ParallelProcessRadiance implements Runnable {
           float rndY=0;
 
           //utilizzo questa variabile tt perche' non
-          //posso usare il valore x+y*w nell'array
+          //posso usare il valore x+y*width nell'array
           //samplesX[], altrimenti l'ultimo indice
           //sarebbe fuori dal range (ricordo che la
-          //misura e' w*h ma gli indici vanno da 0 a
-          //w*h-1)
-          int tt = x+y*RenderAction.w;
-          //allora faccio l'if per tt<w*h cosi' da
+          //misura e' width*height ma gli indici vanno da 0 a
+          //width*height-1)
+          int tt = x+y*RenderAction.width;
+          //allora faccio l'if per tt<width*height cosi' da
           //accertarmi che non sia considerato l'indice
-          //w*h-esimo
-          if(tt < RenderAction.w*RenderAction.h) {
+          //width*height-esimo
+          if(tt < RenderAction.width *RenderAction.height) {
             // gli passo il numero random da cui
             //siamo partiti all'interno del pixel
             rndX = Utilities.generateRandom(RenderAction.samplesX[tt]);
             rndY = Utilities.generateRandom(RenderAction.samplesY[tt]);
           }
 
-          raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
-          raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperturaDiaframma*rndY;
+          // Gestisco la messa a fuoco dell'immagine finale, valutando il diaframma e il punto di messa a fuoco
+          raster_x += Math.cos(2 * Utilities.MATH_PI * rndX)*cam.aperture *rndY;
+          raster_y += Math.sin(2 * Utilities.MATH_PI * rndX)*cam.aperture *rndY;
           Point3D camUFuoco = cam.U.multiplyScalar(cam.fuoco*(x - raster_x));
           Point3D camVFuoco = cam.V.multiplyScalar(cam.fuoco*(y - raster_y));
 
@@ -80,11 +84,11 @@ public class ParallelProcessRadiance implements Runnable {
         //data dalla combinazione lineare dell'ONB
         //della fotocamera
         //centro il piano rispetto alla fotocamera
-        //sottraendo w/2 alla componente in x e h/2
+        //sottraendo width/2 alla componente in x e height/2
         //alla componente in y infine la distanza z
         //tra la fotocamera e il piano e' cam.d
-        Point3D ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f * RenderAction.w))
-            .add(cam.V.multiplyScalar(raster_y - 0.5f * RenderAction.h))
+        Point3D ray_direction = (cam.U.multiplyScalar(raster_x - 0.5f * RenderAction.width))
+            .add(cam.V.multiplyScalar(raster_y - 0.5f * RenderAction.height))
             .add(cam.W.multiplyScalar(-cam.d));
         ray_direction=ray_direction.getNormalizedPoint();
 
@@ -146,22 +150,22 @@ public class ParallelProcessRadiance implements Runnable {
       //se non comprese in [0,1] dopodiche' vengono
       //caricate nel vettore image
       //nota: per ogni y che aumenta abbiamo gia'
-      //caricato w pixel
+      //caricato width pixel
 
       //utilizzo questa variabile tt perche' non posso
-      //usare il valore x+y*w nell'array image[w*y],
+      //usare il valore x+y*width nell'array image[width*y],
       //altrimenti l'ultimo indice sarebbe fuori dal
-      //range (ricordo che la misura e' w*h ma gli
-      //indici vanno da 0 a w*h-1)
-      int tt =x+y*RenderAction.w;
-      //allora faccio l'if per tt<w*h cosi' da
+      //range (ricordo che la misura e' width*height ma gli
+      //indici vanno da 0 a width*height-1)
+      int tt =x+y*RenderAction.width;
+      //allora faccio l'if per tt<width*height cosi' da
       //accertarmi che non sia considerato l'indice
-      //w*h-esimo
-      if(tt<RenderAction.w*RenderAction.h) {
-        RenderAction.image[x+y*RenderAction.w].x = Point3D.clamp(sceneRadiance.x);
+      //width*height-esimo
+      if(tt<RenderAction.width *RenderAction.height) {
+        RenderAction.image[x+y*RenderAction.width].x = Point3D.clamp(sceneRadiance.x);
         //noinspection SuspiciousNameCombination
-        RenderAction.image[x+y*RenderAction.w].y = Point3D.clamp(sceneRadiance.y);
-        RenderAction.image[x+y*RenderAction.w].z = Point3D.clamp(sceneRadiance.z);
+        RenderAction.image[x+y*RenderAction.width].y = Point3D.clamp(sceneRadiance.y);
+        RenderAction.image[x+y*RenderAction.width].z = Point3D.clamp(sceneRadiance.z);
       }
     }
   }

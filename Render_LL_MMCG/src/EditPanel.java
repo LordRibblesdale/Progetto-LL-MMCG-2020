@@ -12,12 +12,18 @@ class EditPanel extends JPanel {
   private JComboBox<String> materials;
   private JComboBox<String> positions;
 
-  //sample per il rendering dell'immagine
+  // Sample per il rendering dell'immagine
   private JSpinner samples;
 
   JacobiPanel jacobiPanel;
   FinalGatheringPanel finalGatheringPanel;
   PhotonPanel photonPanel;
+
+  /* EditPanel è un pannello che contiene un JTabbedPane in cui sono presenti le 3 tecniche di rendering
+   *  implementate. Per ognuna è presente il suo pannello con i suoi parametri.
+   * RenderAction, con accesso statico, controllerà quale tab è scelto e quali valori dai vari
+   *  JSpinner (e successivamente JSlider) richiedere per impostare il rendering effettivo
+   */
 
   EditPanel() {
     super();

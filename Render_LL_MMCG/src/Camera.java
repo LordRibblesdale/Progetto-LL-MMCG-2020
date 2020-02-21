@@ -2,44 +2,28 @@
 class Camera {
 
 	// Posizione della fotocamera
-	public Point3D eye;
+	Point3D eye;
 	// Direzione di vista
-	public Point3D lookAt;
+	private Point3D lookAt;
 	// Up vector (generalmente Y)
-	public Point3D up;
+	private Point3D up;
 	// risoluzione sulla X
-	public int width;
+	private int width;
 	// risoluzione sulla Y
-	public int height;
+	private int height;
 	// Distanza del piano di messa a fuoco
 	public float d;
 	// coordinate locali della fotocamera 
 	//(si intende il sistema di riferimento con la 
 	//fotocamera nell'origine)
-	public Point3D U,V,W;
-	   
-	public float aperturaDiaframma = 0;
-	public double fuoco=0;
-	
-	//costruttore di default imposta la fotocamera 
-	//nell'origine che guarda l'origine con distanza 
-	//focale 35 
-	public Camera() {
+	Point3D U,V,W;
 
-		eye = new Point3D();
-		lookAt= new Point3D();
-		up=new Point3D(0.0f,0.0f,1.0f);
-		width=320;
-		height=240;
-		d=35.0f;
-		U = new Point3D();
-		V = new Point3D();
-		W = new Point3D();
-		
-	}
+	//apertura diaframma della camera
+	float aperture = 0;
+	double fuoco = 0;
 	
 	//costruttore della fotocamera in cui il 
-    //sistema ortonormale viene prima impostato a 0
+	//sistema ortonormale viene prima impostato a 0
 	//per essere poi calcolato basandosi sulla posizione
 	//della fotocamera eye (come centro) e sulla 
 	//direzione in cui si guarda lookAt (come assi)
@@ -72,7 +56,7 @@ class Camera {
 		U=(W.multiplyScalar(-1.0f));
 		U=U.crossProduct(up.getNormalizedPoint());
 		U=U.getNormalizedPoint();
-        //creo l'ultimo vettore ortogonale che e' gia' 
+		//creo l'ultimo vettore ortogonale che e' gia'
 		//normalizzato poiche' i vettori di cui facciamo 
 		//il prodotto vettoriale sono normalizzati
 		//(non potevamo prendere esattamente l'up 

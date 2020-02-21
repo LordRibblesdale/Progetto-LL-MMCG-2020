@@ -5,7 +5,7 @@
 //la normale alla sfera in un punto dato
 public class Sphere {
 	// raggio
-	public float rad; 
+	public float rad;
 	// posizione (centro)
 	public Point3D p;
 
@@ -82,7 +82,6 @@ public class Sphere {
 					return -1.0f;
 			}
 		}
-			
 	}
 
 	//funzione che calcola la normale in un punto iP della 

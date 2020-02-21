@@ -1,7 +1,5 @@
-//classe che definisce un raggio attraverso i parametri
-//origine, direzione e profondita'
+// Classe che definisce un raggio attraverso i parametri origine, direzione e profondità
 public class Ray {
-
 	// Origine del raggio
 	public Point3D o;
 	// Direzione del raggio
@@ -25,6 +23,4 @@ public class Ray {
 	{
 		depth=newDepth;
 	}
-
-
 }

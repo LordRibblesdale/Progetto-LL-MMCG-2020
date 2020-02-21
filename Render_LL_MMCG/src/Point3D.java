@@ -28,10 +28,10 @@ public class Point3D {
 		z = z_;
 	}
 	
-	public Point3D(double x_) {
-		x = x_;
-		y = x_;
-		z = x_;
+	public Point3D(double v) {
+		x = v;
+		y = v;
+		z = v;
 	}
 	
 	//metodi set e get
@@ -58,26 +58,6 @@ public class Point3D {
 	public double getZ() {
 		return z;
 	}
-
-	public double getDim(int i) {
-	  if (i == 0) {
-	    return getX();
-    } else if (i == 1) {
-	    return getY();
-    } else {
-	    return getZ();
-    }
-  }
-
-  public void setDim(int i, double value) {
-    if (i == 0) {
-      setX(value);
-    } else if (i == 1) {
-      setY(value);
-    } else {
-      setZ(value);
-    }
-  }
 	
 	//addizione componente componente tra 2 vettori in R3
 	public Point3D add(Point3D b) {
@@ -134,7 +114,6 @@ public class Point3D {
 		a.y=a.y/b.y;
 		a.z=a.z/b.z;
 		return a;
-		
 	}	    
 			
 	//modulo
@@ -201,10 +180,16 @@ public class Point3D {
 	}
 	    
  	//verificare se sono uguali due vettori
-	boolean equal(Point3D b) {
-		return (b.x == x) && (b.y == y) && (b.z == z);
+	@Override
+	public boolean equals(Object b) {
+		if (b instanceof Point3D) {
+			Point3D b1 = (Point3D) b;
+			return (b1.x == x) && (b1.y == y) && (b1.z == z);
+		} else {
+			return false;
+		}
 	}
-    
+
 	//radice del vettore in R3 passato come parametro
 	//(fa la radice di ogni componente)
 	public static Point3D getSquareCompPoint(Point3D b) {
@@ -212,7 +197,6 @@ public class Point3D {
 		a.x=(float) Math.sqrt(b.x);
 		a.y=(float) Math.sqrt(b.y);
 		a.z=(float) Math.sqrt(b.z);
-
 		return a;
 	}
     
@@ -284,11 +268,10 @@ public class Point3D {
   }
 
   public static Point3D exponent(Point3D point) {
-		//TODO check here
 		return new Point3D(
-						(float) Math.exp(point.getX()),
-						(float) Math.exp(point.getY()),
-						(float) Math.exp(point.getZ())
+						Math.exp(point.getX()),
+						Math.exp(point.getY()),
+						Math.exp(point.getZ())
 		);
 	}
 
@@ -297,7 +280,7 @@ public class Point3D {
   //restituisce Ray[]t in cui t[0]=R, t[1]=G, t[2]=B
   static Ray[] getRefraction(Ray[] rays, Point3D direction, Point3D normal,
 													 Point3D refractionIndex) {
-		//utilizziamo la proprieta' depth del raggio per
+		//utilizziamo la proprieta' maxDepth del raggio per
   	//verificare se c'e' riflessione totale
 		rays[0].depth = 1;
 		rays[1].depth = 1;
@@ -307,7 +290,7 @@ public class Point3D {
 		// <n, i>
   	double cosThetaI = normal.dotProduct(direction);
   	Point3D eta = new Point3D(1.0f).divideComponents(refractionIndex);
-     //se l'angolo di incidenza e' superiore a pi/2
+  	//se l'angolo di incidenza e' superiore a pi/2
   	//allora devo cambiare il verso della normale e
   	//cambiare indice di rifrazione (prendendo il suo
   	//inverso)
@@ -318,8 +301,7 @@ public class Point3D {
   		eta=new Point3D(1.0f).divideComponents(eta);
   	}
 
-  	Point3D sin2ThetaT = eta.multiplyComponents(eta).multiplyScalar(
-						1 - (cosThetaI*cosThetaI));
+  	Point3D sin2ThetaT = eta.multiplyComponents(eta).multiplyScalar(1 - (cosThetaI*cosThetaI));
 
     Point3D K = new Point3D(1.0f).subtract(sin2ThetaT);
 
@@ -359,7 +341,7 @@ public class Point3D {
   }
     
   //costringe un numero in [0,1]
-	public static double clamp(double x) {
+	static double clamp(double x) {
 		if(x<0)
 			return 0;
 		else if (x>1)
@@ -369,7 +351,7 @@ public class Point3D {
 	}
 
     //costringe le componenti di un vettore in R3 in [0,1]
-  public static Point3D clamp3(Point3D f) {
+  static Point3D clamp3(Point3D f) {
   	double xf=clamp(f.x);
   	double yf=clamp(f.y);
   	double zf=clamp(f.z);
@@ -381,7 +363,7 @@ public class Point3D {
 		return x + " " + y + " " + z;
 	}
 
-	public Color toColor() {
+	Color toColor() {
 		return new Color(Utilities.toInt(x), Utilities.toInt(y), Utilities.toInt(z));
 	}
 }

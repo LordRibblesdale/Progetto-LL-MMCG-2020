@@ -17,7 +17,7 @@ public class Box {
   //lato=0 taglio con il piano z,
   //l=1 taglio con il piano x,
   //l=2 taglio con il piano y
-  short side =0;
+  private int side;
 
   //array degli oggetti che il box contiene
   ArrayList<Obj> objects;
@@ -25,14 +25,14 @@ public class Box {
   //Box figli: i due "sottobox" in cui il box
   //iniziale viene diviso. Nel caso rimangano Null il
   //Box non ha nessun figlio
-  Box leaf1;;
-  Box leaf2;;
+  Box leaf1;
+  Box leaf2;
 
   //costruttore box
-  public Box(Point3D min, Point3D max, short l){
+  public Box(Point3D min, Point3D max, int l){
       V[0]=min;
       V[1]=max;
-      side =l;
+      side = l;
   }
 
   //BSP (binary space partition): dato un box lo ripartisce
@@ -86,16 +86,16 @@ public class Box {
   //scena e divide gli oggetti di un box padre tra i suoi
   //due box figli.
   //il metodo continua fino a quando non si raggiunge il
-  //valore depth
+  //valore maxDepth
   //notiamo che la variabile liv (livello di profondita'
   //all'interno dell'albero) e' globale e viene
   //continuamente aggiornata nei passaggi
   static Box setPartition(Box b) {
     //procede solo se il box non e' nullo, il livello di
-    //profondita' non ha superato il parametro depth e se
+    //profondita' non ha superato il parametro maxDepth e se
     //ci sono almeno un numero di oggetti maggiore del
-    //valore di sogliaBox dentro al box
-    if((RenderAction.depthLevel < RenderAction.depth) && (b!=null) && (b.objects.size() > RenderAction.sogliaBox)){
+    //valore di boxThreshold dentro al box
+    if((RenderAction.depthLevel < RenderAction.maxDepth) && (b!=null) && (b.objects.size() > RenderAction.boxThreshold)){
       //aumentiamo il livello di profondita' dell'albero
       RenderAction.depthLevel++;
 
@@ -115,10 +115,6 @@ public class Box {
       //di caricamento dei box
       RenderAction.loadedBoxes++;
 
-      Main.label.setText("box caricati:  "+ RenderAction.loadedBoxes
-          +"  su un massimo di  "+ RenderAction.maxPartitions
-          +"  (ogni box contenente minimo  "
-          + RenderAction.sogliaBox+"  oggetti)");
       //una volta finita la partizione dei figli
       //ritorna al livello iniziale
       RenderAction.depthLevel--;

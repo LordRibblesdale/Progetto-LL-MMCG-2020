@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 
-//sistemare i commenti
-public class PhotonBox {
+/* La PhotonBox, come per la Box per gli oggetti di scena, suddivide lo spazio per raggruppare i fotoni che
+ *  colpiscono la porzione di spazio
+ */
 
-	//vertici del box
+class PhotonBox {
+	  //vertici del box
     Point3D[] V=new Point3D[2];
     //array di fotoni
     ArrayList<Photon> ph;
@@ -14,7 +16,7 @@ public class PhotonBox {
     //posizione del piano lungo la dimensione dim
     double planePos;
 
-    public PhotonBox(Point3D v1, Point3D v2, ArrayList<Photon> p){
+    PhotonBox(Point3D v1, Point3D v2, ArrayList<Photon> p) {
         V[0]=v1;
         V[1]=v2;
 

@@ -6,7 +6,7 @@ public class Octree {
     Point3D[] V=new Point3D[2];
     
     //centro pesato in base alla posizione degli oggetti presenti nel box dell'octree:
-    Point3D center=new Point3D();//=new float3();
+    Point3D center=new Point3D();
     
     //oggetti che il box dell'octree contiene:
     int nObj=0;

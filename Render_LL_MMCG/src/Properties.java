@@ -1,4 +1,7 @@
 public interface Properties {
+  /* Interfaccia che contiene tutte le opzioni scelte nel Main e in EditPanel
+   *  per un utilizzo più pratico tra le classi
+   */
   int JACOBI_PANEL = 0;
   int FINAL_GATHERING_PANEL = 1;
   int PHOTON_PANEL = 2;

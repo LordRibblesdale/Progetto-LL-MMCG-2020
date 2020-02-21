@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 import java.util.Map;
 
+/* La classe Utilities contiene le variabili già precalcolate e i metodi necessari per le intersezioni
+ * La classe è gestita come un oggetto e con variabili non statiche poichè è necessario gestire tutte le intersezioni
+ *  in modo interno all'oggetto durante il multithreading per evitare accessi non autorizzati ad altre variabili.
+ */
+
 public class Utilities {
 	//DEFINIZIONE DI VARIABILI
 	
@@ -27,7 +32,7 @@ public class Utilities {
   //variabile globale, utilizzata nel metodo intersect(),
   //in cui viene salvato punto di intersezione tra l'oggetto
   //e il raggio considerato
-  static double inf=(float) 1e20;	//distanza massima dal raggio
+  static double inf = 1e20;	//distanza massima dal raggio
   double inters = inf;//sarebbe t del metodo intersect;
 
   //Intersezione con i box della ripartizione spaziale.
@@ -36,7 +41,7 @@ public class Utilities {
   //considerando, fino a trovare il punto di intersezione
   //b: box da intersecare con il raggio,
   //r: raggio considerato
-  boolean intersectBSP(Box b,Ray r){
+  private boolean intersectBSP(Box b, Ray r){
     if(b.intersect(r)) {  //controllo che i figli non siano nulli (ovvero che abbia figli)
       if((b.leaf1 != null) && (b.leaf2 != null)) { //se non e' nullo ricomincia con i figli
         intersectBSP(b.leaf1,r);
@@ -164,7 +169,7 @@ public class Utilities {
   Ray[] refract(Ray[] rays, Point3D i, Point3D n, Point3D ior) {
     Ray[] t = rays;
 
-    //utilizziamo la proprietà depth del raggio per verificare se c'è riflessione totale
+    //utilizziamo la proprietà maxDepth del raggio per verificare se c'è riflessione totale
     t[0].depth=1;
     t[1].depth=1;
     t[2].depth=1;
@@ -274,13 +279,12 @@ public class Utilities {
     return ProjectionMap;
   }
 
-  void locate_photons(Map<Double, Photon> nearPh, Point3D iP, int index, Obj objX, PhotonBox[] Tree, double d_2, int nph){
-
+  void locatePhotons(Map<Double, Photon> nearPh, Point3D iP, int index, Obj objX, PhotonBox[] Tree, double d_2, int nph){
 //si verifica che il box index non sia vuoto
     if(Tree[index-1].nph != 0){
 
       //si verifica che il nuovo indice non abbia ha superato la lunghezza dell'albero (power), in tal caso l'indice corrisponde ad un box all'estremità dell'albero
-      if((2*index)+1< RenderAction.power){
+      if((2*index)+1 < RenderAction.power){
 
         //viene caricato il punto di intersezione in un array di 3 elementi
         double[] pos = {iP.x, iP.y, iP.z};
@@ -294,29 +298,26 @@ public class Utilities {
           //foglia sinistra:
 
           //si continua la ricerca solo se il box ha dei fotoni all'interno
-          locate_photons(nearPh,iP,2*index,objX,Tree,d_2,nph);
+          locatePhotons(nearPh,iP,2*index,objX,Tree,d_2,nph);
 
           //viene verificato se la distanza dal piano è più piccola della distanza di ricerca
           if(Math.pow(delta,2)<d_2){
 
             //se lo è si deve cercare anche nella foglia destra
-            locate_photons(nearPh,iP,2*index+1,objX,Tree,d_2,nph);
+            locatePhotons(nearPh,iP,2*index+1,objX,Tree,d_2,nph);
 
           }
         }else{
 
           //foglia destra (stesso procedimento invertito della foglia sinistra)
-          locate_photons(nearPh,iP,2*index+1,objX,Tree,d_2,nph);
+          locatePhotons(nearPh,iP,2*index+1,objX,Tree,d_2,nph);
 
-          if(Math.pow(delta,2)<d_2){
-
-            locate_photons(nearPh,iP,2*index,objX,Tree,d_2,nph);
+          if(Math.pow(delta,2)<d_2) {
+            locatePhotons(nearPh,iP,2*index,objX,Tree,d_2,nph);
           }
         }
-      }else{
-
+      } else {
         //se ci si trova all'estremità dell'albero
-
         //si caricano tutti i fotoni del box
         int n = Tree[index-1].nph;
         ArrayList<Photon> p = Tree[index-1].ph;
@@ -329,7 +330,6 @@ public class Utilities {
 
 
           if(objX.t != null){
-
             //se l'oggetto è un triangolo la ricerca sarà planare
             //in realtà per evitare fenomeni di aliasing su le facce piccole si è costretti a considerare un parametro che
             // ci permetta di effettuare la ricerca sul disco o su una sfera
