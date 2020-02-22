@@ -10,9 +10,11 @@ public class Triangle {
   //Normale al triangolo
   private Point3D n;
 
+  int matId;
+
   //costruttore:i parametri in input sono i tre vertici
   //del triangolo
-  public Triangle(Point3D v0, Point3D v1, Point3D v2) {
+  public Triangle(Point3D v0, Point3D v1, Point3D v2, int matId) {
     // triangolo definito da un array di 3 float3
     vertices = new Point3D[3];
     vertices[0]=v0;
@@ -21,6 +23,8 @@ public class Triangle {
 
     //calcoliamo la normale con un metodo apposito
     n=tNormalCalc();
+
+    this.matId = matId;
   }
 
   //vettore normale e' ottenuto tramite prodotto

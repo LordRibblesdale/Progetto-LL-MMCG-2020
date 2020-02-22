@@ -32,20 +32,14 @@ public class Mesh {
     utilities = new Utilities();
   }
 
-  Mesh(ArrayList<Sphere> spheres, ArrayList<Integer> matIdSphere) {
+  Mesh(ArrayList<Sphere> spheres) {
     this();
-    loadSphere(spheres, matIdSphere);
+    loadSphere(spheres);
   }
 
   Mesh(Point3D max, Point3D min) {
     this();
     createScene(max, min);
-  }
-
-  // costruttore Mesh
-  Mesh(ArrayList<Obj> o){
-    //array di oggetti contenuti nella mesh
-    objects=o;
   }
 
   //si crea la stanza con grandezza dipendente da max e min
@@ -155,9 +149,9 @@ public class Mesh {
       Point3D Lv6tr = (Lv6).add(translateLL);
       //si creano e si aggiungono i triangoli per la 
       //luce
-      Triangle Tr0=new Triangle(Lv4tr,Lv5tr,Lv6tr);
+      Triangle Tr0=new Triangle(Lv4tr,Lv5tr,Lv6tr, RenderAction.matIdL);
       Troom.add(0,Tr0);
-      Triangle Tr1=new Triangle(Lv1tr,Lv6tr,Lv5tr);
+      Triangle Tr1=new Triangle(Lv1tr,Lv6tr,Lv5tr, RenderAction.matIdL);
       Troom.add(1,Tr1);
     }
   
@@ -170,51 +164,37 @@ public class Mesh {
     //si creano e si aggiungono i triangoli per le 
     //pareti
     //faccia laterale sinistra
-    Triangle Tr2=new Triangle(v[0],v[1],v[2]);
+    Triangle Tr2=new Triangle(v[0],v[1],v[2], matIdRoom[0]);
     Troom.add(2,Tr2);
-    Triangle Tr3=new Triangle(v[5],v[2],v[1]);
+    Triangle Tr3=new Triangle(v[5],v[2],v[1], matIdRoom[0]);
     Troom.add(3,Tr3);
     //faccia inferiore
-    Triangle Tr4=new Triangle(v[0],v[2],v[3]);
+    Triangle Tr4=new Triangle(v[0],v[2],v[3], matIdRoom[1]);
     Troom.add(4,Tr4);
-    Triangle Tr5=new Triangle(v[7],v[3],v[2]);
+    Triangle Tr5=new Triangle(v[7],v[3],v[2], matIdRoom[1]);
     Troom.add(5,Tr5);
     //faccia posteriore
-    Triangle Tr6=new Triangle(v[0],v[3],v[1]);
+    Triangle Tr6=new Triangle(v[0],v[3],v[1], matIdRoom[2]);
     Troom.add(6,Tr6);
-    Triangle Tr7=new Triangle(v[6],v[1],v[3]);
+    Triangle Tr7=new Triangle(v[6],v[1],v[3], matIdRoom[2]);
     Troom.add(7,Tr7);
     //faccia laterale destra
-    Triangle Tr8=new Triangle(v[4],v[6],v[7]);
+    Triangle Tr8=new Triangle(v[4],v[6],v[7], matIdRoom[3]);
     Troom.add(8,Tr8);
-    Triangle Tr9=new Triangle(v[7],v[6],v[3]);
+    Triangle Tr9=new Triangle(v[7],v[6],v[3], matIdRoom[3]);
     Troom.add(9,Tr9);
     //faccia superiore
-    Triangle Tr10=new Triangle(v[4],v[5],v[6]);
+    Triangle Tr10=new Triangle(v[4],v[5],v[6], matIdRoom[4]);
     Troom.add(10,Tr10);
-    Triangle Tr11=new Triangle(v[1],v[6],v[5]);
+    Triangle Tr11=new Triangle(v[1],v[6],v[5], matIdRoom[4]);
     Troom.add(11,Tr11);
   
-    //imposto i materiali della stanza
-    objects.add(new Obj(Troom.get(0), RenderAction.matIdL));
-    objects.add(new Obj(Troom.get(1), RenderAction.matIdL));
-    objects.add(new Obj(Troom.get(2), matIdRoom[0]));
-    objects.add(new Obj(Troom.get(3), matIdRoom[0]));
-    objects.add(new Obj(Troom.get(4), matIdRoom[1]));
-    objects.add(new Obj(Troom.get(5), matIdRoom[1]));
-    objects.add(new Obj(Troom.get(6), matIdRoom[2]));
-    objects.add(new Obj(Troom.get(7), matIdRoom[2]));
-    objects.add(new Obj(Troom.get(8), matIdRoom[3]));
-    objects.add(new Obj(Troom.get(9), matIdRoom[3]));
-    objects.add(new Obj(Troom.get(10), matIdRoom[4]));
-    objects.add(new Obj(Troom.get(11), matIdRoom[4]));
-
-    //viene resituita una mesh che contiene i triangoli
-    //che costituiscono la stanza e la luce
-
+    for (Triangle t : Troom) {
+      objects.add(new Obj(t));
+    }
   }
 
-  void loadSphere(ArrayList<Sphere> spheres, ArrayList<Integer> matIdSphere) {
+  void loadSphere(ArrayList<Sphere> spheres) {
     //crea una mesh costituita da n sfere
     //creo un array di Obj di n elementi
       objects = new ArrayList<>();
@@ -223,9 +203,9 @@ public class Mesh {
       //i-esimo dell'array di Sphere[] spheres e l'elemento
       //i-esimo di int[] matIdSphere (che considerera'
       //l'i-esimo materiale)
-      for(int i=0; i < spheres.size(); i++) {
-        objects.add(new Obj(spheres.get(i), matIdSphere.get(i)));
-      }
+    for (Sphere sphere : spheres) {
+      objects.add(new Obj(sphere));
+    }
 
       //viene restituita una mesh delle sfere create
   }
@@ -233,7 +213,7 @@ public class Mesh {
   //metodo per impostare il materiale degli oggetti 
   //presenti nella mesh
   
-  void setMaterial(int m){
+  void setMaterial(int m) {
     for (Obj object : objects) {
       object.setMaterial(m);
     }
@@ -271,8 +251,8 @@ public class Mesh {
             v[pos], l[pos].multiplyScalar(val).
             add(v[pos])};
         //creo i nuovi due triangoli
-        objects2.add(new Obj(new Triangle(nv[0], nv[1], nv[3]), object.matId));
-        objects2.add(new Obj(new Triangle(nv[0], nv[3], nv[2]), object.matId));
+        objects2.add(new Obj(new Triangle(nv[0], nv[1], nv[3], object.matId)));
+        objects2.add(new Obj(new Triangle(nv[0], nv[3], nv[2], object.matId)));
       }
     }
 

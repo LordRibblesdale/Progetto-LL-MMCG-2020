@@ -14,9 +14,9 @@ import java.util.ArrayList;
 //dell'oggetto: i due valori min e max delimitano il
 //volume entro cui e' contenuto l'oggetto in questione
 public class Obj {
-	Sphere s;
-	Triangle t;
-	Hourglass h;
+	Sphere s = null;
+	Triangle t = null;
+	Hourglass h = null;
 	//TODO cambiare organizzazione delle variabili
 	
 	//bounding box dell'oggetto:
@@ -35,55 +35,33 @@ public class Obj {
 	int matId;
 
 	//costruttore per Obj sfera
-	public Obj(Sphere sp,int nmatId) {
-		s = sp;
-		t = null;
-		h = null;
-		matId=nmatId;
-	       
+	public Obj(Object obj) {
+		if (obj instanceof Sphere) {
+			s = (Sphere) obj;
+			matId = s.matId;
+
+			calculateBoundingBox();
+
+			//calcolo il bounding box dell'oggetto
+			Point3D r= new Point3D(s.rad);
+			min=(s.p).subtract(r);
+			max=(s.p).add(r);
+		} else if (obj instanceof Triangle) {
+			t = (Triangle) obj;
+			matId = t.matId;
+		} else if (obj instanceof Hourglass) {
+			h = (Hourglass) obj;
+			matId = h.matId;
+
+			//calcolo il bounding box dell'oggetto
+			//Point3D r= new Point3D(h.rad);
+			//min=(h.p).subtract(r);
+			//max=(h.p).add(r);
+		}
+
 		//calcolo l'area dell'oggetto
-		areaObj=area();
-
-		//calcolo il bounding box dell'oggetto
-		Point3D r= new Point3D(s.rad);
-		min=(s.p).subtract(r);
-		max=(s.p).add(r);
+		areaObj = area();
 	}
-
-	// Costruttore per Obj clessidra
-	public Obj(Hourglass h,int nmatId) {
-		s = null;
-		t = null;
-		this.h = h;
-		matId=nmatId;
-
-		//calcolo l'area dell'oggetto
-		areaObj=area();
-
-		//calcolo il bounding box dell'oggetto
-		Point3D r= new Point3D(h.rad);
-		min=(h.p).subtract(r);
-		max=(h.p).add(r);
-	}
-    
-	//costruttore per Obj triangolo
-	public Obj(Triangle tr,int nmatId){
-		s=null;
-		t=tr;
-		matId=nmatId;
-		//calcolo l'area dell'oggetto
-		areaObj=area();
-
-		//calcolo il bounding box dell'oggetto
-		max.x=Math.max(t.vertices[0].x, Math.max(t.vertices[1].x, t.vertices[2].x));
-		max.y=Math.max(t.vertices[0].y, Math.max(t.vertices[1].y, t.vertices[2].y));
-		max.z=Math.max(t.vertices[0].z, Math.max(t.vertices[1].z, t.vertices[2].z));
-
-		min.x=Math.min(t.vertices[0].x, Math.min(t.vertices[1].x, t.vertices[2].x));
-		min.y=Math.min(t.vertices[0].y, Math.min(t.vertices[1].y, t.vertices[2].y));
-		min.z=Math.min(t.vertices[0].z, Math.min(t.vertices[1].z, t.vertices[2].z));
-	}
-    
 	void setMaterial(int m){
 		matId=m;
 	}
@@ -138,7 +116,7 @@ public class Obj {
 			double rad10 = h.rad/(double) 10;
 			double multiplier = (rad10 + cosPhi*(h.rad - rad10));
 
-			Point3D r = new Point3D(h.rad*cosPhi, senPhi*cosTheta*multiplier, senPhi*senTheta*multiplier);
+			Point3D r = new Point3D(senPhi*cosTheta*multiplier, senPhi*senTheta*multiplier, h.rad*cosPhi);
 
 			return h.p.add(r);
 		}
@@ -188,8 +166,8 @@ public class Obj {
 				double rad10 = h.rad/(double) 10;
 				double multiplier = (rad10 + cosPhi*(h.rad - rad10));
 
-				Point3D derPhiFormula = new Point3D(-h.rad*senPhi, cosPhi*cosTheta*multiplier, cosPhi*senTheta*multiplier);
-				Point3D derThetaFormula = new Point3D(0, -senPhi*senTheta*multiplier, senPhi*cosTheta*multiplier);
+				Point3D derPhiFormula = new Point3D(cosPhi*cosTheta*multiplier, cosPhi*senTheta*multiplier, -h.rad*senPhi);
+				Point3D derThetaFormula = new Point3D(-senPhi*senTheta*multiplier, senPhi*cosTheta*multiplier, 0);
 
 				double norm = derPhiFormula.crossProduct(derThetaFormula).normalize();
 
@@ -261,14 +239,15 @@ public class Obj {
 			}
 
 			if (object.h != null) {
-				//carico il centro della sfera
+				//carico il centro della clessidra
 				Point3D sp = object.h.p;
-				//carico il raggio della sfera
+				//carico il raggio della clessidra
 				float rad = object.h.rad;
 
-				//viene preso in esame il bounding box
-				//della sfera quello cioe' il cubo di
-				//lato 2*rad centrato sulla sfera
+				/* Viene preso in esame il bounding box di due sfere di raggio rad/2
+				 *  allineate con l'asse della clessidra.
+				 * Il tutto facendo attenzione alla sua inclinazione rispetto all'asse y (verticale)
+				 */
 				if (sp.x + rad > oldMax.x) oldMax.x = sp.x + rad;
 				if (sp.y + rad > oldMax.y) oldMax.y = sp.y + rad;
 				if (sp.z + rad > oldMax.z) oldMax.z = sp.z + rad;
@@ -345,6 +324,8 @@ public class Obj {
 	void translate(Point3D direction) {
 		if (t != null) {
 			t.translate(direction);
+
+			calculateBoundingBox();
 		} else {
 			s.translate(direction);
 		}
@@ -353,12 +334,37 @@ public class Obj {
 	void rotateTriangleOnly(Point3D axis, double phi) {
 		if (t != null) {
 			t.rotate(axis, phi, true);
+
+			calculateBoundingBox();
 		}
 	}
 
 	void rotateTriangleInSpace(Point3D axis, double phi) {
 		if (t != null) {
 			t.rotate(axis, phi, false);
+
+			calculateBoundingBox();
+		}
+	}
+
+	private void calculateBoundingBox() {
+		if (t != null) {
+			//calcolo il bounding box dell'oggetto
+			max.x=Math.max(t.vertices[0].x, Math.max(t.vertices[1].x, t.vertices[2].x));
+			max.y=Math.max(t.vertices[0].y, Math.max(t.vertices[1].y, t.vertices[2].y));
+			max.z=Math.max(t.vertices[0].z, Math.max(t.vertices[1].z, t.vertices[2].z));
+
+			min.x=Math.min(t.vertices[0].x, Math.min(t.vertices[1].x, t.vertices[2].x));
+			min.y=Math.min(t.vertices[0].y, Math.min(t.vertices[1].y, t.vertices[2].y));
+			min.z=Math.min(t.vertices[0].z, Math.min(t.vertices[1].z, t.vertices[2].z));
+		}
+	}
+
+	void setNewPosition(Point3D point) {
+		if (s != null) {
+			s.translate(point.subtract(s.p));
+		} else if (t != null) {
+			t.translate(point.subtract(t.calculateCenter()));
 		}
 	}
 

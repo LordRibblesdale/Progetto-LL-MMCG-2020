@@ -1,9 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -36,20 +33,6 @@ class RenderAction implements Properties, ModelerProperties {
             StandardMaterial.MATERIAL_DIFFUSIVE_DEEP_GRAY,
             StandardMaterial.MATERIAL_DIFFUSIVE_JADE
     };
-
-  // vettore per gli indici dei materiali delle sfere
-  // si fa corrispondere alla sfera i-esima del vettore
-  // spheres definito poco sotto, il materiale di
-  // indice corrispondente nel vettore material
-
-  /* Questo fattore può essere ottimizzato assegnando a ogni oggetto
-   *  (in questo caso sfere), l'indice o addirittura l'oggetto Material
-   *  all'oggetto stesso e far richiamare il materiale dell'oggetto
-   *  invece di chiamare l'indice di un array
-   */
-  private static ArrayList<Integer> matIdSphere = new ArrayList<>();
-
-  static ArrayList<Sphere> spheres;
 
   /* Controlli booleani per accedere ai vari metodi per la scelta del
    *  tipo di rendering da effettuare
@@ -122,6 +105,8 @@ class RenderAction implements Properties, ModelerProperties {
   // Variabile per la suddivisione della scena tramite BSP
   // BSP: suddivisione dello spazio binaria secondo una struttura ad albero
   static Box bound;
+
+  static ArrayList<Sphere> spheres;
 
   // Variabile globale in cui verranno salvati gli oggetti della scena
   static ArrayList<Obj> globalObjects;
@@ -242,26 +227,20 @@ class RenderAction implements Properties, ModelerProperties {
      *  dell'indice è presente il materiale, che verrà richiamato dai metodi vari
      */
     int mIS = setMatIdSphere();
-    matIdSphere = new ArrayList<>();
     spheres = new ArrayList<>();
 
     // Oggetti predefiniti
     for(int sph = 0; sph < SPHERES; sph++) {
-      matIdSphere.add(mIS);
       Point3D sPos = Sphere.setSpheresPosition(sph);
 
       //vettore costruttore delle sfere
-      spheres.add(new Sphere(1, sPos));
+      spheres.add(new Sphere(1, sPos, mIS));
     }
 
     // Aggiunta di oggetti dal modellatore
     if (additionalSpheres != null && !additionalSpheres.isEmpty()) {
       spheres.addAll(additionalSpheres);
       SPHERES = spheres.size();
-
-      for (int i = 0; i < additionalSpheres.size(); i++) {
-        matIdSphere.add(mIS);
-      }
     }
 
     /* Reimposta le variabili utilizzate
@@ -344,7 +323,7 @@ class RenderAction implements Properties, ModelerProperties {
 
     //array di mesh della scena
     ArrayList<Mesh> meshes = new ArrayList<>(2);
-    meshes.add(new Mesh(spheres, matIdSphere));
+    meshes.add(new Mesh(spheres));
 
     //inizializzo dei fittizi massimo e minimo, che mi
     //serviranno per definire i valori di max e min
@@ -422,7 +401,7 @@ class RenderAction implements Properties, ModelerProperties {
     }
 
     // Aggiungo un oggetto (triangolo) predefinito nella scena, uno specchio
-    objects.add(new Obj(new Triangle(new Point3D(-5.5, 0, 1.5), new Point3D(-6.2, 0, 2), new Point3D(-5.75, 1, 1.75)), 7));
+    objects.add(new Obj(new Triangle(new Point3D(-5.5, 0, 1.5), new Point3D(-6.2, 0, 2), new Point3D(-5.75, 1, 1.75), 7)));
 ;
     //liv e' il livello di profondita' all'interno
     //dell'albero
@@ -525,6 +504,78 @@ class RenderAction implements Properties, ModelerProperties {
       }
     };
 
+    JButton changePositionButton = new JButton("Cambia posizioni");
+    changePositionButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JDialog dialog = new JDialog(frame, "Cambia posizione", true);
+        dialog.setMinimumSize(new Dimension(400, 500));
+        dialog.setLocationRelativeTo(frame);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        JList<Obj> list = new JList<>(RenderAction.globalObjects.toArray(new Obj[0]));
+
+        list.addMouseListener(new MouseAdapter() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            super.mouseClicked(e);
+
+            if (e.getClickCount() == 2) {
+              JDialog properties = new JDialog(dialog, list.getSelectedValue().toString(), true);
+              dialog.setLayout(new GridLayout(0, 1));
+              JPanel panel = new JPanel();
+              JSlider xSlider = new JSlider(-100, 100);
+              xSlider.createStandardLabels(1);
+              JSlider ySlider = new JSlider(-100, 100);
+              ySlider.createStandardLabels(1);
+              JSlider zSlider = new JSlider(-100, 100);
+              zSlider.createStandardLabels(1);
+              JButton abortButton = new JButton("Annulla");
+              JButton doneButton = new JButton("Accetta modifiche");
+
+              doneButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  RenderAction.globalObjects.get(list.getSelectedIndex()).setNewPosition(new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10));
+
+                  new RenderAction(ModelerProperties.PREVIEW_ONLY);
+                  frame.repaint();
+                  properties.dispose();
+                }
+              });
+
+              panel.add(new JLabel("Posizione su X: "));
+              panel.add(xSlider);
+              properties.add(panel);
+
+              panel = new JPanel();
+              panel.add(new JLabel("Posizione su Y"));
+              panel.add(ySlider);
+              properties.add(panel);
+
+              panel = new JPanel();
+              panel.add(new JLabel("Posizione su Z"));
+              panel.add(zSlider);
+              properties.add(panel);
+
+              panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+              panel.add(abortButton);
+              panel.add(doneButton);
+              properties.add(panel);
+
+              properties.setMinimumSize(new Dimension(300, 300));
+              properties.setLocationRelativeTo(dialog);
+              properties.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+              properties.setVisible(true);
+            }
+          }
+        });
+
+        dialog.add(list);
+
+        dialog.setVisible(true);
+      }
+    });
+
     JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     JButton insert = new JButton("Aggiungi sfere");
     insert.addActionListener(new ActionListener() {
@@ -551,6 +602,7 @@ class RenderAction implements Properties, ModelerProperties {
       }
     });
 
+    bottomPanel.add(changePositionButton);
     bottomPanel.add(insert);
     bottomPanel.add(button);
 

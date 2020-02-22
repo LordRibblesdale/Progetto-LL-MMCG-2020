@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
@@ -79,11 +81,27 @@ class Modeler extends JDialog {
         super.mouseClicked(e);
 
         if (e.getButton() == MouseEvent.BUTTON1) {
+          Object choice = JOptionPane.showInputDialog(
+              Modeler.this,
+              "Scelta materiale",
+              "Scelta materiale",
+              JOptionPane.QUESTION_MESSAGE,
+              null,
+              RenderAction.material, RenderAction.material[0]);
+          int matId = 0;
+
+          for (int i = 0; i < RenderAction.material.length; i++) {
+            if (choice.toString().equals(RenderAction.material[i].toString())) {
+              matId = i;
+              break;
+            }
+          }
+
           //TODO add slider to manage sphere radius
           //TODO fix -8 & -31 parameters (incorrect position from MouseEvent e)
           imagePanel.ellipse2DS.add(new Ellipse2D.Double(e.getX() - (radius/ (double) 2) -8, e.getY()- (radius/ (double) 2) -31, radius, radius));
           Point3D newPoint = new Point3D(((e.getX() - SIZE)/ (double) 40), 0, e.getY()/ (double) 75);
-          RenderAction.additionalSpheres.add(new Sphere(1, newPoint));
+          RenderAction.additionalSpheres.add(new Sphere(1, newPoint, matId));
 
           repaint();
         }

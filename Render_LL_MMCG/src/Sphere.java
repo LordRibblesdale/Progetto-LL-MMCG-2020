@@ -9,10 +9,13 @@ public class Sphere {
   // posizione (centro)
   public Point3D p;
 
+  int matId;
+
   //costruttore
-  public Sphere(float nrad, Point3D np) {
+  public Sphere(float nrad, Point3D np, int matId) {
     rad=nrad;
     p=np;
+    this.matId = matId;
   }
 
   //metodo che imposta, a seconda della scelta

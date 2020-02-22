@@ -49,38 +49,46 @@ public class Material {
 	//necessario calcolare la BRDF o la BSSRDF
 	public boolean translucent=false;
 
+	// Nome per la scelta nella creazione dell'oggetto
+	public String name;
+
 	//materiale di default: diffusivo bianco senza 
 	//riflessione
-	public Material() {
-		diffusionColor =new Point3D(1.0f);
-		reflectionColor =new Point3D(0.0f);
-		refractionColor =new Point3D(0.0f);
-		refractionIndexRGB =new Point3D(0.0f);
-		emittedLight =new Point3D(0.0f);
+	public Material(String name) {
+		diffusionColor = new Point3D(1.0f);
+		reflectionColor = new Point3D(0.0f);
+		refractionColor = new Point3D(0.0f);
+		refractionIndexRGB = new Point3D(0.0f);
+		emittedLight = new Point3D(0.0f);
+
 	}
 	
 	//costruttore materiale 1: materiali diffusivi e riflessivi
-	public Material(Point3D diffusionColor, Point3D reflectionColor) {
+	public Material(Point3D diffusionColor, Point3D reflectionColor, String name) {
 		this.diffusionColor = diffusionColor;
 		this.reflectionColor = reflectionColor;
 		refractionColor =new Point3D(0.0f);
 		refractionIndexRGB =new Point3D(0.0f);
 		emittedLight =new Point3D(0.0f);
 		refImperfection=0;
+
+		this.name = name;
 	}
 	
 	//costruttore materiali lucidi (tramite il modello di Cook-Torrance)
-	public Material(Point3D diffusionColor, Point3D refractionIndexRGB, float slope_) {
+	public Material(Point3D diffusionColor, Point3D refractionIndexRGB, float slope_, String name) {
 		this.diffusionColor = diffusionColor;
 		slope = slope_;
 		this.refractionIndexRGB =refractionIndexRGB;
 		emittedLight =new Point3D(0.0f);
+
+		this.name = name;
 	}   
 	
 	//costruttore materiale generico
 	public Material(Point3D diffusionColor, Point3D reflectionColor, Point3D refractionColor,
 									Point3D refractionIndexRGB, Point3D absorptionCoefficient, float slope_,
-									float refImperfection_, boolean translucent_) {
+									float refImperfection_, boolean translucent_, String name) {
 
 		emittedLight =new Point3D(0.0f);
 		//normalizzazione: Kd+Kr deve essere <1
@@ -99,15 +107,19 @@ public class Material {
 		slope=slope_;
 		refImperfection=refImperfection_;
 		translucent=translucent_;
+
+		this.name = name;
 	}
 	
 	//materiali che emettono luce: Le corrisponde al colore della luce emessa
-	public Material(Point3D emittedLight) {
+	public Material(Point3D emittedLight, String name) {
 		diffusionColor =new Point3D(0.0f);
 		reflectionColor =new Point3D(0.0f);
 		refractionColor =new Point3D(0.0f);
 		refractionIndexRGB =new Point3D(0.0f);
 		this.emittedLight = emittedLight.multiplyScalar(Utilities.MATH_1_DIV_PI);
+
+		this.name = name;
 	}
     
 	//metodo che calcola il coefficente di Fresnel in base  
@@ -340,7 +352,6 @@ public class Material {
 	//come psi il raggio in ingresso e theta quello in
 	//uscita
 	Point3D BSSRDF(Point3D Fpsi, Point3D Ftheta) {
-	
 		Point3D result;
 		Point3D one=new Point3D(1.0f);
 
@@ -386,5 +397,10 @@ public class Material {
 				divideScalar(Utilities.MATH_PI);
 
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }

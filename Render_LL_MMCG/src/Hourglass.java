@@ -4,10 +4,14 @@ public class Hourglass {
   // posizione (centro)
   public Point3D p;
 
+  int matId;
+
   //costruttore
-  public Hourglass(float nrad, Point3D np) {
+  public Hourglass(float nrad, Point3D np, int matId) {
     rad=nrad;
     p=np;
+
+    this.matId = matId;
   }
 
   Point3D normal(Point3D iP) {
@@ -24,8 +28,8 @@ public class Hourglass {
     double senTheta = Math.sin(theta);
     double cosTheta = Math.cos(theta);
 
-    Point3D derPhiFormula = new Point3D(-rad*senPhi, cosPhi*cosTheta*multiplier, cosPhi*senTheta*multiplier);
-    Point3D derThetaFormula = new Point3D(0, -senPhi*senTheta*multiplier, senPhi*cosTheta*multiplier);
+    Point3D derPhiFormula = new Point3D(cosPhi*cosTheta*multiplier, cosPhi*senTheta*multiplier, -rad*senPhi);
+    Point3D derThetaFormula = new Point3D(-senPhi*senTheta*multiplier, senPhi*cosTheta*multiplier, 0);
 
     return derPhiFormula.crossProduct(derThetaFormula);
   }
