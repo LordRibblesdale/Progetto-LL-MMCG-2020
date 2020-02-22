@@ -496,8 +496,6 @@ class RenderAction implements Properties, ModelerProperties {
     //Ora viene creata l'immagine (per il modellatore viene solo mostrata, per il render invece viene salvata)
     if (modelerProperties == ENABLE_MODELER) {
       showImage();
-    } else if (modelerProperties == PREVIEW_ONLY) {
-
     } else if (modelerProperties == START_RENDERING) {
       createImage();
 

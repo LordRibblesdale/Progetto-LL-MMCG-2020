@@ -36,7 +36,6 @@ public class Triangle {
   //funzione di intersezione con un raggio: Return
   //distanza o -1.0f se non c'e' intersezione
   float intersect(Ray r) {
-
     //risolvo il sistema o+Td=a1+ beta(b1-a1) +
     //gamma(c1-a1) => riscritto come [ beta(a1-b1)+
     //gamma(a-c1)+Td1 = a-o ]  dove T,beta,gamma sono

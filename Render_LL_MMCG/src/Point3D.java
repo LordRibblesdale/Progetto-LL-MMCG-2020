@@ -124,9 +124,9 @@ public class Point3D {
 	}
 	
 	//norma euclidea
-	float normalize() {
+	double normalize() {
 		Point3D a=new Point3D(x,y,z);
-		return (float) Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
+		return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
 	}
 
 	//norma al quadrato
@@ -144,7 +144,7 @@ public class Point3D {
   //norma del vettore
   Point3D getNormalizedPoint() {
   	Point3D a=new Point3D(x,y,z);
-  	float n = a.normalize();
+  	double n = a.normalize();
   	double ax=(a.x)/n;
   	double ay=(a.y)/n;
   	double az=(a.z)/n;

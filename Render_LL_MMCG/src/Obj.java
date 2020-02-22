@@ -14,15 +14,17 @@ import java.util.ArrayList;
 //dell'oggetto: i due valori min e max delimitano il
 //volume entro cui e' contenuto l'oggetto in questione
 public class Obj {
-	Sphere s=null;
-	Triangle t=null;
+	Sphere s;
+	Triangle t;
+	Hourglass h;
+	//TODO cambiare organizzazione delle variabili
 	
 	//bounding box dell'oggetto:
 	Point3D min=new Point3D();
 	Point3D max=new Point3D();
 	    
 	//area dell'oggetto
-	float areaObj;
+	double areaObj;
 	    
 	//potenza emessa dall'oggetto: viene utilizzata 
 	//all'interno dell'algoritmo che calcola la radiosita'
@@ -34,8 +36,9 @@ public class Obj {
 
 	//costruttore per Obj sfera
 	public Obj(Sphere sp,int nmatId) {
-		s=sp;
-		t=null;
+		s = sp;
+		t = null;
+		h = null;
 		matId=nmatId;
 	       
 		//calcolo l'area dell'oggetto
@@ -45,6 +48,22 @@ public class Obj {
 		Point3D r= new Point3D(s.rad);
 		min=(s.p).subtract(r);
 		max=(s.p).add(r);
+	}
+
+	// Costruttore per Obj clessidra
+	public Obj(Hourglass h,int nmatId) {
+		s = null;
+		t = null;
+		this.h = h;
+		matId=nmatId;
+
+		//calcolo l'area dell'oggetto
+		areaObj=area();
+
+		//calcolo il bounding box dell'oggetto
+		Point3D r= new Point3D(h.rad);
+		min=(h.p).subtract(r);
+		max=(h.p).add(r);
 	}
     
 	//costruttore per Obj triangolo
@@ -72,23 +91,25 @@ public class Obj {
 	//richiamo rispettivamente i metodi di triangle o
 	//sphere
 	Point3D normal(Point3D iP){
-		if(s!=null)
+		if (s != null) {
 			return s.normal(iP);
-
-		if(t!=null)
+		} else if (t != null) {
 			return t.normal();
-		else
-			return new Point3D();
+		} else if (h != null) {
+			return h.normal(iP);
+		}
+
+		return new Point3D();
 	}
 
 	//metodo che restituisce un punto random sulla
 	//superficie dell'oggetto
 	Point3D randomPoint(float rnd1, float rnd2, float rnd3){
 		if(s!=null){
-			float cos1=(float) Math.cos(rnd1);
-			float cos2=(float) Math.cos(rnd2);
-			float sin1=(float) Math.sin(rnd1);
-			float sin2=(float) Math.sin(rnd2);
+			double cos1= Math.cos(rnd1);
+			double cos2= Math.cos(rnd2);
+			double sin1= Math.sin(rnd1);
+			double sin2= Math.sin(rnd2);
 			Point3D r=new Point3D(cos1*cos2,cos1*sin2,sin1);
 			return (s.p).add(r);
 		}
@@ -104,17 +125,33 @@ public class Obj {
 			ret=ret.add(ret3);
 
 			return ret;
+		} else if (h != null) {
+			double phi = Math.acos(Math.random());
+			double theta = Math.acos(Math.random());
+			// Distribuzione di probabilità uniforme in [0, 1]
+
+			double senPhi = Math.sin(phi);
+			double cosPhi = Math.cos(phi);
+			double senTheta = Math.sin(theta);
+			double cosTheta = Math.cos(theta);
+
+			double rad10 = h.rad/(double) 10;
+			double multiplier = (rad10 + cosPhi*(h.rad - rad10));
+
+			Point3D r = new Point3D(h.rad*cosPhi, senPhi*cosTheta*multiplier, senPhi*senTheta*multiplier);
+
+			return h.p.add(r);
 		}
-		else
-			return new Point3D();
+
+		return new Point3D();
 	}
     
 	//metodo che calcola l'area dell'oggetto
-	float area() {
-		if(s!=null) {
+	double area() {
+		if (s != null) {
 			//area sfera: 4*pigreco*r
 			return 4* Utilities.MATH_PI *s.rad;
-		}	else if(t!=null) {
+		}	else if (t != null) {
 			//prendo i vertici del triangolo
 			Point3D[] v= t.vertices;
 			//calcolo dell'area del triangolo
@@ -132,9 +169,39 @@ public class Obj {
 					cosl1_l2);
 
 			return l1_norma*sinl1_l2*l2_norma;
+		} else if (h != null) {
+			// Estimatore di Montecarlo con N campioni in [0, 1] a campionamento libero
+			int samples = 200;
+			double sum = 0;
+			// x: cos(phi); y: sen(phi)*cos(theta)*(r/10 - (1-r/10)*cos(phi)); z = sen(phi)*sen(theta)*(1-r/10)*cos(phi))
+
+			for (int i = 0; i < samples; i++) {
+				double phi = Math.acos(Math.random());
+				double theta = Math.acos(Math.random());
+				// Distribuzione di probabilità uniforme in [0, 1]
+
+				double senPhi = Math.sin(phi);
+				double cosPhi = Math.cos(phi);
+				double senTheta = Math.sin(theta);
+				double cosTheta = Math.cos(theta);
+
+				double rad10 = h.rad/(double) 10;
+				double multiplier = (rad10 + cosPhi*(h.rad - rad10));
+
+				Point3D derPhiFormula = new Point3D(-h.rad*senPhi, cosPhi*cosTheta*multiplier, cosPhi*senTheta*multiplier);
+				Point3D derThetaFormula = new Point3D(0, -senPhi*senTheta*multiplier, senPhi*cosTheta*multiplier);
+
+				double norm = derPhiFormula.crossProduct(derThetaFormula).normalize();
+
+				sum += norm;
+			}
+
+			sum /= 1 / (double) (4 * Utilities.MATH_PI * Utilities.MATH_PI);
+
+			return sum / (double) samples;
 		}
-		else
-			return 0.0f;
+
+		return 0.0f;
 	}
     
 	//controlla se il raggio passato come parametro
@@ -142,14 +209,15 @@ public class Obj {
 	double intersect(Ray raggio) {
 		//richiamo rispettivamente i metodi di triangle o
 		//sphere
-		if(s!=null){
+		if (s != null) {
 			return s.intersect(raggio);
-		}
-		else if(t!=null){
+		} else if ( t != null) {
 			return t.intersect(raggio);
+		} else if (h != null) {
+			return h.intersect(raggio);
 		}
-		else
-			return 0.0f;
+
+		return 0.0f;
 	}
     
 	//aggiorna (considerando il paramero oldMax) il valore
@@ -191,6 +259,20 @@ public class Obj {
 				if (sp.y + rad > oldMax.y) oldMax.y = sp.y + rad;
 				if (sp.z + rad > oldMax.z) oldMax.z = sp.z + rad;
 			}
+
+			if (object.h != null) {
+				//carico il centro della sfera
+				Point3D sp = object.h.p;
+				//carico il raggio della sfera
+				float rad = object.h.rad;
+
+				//viene preso in esame il bounding box
+				//della sfera quello cioe' il cubo di
+				//lato 2*rad centrato sulla sfera
+				if (sp.x + rad > oldMax.x) oldMax.x = sp.x + rad;
+				if (sp.y + rad > oldMax.y) oldMax.y = sp.y + rad;
+				if (sp.z + rad > oldMax.z) oldMax.z = sp.z + rad;
+			}
 		}
 
 		return oldMax;
@@ -223,11 +305,27 @@ public class Obj {
 			}
 			//se l'oggetto e' una sfera
 			if (object.s != null) {
-
 				//carico il centro della sfera
 				Point3D sp = object.s.p;
 				//carico il raggio della sfera
 				float rad = object.s.rad;
+
+				//viene preso in esame il bounding box
+				//della sfera quello cioe' il cubo di
+				//lato 2*rad centrato sulla sfera
+				if (sp.x - rad < oldMin.x)
+					oldMin.x = sp.x - rad;
+				if (sp.y - rad < oldMin.y)
+					oldMin.y = sp.y - rad;
+				if (sp.z - rad < oldMin.z)
+					oldMin.z = sp.z - rad;
+			}
+
+			if (object.h != null) {
+				//carico il centro della sfera
+				Point3D sp = object.h.p;
+				//carico il raggio della sfera
+				float rad = object.h.rad;
 
 				//viene preso in esame il bounding box
 				//della sfera quello cioe' il cubo di

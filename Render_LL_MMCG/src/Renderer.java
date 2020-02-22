@@ -67,7 +67,7 @@ class Renderer {
     //per ogni luce
     for (int i = 0; i < RenderAction.lights.size(); i++) {
       //carico l'area della luce in esame
-      float area = RenderAction.lights.get(i).areaObj;
+      double area = RenderAction.lights.get(i).areaObj;
 
       //per ogni s campione della luce tra i dirsamps
       //campioni totali per l'illuminazione diretta
@@ -130,7 +130,7 @@ class Renderer {
           //r.o al punto campionato
           Point3D dir = (p.subtract(newPoint));
           //salviamo la distanza tra i due punti
-          float norma = dir.normalize();
+          double norma = dir.normalize();
           dir = dir.getNormalizedPoint();
           //creazione del raggio d'ombra diretto verso
           //la luce
@@ -228,7 +228,7 @@ class Renderer {
         //r.o al punto campionato
         Point3D dir = (p.subtract(r.o));
         //salviamo la distanza tra i due punti
-        float norma = dir.normalize();
+        double norma = dir.normalize();
         dir = dir.getNormalizedPoint();
 
         //creazione del raggio d'ombra diretto verso
@@ -351,7 +351,7 @@ class Renderer {
         Obj objX = utilities.intersObj;
         utilities.intersObj = null;
         if(RenderAction.material[objX.matId].emittedLight.max() == 0) {
-          float _area = 1 / (objX).area();
+          double _area = 1 / (objX).area();
           radianceOutput
               = radianceOutput.add(((objX).P).multiplyComponents(RenderAction.material[mId].diffusionColor).multiplyScalar(_area));
         }
@@ -791,7 +791,7 @@ class Renderer {
 
       //metodo di Jacobi stocastico:
       if(RenderAction.doJacobi){
-        float areaInverse= (1.0f)/((o).areaObj);
+        double areaInverse= (1.0f)/((o).areaObj);
         Point3D L=((o).P).multiplyScalar(areaInverse);
 
         //si somma alla radianza emessa dalla patch
@@ -857,7 +857,7 @@ class Renderer {
     //Emessa per ogni patch della scena (Pe)
     for(int i=0;i<nObj;i++) {
       //viene caricata l'area dell'oggetto i-esimo
-      float area= RenderAction.globalObjects.get(i).areaObj;
+      double area= RenderAction.globalObjects.get(i).areaObj;
       //se l'area e' piu' piccola della precisione di
       //calcolo allora impostiamo l'area a 0
       if(area < Utilities.EPSILON) {
@@ -1277,7 +1277,7 @@ class Renderer {
 
     for (int i = 0; i < RenderAction.lights.size(); i++) {
       //carichiamo l'area della luce
-      float area = RenderAction.lights.get(i).areaObj;
+      double area = RenderAction.lights.get(i).areaObj;
       //carichiamo i dati relativi alla luce
       int lid = RenderAction.lights.get(i).matId;
       //calcoliamo la potenza trasportata dal singolo fotone (condivisa con gli altri nPhoton)
