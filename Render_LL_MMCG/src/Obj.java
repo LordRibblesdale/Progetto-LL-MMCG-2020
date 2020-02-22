@@ -244,4 +244,24 @@ public class Obj {
 
 		return oldMin;
 	}
+
+	void translate(Point3D direction) {
+		if (t != null) {
+			t.translate(direction);
+		} else {
+			s.translate(direction);
+		}
+	}
+
+	void rotateTriangleOnly(Point3D axis, double phi) {
+		if (t != null) {
+			t.rotate(axis, phi, true);
+		}
+	}
+
+	void rotateTriangleInSpace(Point3D axis, double phi) {
+		if (t != null) {
+			t.rotate(axis, phi, false);
+		}
+	}
 }

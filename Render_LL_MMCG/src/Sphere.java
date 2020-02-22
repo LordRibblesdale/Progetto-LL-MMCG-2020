@@ -62,9 +62,9 @@ public class Sphere {
 		// 2*t*B -> semplificato usando b/2 invece di B
 		double B=op.dotProduct(r.d);
 		double C=op.dotProduct(op)-rad*rad;
-	    //determinante equazione quadratica
+		//determinante equazione quadratica
 		double det=B*B-C;
-	    // se e' negativo non c'e' intersezione reale, 
+		// se e' negativo non c'e' intersezione reale,
 		//altrimenti assegna a det il risultato
 		if (det<0) 
 			return -1.0f; 
@@ -86,8 +86,12 @@ public class Sphere {
 
 	//funzione che calcola la normale in un punto iP della 
 	//sfera
-    Point3D normal(Point3D iP){
-        //vettore dal centro all'intersezione normalizzato
-        return (iP.subtract(p)).getNormalizedPoint();
-    }
+  Point3D normal(Point3D iP) {
+	  //vettore dal centro all'intersezione normalizzato
+    return (iP.subtract(p)).getNormalizedPoint();
+	}
+
+	void translate(Point3D direction) {
+	  p.add(direction);
+  }
 }
