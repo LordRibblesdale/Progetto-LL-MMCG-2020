@@ -66,6 +66,9 @@ class Modeler extends JDialog {
     doneButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        new RenderAction(ModelerProperties.PREVIEW_ONLY);
+
+        frame.repaint();
         dispose();
       }
     });

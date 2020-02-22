@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-class RenderAction implements Properties {
+class RenderAction implements Properties, ModelerProperties {
   // Vettore dei materiali, per i modelli predefiniti di scena
     static Material[] material = {
             //luce
@@ -93,7 +93,6 @@ class RenderAction implements Properties {
   /* Punto di messa a fuoco della camera (può essere modificato per definire la
    *  posizione della messa a fuoco
    */
-  //TODO define focal point position
   private static Point3D focusPoint = new Point3D(0.0f);
 
   //TODO add variables in UI
@@ -227,14 +226,14 @@ class RenderAction implements Properties {
    */
   static ArrayList<Sphere> additionalSpheres = new ArrayList<>();
 
-  RenderAction(boolean isModeler) {
+  RenderAction(int modelerProperties) {
     // Il valore booleano fa sapere al programma in che modo deve partire il render (se semplice o quello finale)
     renderer = new Renderer(new Utilities());
 
-    doRender(isModeler);
+    doRender(modelerProperties);
   }
 
-  private void doRender(boolean isModeler) {
+  private void doRender(int modelerProperties) {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
@@ -271,16 +270,16 @@ class RenderAction implements Properties {
      */
     resetVariables();
 
-    if (isModeler) {
+    if (modelerProperties == ENABLE_MODELER || modelerProperties == PREVIEW_ONLY) {
       // Impostazioni per un render veloce ma aggiungere altri metodi (ad esempio uno zBuffer sarebbe l'ideale)
       samps = 1;
 
       doJacobi = true;
 
       jacobiSamps = 175;
-      maxSteps = 6;
+      maxSteps = 3;
       maxErr = 0.01f;
-    } else {
+    } else if (modelerProperties == START_RENDERING) {
       // Impostazioni per il rendering effettivo
       samps = Main.editPanel.getSamps();
 
@@ -495,9 +494,11 @@ class RenderAction implements Properties {
     renderer.calculateThreadedRadiance(cam);
 
     //Ora viene creata l'immagine (per il modellatore viene solo mostrata, per il render invece viene salvata)
-    if (isModeler) {
+    if (modelerProperties == ENABLE_MODELER) {
       showImage();
-    } else {
+    } else if (modelerProperties == PREVIEW_ONLY) {
+
+    } else if (modelerProperties == START_RENDERING) {
       createImage();
 
       Main.editPanel.setUI(true);
@@ -512,7 +513,7 @@ class RenderAction implements Properties {
     frame.setMinimumSize(new Dimension(width, height));
     frame.setLocationRelativeTo(Main.editPanel);
     frame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-    JPanel panel = new JPanel(null) {
+    JPanel imagePanel = new JPanel(null) {
       @Override
       public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -546,7 +547,7 @@ class RenderAction implements Properties {
         new Thread(new Runnable() {
           @Override
           public void run() {
-            new RenderAction(false);
+            new RenderAction(START_RENDERING);
           }
         }).start();
       }
@@ -555,7 +556,7 @@ class RenderAction implements Properties {
     bottomPanel.add(insert);
     bottomPanel.add(button);
 
-    frame.add(panel);
+    frame.add(imagePanel);
     frame.add(bottomPanel, BorderLayout.PAGE_END);
 
     frame.setVisible(true);

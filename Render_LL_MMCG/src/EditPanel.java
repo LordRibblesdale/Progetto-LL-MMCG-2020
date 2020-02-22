@@ -48,7 +48,7 @@ class EditPanel extends JPanel {
         new Thread(new Runnable() {
           @Override
           public void run() {
-            new RenderAction(true);
+            new RenderAction(ModelerProperties.ENABLE_MODELER);
           }
         }).start();
       }

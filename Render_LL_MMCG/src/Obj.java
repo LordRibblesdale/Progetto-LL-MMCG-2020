@@ -110,12 +110,11 @@ public class Obj {
 	}
     
 	//metodo che calcola l'area dell'oggetto
-	float area(){
-		if(s!=null){
+	float area() {
+		if(s!=null) {
 			//area sfera: 4*pigreco*r
 			return 4* Utilities.MATH_PI *s.rad;
-		}
-		else if(t!=null){
+		}	else if(t!=null) {
 			//prendo i vertici del triangolo
 			Point3D[] v= t.vertices;
 			//calcolo dell'area del triangolo
@@ -263,5 +262,10 @@ public class Obj {
 		if (t != null) {
 			t.rotate(axis, phi, false);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return (s != null ? "Sfera, centro: " + s.p.toString() : "Triangolo, punti: (" + t.vertices[0] + ") (" + t.vertices[1] + ") (" + t.vertices[2] + ")");
 	}
 }
