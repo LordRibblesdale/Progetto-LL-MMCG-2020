@@ -12,6 +12,8 @@ public class Triangle {
 
   int matId;
 
+  boolean isBorderMeshScene = false;
+
   //costruttore:i parametri in input sono i tre vertici
   //del triangolo
   public Triangle(Point3D v0, Point3D v1, Point3D v2, int matId) {
@@ -123,15 +125,15 @@ public class Triangle {
     Point3D center = new Point3D();
 
     for (Point3D v : vertices) {
-      center.add(v);
+      center.sum(v);
     }
 
     return center.multiplyScalar(1/ (double) 3);
   }
 
   void translate(Point3D direction) {
-    for (Point3D v : vertices) {
-      v.add(direction);
+    for (Point3D vertex : vertices) {
+      vertex.sum(direction);
     }
   }
 
@@ -158,5 +160,10 @@ public class Triangle {
 
       vertices[i] = p1.add(p2).add(p3).add(center);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "Triangolo, punti: (" + vertices[0] + ") (" + vertices[1] + ") (" + vertices[2] + ")";
   }
 }

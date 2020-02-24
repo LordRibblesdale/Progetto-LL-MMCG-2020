@@ -93,7 +93,8 @@ public class Sphere {
     return (iP.subtract(p)).getNormalizedPoint();
   }
 
-  void translate(Point3D direction) {
-    p.add(direction);
+  @Override
+  public String toString() {
+    return "Sfera, centro: " + p.toString();
   }
 }

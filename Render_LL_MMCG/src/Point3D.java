@@ -58,17 +58,26 @@ public class Point3D {
 	public double getZ() {
 		return z;
 	}
+
+	// Sum applica una traslazione al punto
+	void sum(Point3D point3D) {
+		x += point3D.x;
+		y += point3D.y;
+		z += point3D.z;
+	}
 	
 	//addizione componente componente tra 2 vettori in R3
+	// Non modifica il punto
 	public Point3D add(Point3D b) {
-		Point3D a=new Point3D(x,y,z);
-		a.x=a.x+b.x;
-		a.y=a.y+b.y;
-		a.z=a.z+b.z;
+		Point3D a = new Point3D(x,y,z);
+		a.x += b.x;
+		a.y += b.y;
+		a.z += b.z;
 		return a;
 	}
 	
 	//sottrazione componente componente tra 2 vettori in R3
+	// Non modifica il punto
 	public Point3D subtract(Point3D b)	{
 		Point3D a=new Point3D(x,y,z);
 		a.x=a.x-b.x;

@@ -19,7 +19,7 @@ class Camera {
 	Point3D U,V,W;
 
 	//apertura diaframma della camera
-	float aperture = 0;
+	float aperture = 5;
 	double fuoco = 0;
 	
 	//costruttore della fotocamera in cui il 

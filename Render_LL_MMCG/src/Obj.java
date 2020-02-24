@@ -321,16 +321,6 @@ public class Obj {
 		return oldMin;
 	}
 
-	void translate(Point3D direction) {
-		if (t != null) {
-			t.translate(direction);
-
-			calculateBoundingBox();
-		} else {
-			s.translate(direction);
-		}
-	}
-
 	void rotateTriangleOnly(Point3D axis, double phi) {
 		if (t != null) {
 			t.rotate(axis, phi, true);
@@ -362,15 +352,17 @@ public class Obj {
 
 	void setNewPosition(Point3D point) {
 		if (s != null) {
-			s.translate(point.subtract(s.p));
+			s.p.sum(point);
 		} else if (t != null) {
-			t.translate(point.subtract(t.calculateCenter()));
+			t.translate(point);
+
+			calculateBoundingBox();
 		}
 	}
 
 	@Override
 	public String toString() {
-		return (s != null ? "Sfera, centro: " + s.p.toString() : "Triangolo, punti: (" + t.vertices[0] + ") (" + t.vertices[1] + ") (" + t.vertices[2] + ")");
+		return (s != null ? s.toString() : t.toString());
 	}
 
 	public Point3D getPosition() {

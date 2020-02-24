@@ -88,7 +88,7 @@ public class Mesh {
     //(a cui manca appunto la faccia frontale per 
     //permettere di vedere all'interno) e 2 per la luce 
     //parallela al soffitto (perche' frontL=false)
-    ArrayList<Triangle> Troom=new ArrayList<Triangle>();
+    ArrayList<Triangle> tRoom = new ArrayList<>();
     //array per gli oggetti che compongono la stanza
     objects = new ArrayList<>(12);
     
@@ -122,7 +122,7 @@ public class Mesh {
             }
         }
       */
-  }
+    }
   
     //anche in questo caso copio i valori in delle 
     //variabili che non si aggiornano
@@ -150,9 +150,9 @@ public class Mesh {
       //si creano e si aggiungono i triangoli per la 
       //luce
       Triangle Tr0=new Triangle(Lv4tr,Lv5tr,Lv6tr, RenderAction.matIdL);
-      Troom.add(0,Tr0);
+      tRoom.add(0,Tr0);
       Triangle Tr1=new Triangle(Lv1tr,Lv6tr,Lv5tr, RenderAction.matIdL);
-      Troom.add(1,Tr1);
+      tRoom.add(1,Tr1);
     }
   
     //dilatazione delle pareti
@@ -165,31 +165,32 @@ public class Mesh {
     //pareti
     //faccia laterale sinistra
     Triangle Tr2=new Triangle(v[0],v[1],v[2], matIdRoom[0]);
-    Troom.add(2,Tr2);
+    tRoom.add(2,Tr2);
     Triangle Tr3=new Triangle(v[5],v[2],v[1], matIdRoom[0]);
-    Troom.add(3,Tr3);
+    tRoom.add(3,Tr3);
     //faccia inferiore
     Triangle Tr4=new Triangle(v[0],v[2],v[3], matIdRoom[1]);
-    Troom.add(4,Tr4);
+    tRoom.add(4,Tr4);
     Triangle Tr5=new Triangle(v[7],v[3],v[2], matIdRoom[1]);
-    Troom.add(5,Tr5);
+    tRoom.add(5,Tr5);
     //faccia posteriore
     Triangle Tr6=new Triangle(v[0],v[3],v[1], matIdRoom[2]);
-    Troom.add(6,Tr6);
+    tRoom.add(6,Tr6);
     Triangle Tr7=new Triangle(v[6],v[1],v[3], matIdRoom[2]);
-    Troom.add(7,Tr7);
+    tRoom.add(7,Tr7);
     //faccia laterale destra
     Triangle Tr8=new Triangle(v[4],v[6],v[7], matIdRoom[3]);
-    Troom.add(8,Tr8);
+    tRoom.add(8,Tr8);
     Triangle Tr9=new Triangle(v[7],v[6],v[3], matIdRoom[3]);
-    Troom.add(9,Tr9);
+    tRoom.add(9,Tr9);
     //faccia superiore
     Triangle Tr10=new Triangle(v[4],v[5],v[6], matIdRoom[4]);
-    Troom.add(10,Tr10);
+    tRoom.add(10,Tr10);
     Triangle Tr11=new Triangle(v[1],v[6],v[5], matIdRoom[4]);
-    Troom.add(11,Tr11);
+    tRoom.add(11,Tr11);
   
-    for (Triangle t : Troom) {
+    for (Triangle t : tRoom) {
+      t.isBorderMeshScene = true;
       objects.add(new Obj(t));
     }
   }

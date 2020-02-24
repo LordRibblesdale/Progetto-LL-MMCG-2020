@@ -47,7 +47,7 @@ public class Main implements StandardMaterial {
     mainFrame.add(editPanel);
     mainFrame.add(label, BorderLayout.PAGE_END);
 
-    mainFrame.setMinimumSize(new Dimension(650, 400));
+    mainFrame.pack();
     mainFrame.setResizable(false);
     mainFrame.setLocationRelativeTo(null);
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

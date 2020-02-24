@@ -81,11 +81,16 @@ class RenderAction implements Properties, ModelerProperties {
   //TODO add variables in UI
   static int width = 1080;	//larghezza dell'immagine
   static int height = 720;	//altezza dell'immagine
+
+  //costruttore della fotocamera
+  //imposto la fotocamera che guarda il centro
+  //dell'oggetto ed e' posizionata davanti
+  private static Camera cam;
+  private static Point3D focalPoint;
   private static float filmDistance = 700;	// Lunghezza focale
   /* Per una resa visiva del motore, la lunghezza focale impostata a 700 fa si che l'apertura
    *  del diaframma sia molto bassa per avere un piano di messa a fuoco più esteso
    */
-  private static float aperture = 5;  // Apertura diaframma della fotocamera
 
   /* Densità triangoli nella stanza
    * Variabile che gestisce il grado di tassellazione della scena suddividendo le mesh con
@@ -109,7 +114,8 @@ class RenderAction implements Properties, ModelerProperties {
   static ArrayList<Sphere> spheres;
 
   // Variabile globale in cui verranno salvati gli oggetti della scena
-  static ArrayList<Obj> globalObjects;
+  static ArrayList<Obj> objects;        // Come vettore di supporto
+  static ArrayList<Obj> globalObjects;  // Come variabile globale
 
   // Variabile globale per le luci della scena
   static ArrayList<Obj> lights;
@@ -222,10 +228,8 @@ class RenderAction implements Properties, ModelerProperties {
     Main.label.setText("Creazione immagine in corso");
     Main.editPanel.setUI(false);
 
-    // Inizializzo l'array nei quali conservare gli oggetti di scena e l'array di indici
-    /* L'array di indici può essere cancellato in favore di una riscrittura di Sphere nel quale al posto
-     *  dell'indice è presente il materiale, che verrà richiamato dai metodi vari
-     */
+    // Inizializzo l'array nei quali conservare gli oggetti di scena
+    //TODO rendere passaggio valido per oggetti generici
     int mIS = setMatIdSphere();
     spheres = new ArrayList<>();
 
@@ -315,113 +319,7 @@ class RenderAction implements Properties, ModelerProperties {
         break;
     }
     //TODO le opzioni predefinite possono essere modificate per raggiungere un livello di creazione dinamico
-
-    //dovendo disegnare 3 sfere e la stanza definisco un
-    //array di 2 Mesh: nella prima delle due mesh (per
-    //meshes[0]) aggiungiamo le 3
-    //sfere richiamando il metodo caricaSphere
-
-    //array di mesh della scena
-    ArrayList<Mesh> meshes = new ArrayList<>(2);
-    meshes.add(new Mesh(spheres));
-
-    //inizializzo dei fittizi massimo e minimo, che mi
-    //serviranno per definire i valori di max e min
-    Point3D oldMin=new Point3D(Float.POSITIVE_INFINITY);
-    Point3D oldMax=new Point3D(Float.NEGATIVE_INFINITY);
-
-    //trovo le dimensioni della scena (tralasciando la
-    //stanza in cui gli oggetti sono contenuti)
-    for (Mesh tmpObjects : meshes) {
-      max = Obj.getBoundMax(tmpObjects.objects, oldMax);
-      min = Obj.getBoundMin(tmpObjects.objects, oldMin);
-    }
-
-    //definisco e calcolo il punto in cui guarda
-    //l'osservatore: il centro della scena
-    Point3D center = (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
-
-    //parametri della fotocamera con sistema di riferimento centrato nella scena:
-    //absolutePos e' vero se stiamo guardando proprio al centro della scena
-    boolean absolutePos = false;
-
-    //TODO check variable usage
-    if(!absolutePos) {
-      lookAt = lookAt.add(center);
-    }
-
-    //l'osservatore si trova nel punto camPosition
-    Point3D camPosition = center.add(eye);
-
-    // Inizializzo il punto di messa a fuoco
-    Point3D focalPoint = center.add(focusPoint);
-
-    //costruttore della fotocamera
-    //imposto la fotocamera che guarda il centro
-    //dell'oggetto ed e' posizionata davanti
-    Camera cam = new Camera(camPosition, lookAt, new Point3D(0.00015f,1.00021f,0.0f), width, height, filmDistance);
-
-    //Abbiamo ora a disposizione tutti gli elementi
-    //necessari per costruire la stanza
-    //Creo la stanza in cui mettere l'oggetto (per
-    //visualizzare l'illuminazione globale)
-    //La carico come ultima mesh
-    meshes.add(new Mesh(max,min));
-
-    //nel nostro caso scenePrecision=0, quindi non si entra
-    //mai in questo ciclo
-    for(int q = 0; q < scenePrecision; q++) {
-      meshes.get(meshes.size()-1).splitMeshes();
-    }
-
-    //A questo punto consideriamo l'intero array di mesh,
-    //ora composto da oggetti+stanza e aggiorno i valori
-    //della grandezza della stanza, usando di nuovo i
-    //metodi getBoundMin e getBoundMax.
-    oldMax=max;
-    oldMin=min;
-    max=Obj.getBoundMax(meshes.get(meshes.size()-1).objects, oldMax);
-    min=Obj.getBoundMin(meshes.get(meshes.size()-1).objects, oldMin);
-
-    //vettore che conterra' gli oggetti della scena
-    ArrayList<Obj> objects = new ArrayList<>();
-    //vettore che contiene solo le luci della scena
-    lights = new ArrayList<>();
-
-    for (Mesh tmpMesh : meshes) {
-      //e carico tutto nella lista globale degli oggetti
-      for (int j = 0; j < tmpMesh.objects.size(); j++) {
-        objects.add(tmpMesh.objects.get(j));
-        //se l'oggetto e' una luce la carico dentro
-        //l'array delle luci
-        if (material[tmpMesh.objects.get(j).matId].emittedLight.max() > 0) {
-          lights.add(tmpMesh.objects.get(j));
-        }
-      }
-    }
-
-    // Aggiungo un oggetto (triangolo) predefinito nella scena, uno specchio
-    objects.add(new Obj(new Triangle(new Point3D(-5.5, 0, 1.5), new Point3D(-6.2, 0, 2), new Point3D(-5.75, 1, 1.75), 7)));
-;
-    //liv e' il livello di profondita' all'interno
-    //dell'albero
-    depthLevel = 0;
-
-    //creo il Bounding Box
-    //Bound e' il primo elemento dell'albero che contiene
-    //tutti gli oggetti della scena
-    bound = new Box(min, max, 0);
-    bound.setObjects(objects);
-
-    //crea il tree: si richiama il metodo setPartition()
-    //per dividere gli oggetti del box padre nei box figli
-    bound = Box.setPartition(bound);
-
-    //salviamo gli oggetti della scena nella variabile
-    //globale globalObjects in modo da poterli aggiornare
-    //in JacobiStoc()
-    globalObjects = new ArrayList<>();
-    globalObjects.addAll(objects);
+    initialiseMeshes(modelerProperties);
 
     //richiamo la funzione per il calcolo della radiosita'
     //della scena attraverso il metodo di Jacobi
@@ -462,11 +360,6 @@ class RenderAction implements Properties, ModelerProperties {
       image[i] = new Point3D();
     }
 
-    cam.aperture = aperture;
-
-    // Fattore di scala per la messa a fuoco in base al punto focale e alla camera tramite trasformazione prospettica
-    cam.fuoco = (focalPoint.z-cam.eye.z)/(cam.W.z*(-cam.d));
-
     /* Avvio il render effettivo (automaticamente effettuerà un render completo o meno a seconda dei calcoli
      * effettuati nelle righe precedenti
      */
@@ -480,6 +373,153 @@ class RenderAction implements Properties, ModelerProperties {
 
       Main.editPanel.setUI(true);
     }
+  }
+
+  private ArrayList<Sphere> getSpheresFromGlobalObjects() {
+    ArrayList<Sphere> spheres = new ArrayList<>();
+
+    for (Obj o : globalObjects) {
+      if (o.s != null) {
+        spheres.add(o.s);
+      }
+    }
+
+    return spheres;
+  }
+
+  private Obj[] getEditableObjects() {
+    ArrayList<Obj> objs = new ArrayList<>();
+
+    for (Obj o : globalObjects) {
+      if (o.s != null) {
+        objs.add(o);
+      } else if (o.t != null) {
+        if (!o.t.isBorderMeshScene) {
+          objs.add(o);
+        }
+      }
+    }
+
+    return objs.toArray(new Obj[0]);
+  }
+
+  private void initialiseMeshes(int modelPreview) {
+    //dovendo disegnare 3 sfere e la stanza definisco un
+    //array di 2 Mesh: nella prima delle due mesh (per
+    //meshes[0]) aggiungiamo le 3
+    //sfere richiamando il metodo caricaSphere
+
+    //array di mesh della scena
+    ArrayList<Mesh> meshes = new ArrayList<>(2);
+    meshes.add(new Mesh(modelPreview == PREVIEW_ONLY ? getSpheresFromGlobalObjects() : spheres));
+
+    //inizializzo dei fittizi massimo e minimo, che mi
+    //serviranno per definire i valori di max e min
+    Point3D oldMin = new Point3D(Float.POSITIVE_INFINITY);
+    Point3D oldMax = new Point3D(Float.NEGATIVE_INFINITY);
+
+    //trovo le dimensioni della scena (tralasciando la
+    //stanza in cui gli oggetti sono contenuti)
+    for (Mesh tmpObjects : meshes) {
+      max = Obj.getBoundMax(tmpObjects.objects, oldMax);
+      min = Obj.getBoundMin(tmpObjects.objects, oldMin);
+    }
+
+    //definisco e calcolo il punto in cui guarda
+    //l'osservatore: il centro della scena
+    Point3D center = (max.add(min)).multiplyScalar(0.5f).subtract(new Point3D(0, 0.8, 0));
+
+    //parametri della fotocamera con sistema di riferimento centrato nella scena:
+    //absolutePos e' vero se stiamo guardando proprio al centro della scena
+    boolean absolutePos = false;
+
+    if (modelPreview == ENABLE_MODELER || modelPreview == PREVIEW_ONLY) {
+      lookAt = new Point3D();
+    }
+
+    //TODO check variable usage
+    if(!absolutePos) {
+      lookAt = lookAt.add(center);
+    }
+
+    //l'osservatore si trova nel punto camPosition
+    Point3D camPosition = center.add(eye);
+
+    // Inizializzo il punto di messa a fuoco
+    focalPoint = center.add(focusPoint);
+
+    cam = new Camera(camPosition, lookAt, new Point3D(0.00015f,1.00021f,0.0f), width, height, filmDistance);
+
+    //Abbiamo ora a disposizione tutti gli elementi
+    //necessari per costruire la stanza
+    //Creo la stanza in cui mettere l'oggetto (per
+    //visualizzare l'illuminazione globale)
+    //La carico come ultima mesh
+    meshes.add(new Mesh(max, min));
+
+    //nel nostro caso scenePrecision=0, quindi non si entra
+    //mai in questo ciclo
+    for(int q = 0; q < scenePrecision; q++) {
+      meshes.get(meshes.size()-1).splitMeshes();
+    }
+
+    //A questo punto consideriamo l'intero array di mesh,
+    //ora composto da oggetti+stanza e aggiorno i valori
+    //della grandezza della stanza, usando di nuovo i
+    //metodi getBoundMin e getBoundMax.
+    oldMax = max;
+    oldMin = min;
+    max = Obj.getBoundMax(meshes.get(meshes.size()-1).objects, oldMax);
+    min = Obj.getBoundMin(meshes.get(meshes.size()-1).objects, oldMin);
+
+    //vettore che conterra' gli oggetti della scena
+    objects = new ArrayList<>();
+    //vettore che contiene solo le luci della scena
+    lights = new ArrayList<>();
+
+    for (Mesh tmpMesh : meshes) {
+      //e carico tutto nella lista globale degli oggetti
+      for (int j = 0; j < tmpMesh.objects.size(); j++) {
+        objects.add(tmpMesh.objects.get(j));
+        //se l'oggetto e' una luce la carico dentro
+        //l'array delle luci
+        if (material[tmpMesh.objects.get(j).matId].emittedLight.max() > 0) {
+          lights.add(tmpMesh.objects.get(j));
+        }
+      }
+    }
+
+    // Aggiungo un oggetto (triangolo) predefinito nella scena, uno specchio
+    if (modelPreview == ENABLE_MODELER) {
+      objects.add(new Obj(new Triangle(new Point3D(-5.5, 0, 1.5), new Point3D(-6.2, 0, 2), new Point3D(-5.75, 1, 1.75), 7)));
+    } else {
+      for (Obj o : globalObjects) {
+        if (o.t != null && !o.t.isBorderMeshScene) {
+          objects.add(o);
+        }
+      }
+    }
+
+    //depthLevel e' il livello di profondita' all'interno dell'albero
+    depthLevel = 0;
+
+    //creo il Bounding Box
+    //Bound e' il primo elemento dell'albero che contiene tutti gli oggetti della scena
+    bound = new Box(min, max, 0);
+    bound.setObjects(objects);
+
+    //crea il tree: si richiama il metodo setPartition()
+    //per dividere gli oggetti del box padre nei box figli
+    bound = Box.setPartition(bound);
+
+    // Fattore di scala per la messa a fuoco in base al punto focale e alla camera tramite trasformazione prospettica
+    cam.fuoco = (focalPoint.z-cam.eye.z)/(cam.W.z*(-cam.d));
+
+    //salviamo gli oggetti della scena nella variabile
+    //globale globalObjects in modo da poterli aggiornare
+    //in jacobiStoc()
+    globalObjects = new ArrayList<>();
+    globalObjects.addAll(objects);
   }
 
   void showImage() {
@@ -512,7 +552,13 @@ class RenderAction implements Properties, ModelerProperties {
         dialog.setMinimumSize(new Dimension(400, 500));
         dialog.setLocationRelativeTo(frame);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        JList<Obj> list = new JList<>(RenderAction.globalObjects.toArray(new Obj[0]));
+        JList<Obj> list = new JList<>(getEditableObjects());
+        list.setModel(new DefaultListModel<>());
+
+        Obj[] o = getEditableObjects();
+        for (int i = 0; i < o.length; i++) {
+          ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
+        }
 
         list.addMouseListener(new MouseAdapter() {
           @Override
@@ -523,25 +569,46 @@ class RenderAction implements Properties, ModelerProperties {
               JDialog properties = new JDialog(dialog, list.getSelectedValue().toString(), true);
               properties.setLayout(new GridLayout(0, 1));
               JPanel panel = new JPanel();
-              JSlider xSlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().x);
+              JSlider xSlider = new JSlider(-100, 100);
               xSlider.createStandardLabels(1);
-              JSlider ySlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().y);
+              JSlider ySlider = new JSlider(-100, 100);
               ySlider.createStandardLabels(1);
-              JSlider zSlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().z);
-              zSlider.createStandardLabels(1);
+              JSlider zSlider = new JSlider(-100, 100);
+              JSlider rotatePhiSlider = new JSlider(0, 100, 0);
+              JCheckBox[] checkBoxes = new JCheckBox[3];
               JButton abortButton = new JButton("Annulla");
               JButton doneButton = new JButton("Accetta modifiche");
 
               doneButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  RenderAction.globalObjects.get(list.getSelectedIndex()).setNewPosition(new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10));
+                  Point3D direction = new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10);
 
+                  for (Obj globalObject : globalObjects) {
+                    if (globalObject.equals(list.getSelectedValue())) {
+                      globalObject.setNewPosition(direction);
 
+                      if (globalObject.t != null) {
+                        Point3D axis = (new Point3D(checkBoxes[0].isSelected() ? 1 : 0, checkBoxes[1].isSelected() ? 1 : 0, checkBoxes[2].isSelected() ? 1 : 0)).getNormalizedPoint();
+                        globalObject.rotateTriangleOnly(axis, (rotatePhiSlider.getValue()*(2*Utilities.MATH_PI))/ (double) 100);
+                      }
+                    }
+                  }
 
-                  new RenderAction(ModelerProperties.PREVIEW_ONLY);
+                  initialiseMeshes(PREVIEW_ONLY);
+                  renderer.jacobiStoc(objects.size());
+                  renderer.calculateThreadedRadiance(cam);
+
                   frame.repaint();
                   properties.dispose();
+
+                  ((DefaultListModel<Obj>) list.getModel()).removeAllElements();
+
+                  Obj[] o = getEditableObjects();
+
+                  for (int i = 0; i < o.length; i++) {
+                    ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
+                  }
                 }
               });
 
@@ -559,12 +626,29 @@ class RenderAction implements Properties, ModelerProperties {
               panel.add(zSlider);
               properties.add(panel);
 
+              if (list.getSelectedValue().t != null) {
+                panel = new JPanel();
+
+                for (int i = 0; i < checkBoxes.length; i++) {
+                  String axis = i == 0 ? "X" : i == 1 ? "Y" : "Z";
+                  checkBoxes[i] = new JCheckBox("Asse " + axis);
+                  panel.add(checkBoxes[i]);
+                }
+                properties.add(panel);
+
+                panel = new JPanel();
+                panel.add(new JLabel("Rotazione sulla latitudine"));
+                panel.add(rotatePhiSlider);
+
+                properties.add(panel);
+              }
+
               panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
               panel.add(abortButton);
               panel.add(doneButton);
               properties.add(panel);
 
-              properties.setMinimumSize(new Dimension(300, 300));
+              properties.setMinimumSize(new Dimension(300, 400));
               properties.setLocationRelativeTo(dialog);
               properties.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
               properties.setVisible(true);
@@ -625,25 +709,6 @@ class RenderAction implements Properties, ModelerProperties {
         }
       }
     });
-  }
-
-  //metodo che imposta, a seconda della scelta
-  //effettuata dall'utente, il materiale
-  //appropriato alle prime tre sfere
-  private int setMatIdSphere() {
-    int translucentJadeIndex=12;
-    int diffusiveJadeIndex=15;
-    int glassIndex=7;
-    int one=1;
-
-    if(translucentJade)
-      return translucentJadeIndex;
-    else if(diffusiveJade)
-      return diffusiveJadeIndex;
-    else if(glass)
-      return glassIndex;
-
-    return one;
   }
 
   private void createImage() {
@@ -744,5 +809,24 @@ class RenderAction implements Properties, ModelerProperties {
     frontL=false;
     loadedBoxes = 0;
     sphericalSearch = 1;
+  }
+
+  //metodo che imposta, a seconda della scelta
+  //effettuata dall'utente, il materiale
+  //appropriato alle prime tre sfere
+  private int setMatIdSphere() {
+    int translucentJadeIndex=12;
+    int diffusiveJadeIndex=15;
+    int glassIndex=7;
+    int one=1;
+
+    if(translucentJade)
+      return translucentJadeIndex;
+    else if(diffusiveJade)
+      return diffusiveJadeIndex;
+    else if(glass)
+      return glassIndex;
+
+    return one;
   }
 }
