@@ -372,4 +372,14 @@ public class Obj {
 	public String toString() {
 		return (s != null ? "Sfera, centro: " + s.p.toString() : "Triangolo, punti: (" + t.vertices[0] + ") (" + t.vertices[1] + ") (" + t.vertices[2] + ")");
 	}
+
+	public Point3D getPosition() {
+		if (t != null) {
+			return t.calculateCenter();
+		} else if (s != null) {
+			return s.p;
+		}
+
+		return null;
+	}
 }

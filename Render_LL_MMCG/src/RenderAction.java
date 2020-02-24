@@ -152,7 +152,7 @@ class RenderAction implements Properties, ModelerProperties {
   static int nPhoton;                 // Numero di fotoni da inviare nello spazio
   static int causticPhoton;           // Numero di fotoni specifici per le caustiche da inviare agli oggetti trasparenti o traslucidi
   static int aoCausticPhoton;         // Numero di fotoni per le caustiche per l'illuminazione indiretta
-  static int projectionResolution;    // Risoluzione della proiezione della mappa fotonica
+  static int projectionResolution;    // Risoluzione della proiezione della mappa fotonica su un emisfero
   static float scaleCausticPower = 1; // Scalamento di potenza del fotone
   //TODO add this variable in PhotonPanel
 
@@ -427,7 +427,7 @@ class RenderAction implements Properties, ModelerProperties {
     //della scena attraverso il metodo di Jacobi
     //stocastico
 
-    if(doJacobi) {
+    if(doJacobi || Main.editPanel.finalGatheringPanel.getJacobiCheck()) {
       // Avvio il calcolo dell'energia uscente dal metodo di Jacobi stocastico
       renderer.jacobiStoc(objects.size());
     }
@@ -521,13 +521,13 @@ class RenderAction implements Properties, ModelerProperties {
 
             if (e.getClickCount() == 2) {
               JDialog properties = new JDialog(dialog, list.getSelectedValue().toString(), true);
-              dialog.setLayout(new GridLayout(0, 1));
+              properties.setLayout(new GridLayout(0, 1));
               JPanel panel = new JPanel();
-              JSlider xSlider = new JSlider(-100, 100);
+              JSlider xSlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().x);
               xSlider.createStandardLabels(1);
-              JSlider ySlider = new JSlider(-100, 100);
+              JSlider ySlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().y);
               ySlider.createStandardLabels(1);
-              JSlider zSlider = new JSlider(-100, 100);
+              JSlider zSlider = new JSlider(-100, 100, (int) RenderAction.globalObjects.get(list.getSelectedIndex()).getPosition().z);
               zSlider.createStandardLabels(1);
               JButton abortButton = new JButton("Annulla");
               JButton doneButton = new JButton("Accetta modifiche");
@@ -536,6 +536,8 @@ class RenderAction implements Properties, ModelerProperties {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                   RenderAction.globalObjects.get(list.getSelectedIndex()).setNewPosition(new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10));
+
+
 
                   new RenderAction(ModelerProperties.PREVIEW_ONLY);
                   frame.repaint();

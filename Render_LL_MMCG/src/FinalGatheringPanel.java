@@ -13,12 +13,16 @@ public class FinalGatheringPanel extends JPanel {
   //campioni scelti per le riflessioni e le rifrazioni
   private JSpinner refSamples;
 
+  private JCheckBox jacobiCheck;
+
   FinalGatheringPanel() {
     super(new GridLayout(0, 1));
 
     aoSamples = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
     dirSamples = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
     refSamples = new JSpinner(new SpinnerNumberModel(75, 1, 1000, 1));
+    jacobiCheck = new JCheckBox("Sperimentale: aggiunta di Jacobi al processo");
+    jacobiCheck.setSelected(false);
 
     JPanel panel = new JPanel();
     panel.add(new JLabel("Campioni per pixel, illuminazione diretta"));
@@ -34,6 +38,8 @@ public class FinalGatheringPanel extends JPanel {
     panel.add(new JLabel("Campioni per pixel, riflessioni e rifrazioni"));
     panel.add(refSamples);
     add(panel);
+
+    add(jacobiCheck);
   }
 
   int getAOSamples() {
@@ -46,6 +52,10 @@ public class FinalGatheringPanel extends JPanel {
 
   int getRefSamples() {
     return (Integer) refSamples.getValue();
+  }
+
+  boolean getJacobiCheck() {
+    return jacobiCheck.isSelected();
   }
 
   @Override

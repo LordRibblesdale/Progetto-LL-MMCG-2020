@@ -362,11 +362,14 @@ class Renderer {
     return radianceOutput;
   }
 
-  /* Metodo per il Final Gathering che viene chiamato per raccogliere l'energia secondo un sistema di
-   *  illuminazione diretta (illuminazione in relazione alla visibilità diretta con la luce
-   *  e di illuminazione indiretta (illuminazione riflessa dalle superfici nello spazio), con l'aggiunta
-   *  dell'energia emessa dalla superficie di partenza
-   */
+  //metodo per il Final Gathering, che si serve di una sola
+  //iterazione del raytracing stocastico, nella quale si
+  //raccolgono (gathering) le informazioni ottenute dalla
+  //soluzione precalcolata di radiosita', attraverso il
+  //metodo jacobi stocastico)
+  //il valore restituito tiene conto dell'illuminazione
+  //generata dall'oggetto, del contributo dell'illuminazione
+  //diretta e di quello dell'illuminazione indiretta
   private Point3D finalGathering(Ray viewRay, int x, int y, Obj o) {
     // Variabile per la radianza
     Point3D radianceOutput = new Point3D();
@@ -843,8 +846,6 @@ class Renderer {
           Pr[i]=new Point3D();
     }
 
-    //inizializzo la stima dell'errore raggiunto dal
-    //processo
     //inizializzo l'array objX in cui inizialmente gli
     //oggetti sono nulli, ma poi vengono settati con
     //l'oggetto intersecato dal raggio che parte da una
@@ -923,8 +924,7 @@ class Renderer {
       //totale di ciascuna componente RGB che chiamiamo
       //qui (x,y,z)
 
-      Point3D samps = new Point3D(RenderAction.jacobiSamps*Prtot.x,
-              RenderAction.jacobiSamps*Prtot.y, RenderAction.jacobiSamps*Prtot.z);
+      Point3D samps = new Point3D(RenderAction.jacobiSamps*Prtot.x, RenderAction.jacobiSamps*Prtot.y, RenderAction.jacobiSamps*Prtot.z);
       samps=samps.divideScalar(Prt);
       //parametro che ci permette di contare, quindi
       //utilizzare tutti i campioni che erano stati
@@ -943,7 +943,7 @@ class Renderer {
 
         q=q.add(pi);
 
-        //componente rossa:
+        //componente R:
 
         //calcoliamo il numero di campioni utilizzati
         //per la patch i in base alla sua potenza
@@ -998,21 +998,18 @@ class Renderer {
           u=v.crossProduct(w);
 
           //ora che abbiamo la base ortonormale,
-          //possiamo calcolare la direzione dir
+          //possiamo calcolare la direzione dir.
           //salvo in delle cariabili i calori di seno
           //e coseno necessari per il calcolo di dir
           float cosRndPhi=(float) Math.cos(rndPhi);
           float sinRndTeta=(float) Math.sin(rndTeta);
           float sinRndPhi=(float) Math.sin(rndPhi);
           float cosRndTeta=(float) Math.cos(rndTeta);
-          //dir=(u*(cosRndPhi*sinRndTeta))+(v*
-          //*(sinRndPhi*sinRndTeta))+(width*(cosRndTeta))
           //poi normalizzato
-          dir=u.multiplyScalar(cosRndPhi*sinRndTeta).
-                  add(v.multiplyScalar(
-                          sinRndPhi*sinRndTeta)).add(
-                  w.multiplyScalar(cosRndTeta));
-          dir=dir.getNormalizedPoint();
+          dir = u.multiplyScalar(cosRndPhi*sinRndTeta)
+              .add(v.multiplyScalar(sinRndPhi*sinRndTeta))
+              .add(w.multiplyScalar(cosRndTeta));
+          dir = dir.getNormalizedPoint();
 
           //creo il raggio per scegliere la patch j
           //con probabilita' uguale al fattore di forma
@@ -1026,7 +1023,7 @@ class Renderer {
           //su cui sara' rilasciata la potenza totale
           //della componente rossa
 
-          if(utilities.intersect(ffRay, objX[i])){
+          if(utilities.intersect(ffRay, objX[i])) {
             //resetto inters uguale a inf in modo da
             //avere il giusto valore di partenza la
             //prossima volta che si utilizzera' il
@@ -1040,26 +1037,21 @@ class Renderer {
             //il giusto valore di partenza la prossima
             //volta che si utilizzera' il
             //metodo intersect()
-            utilities.intersObj =null;
+            utilities.intersObj = null;
             //salviamo la potenza rilasciata all'interno
             //della struttura dell'oggetto: essa si
             //sommera' con la potenza residua parziale
             //che l'oggetto ha raggiunto finora; solo
             //alla fine del processo infatti avremo
             //la potenza residua totale della patch
-            objX[i].P.x = objX[i].P.x + RenderAction.material[objX[i].matId].diffusionColor.x*(Prtot.x)/(samps.x);
+            objX[i].P.x += RenderAction.material[objX[i].matId].diffusionColor.x*(Prtot.x)/(samps.x);
           }
         }//fine for per la compoente rossa
         //aggiorniamo il numero di campioni usati per
         //questa componente
-        NprevX=NprevX+NX;
+        NprevX += NX;
 
-        //per le componenti verde e blu si utilizzeranno
-        //gli stessi procedimenti della componente rossa,
-        //quindi fare riferimento ai commenti sovrastanti
-        //per maggiori dettagli
-
-        //componente verde:
+        //componente G:
 
         //campioni per la patch i
         NY= (int) Math.round((q.y*samps.y)+NprevY*(-1));
@@ -1109,12 +1101,12 @@ class Renderer {
             utilities.inters = Utilities.inf;
             objX[i]= utilities.intersObj;
             utilities.intersObj =null;
-            objX[i].P.y=objX[i].P.y + RenderAction.material[objX[i].matId].diffusionColor.y*(Prtot.y)/(samps.y);
+            objX[i].P.y += RenderAction.material[objX[i].matId].diffusionColor.y*(Prtot.y)/(samps.y);
           }
         }//fine for per la compoente verde
-        NprevY=NprevY+NY;
+        NprevY += NY;
 
-        //componente blu:
+        //componente B:
 
         //campioni per la patch i
         NZ= (int) Math.round((q.z*samps.z)+NprevZ*(-1));
@@ -1168,11 +1160,11 @@ class Renderer {
             utilities.inters = Utilities.inf;
             objX[i]= utilities.intersObj;
             utilities.intersObj = null;
-            objX[i].P.z = objX[i].P.z + RenderAction.material[objX[i].matId].diffusionColor.z*(Prtot.z)/(samps.z);
+            objX[i].P.z += RenderAction.material[objX[i].matId].diffusionColor.z*(Prtot.z)/(samps.z);
           }
         }//fine for per la componente blu
 
-        NprevZ=NprevZ+NZ;
+        NprevZ += NZ;
       }//fine for per le patch della scena SAS1
 
       //una volta terminata la fase di shooting si
@@ -1186,7 +1178,7 @@ class Renderer {
       for(int i=0; i < nObj; i++) {
         //aggiornamento delle Potenze (vengono aggiunte le potenze residue totali immagazzinate dalle patch durante
         //il processo)
-        P[i]=P[i].add(RenderAction.globalObjects.get(i).P);
+        P[i] = P[i].add(RenderAction.globalObjects.get(i).P);
         Pr[i].copy(RenderAction.globalObjects.get(i).P);          //aggiornamento delle potenze residue totali
         RenderAction.err += Math.pow(Pr[i].average(),2);          //calcolo dell'errore
         Prtot = Prtot.add(Pr[i]);                                 //calcolo dell'energia residua totale
