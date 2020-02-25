@@ -367,9 +367,10 @@ class RenderAction implements Properties, ModelerProperties {
 
     //Ora viene creata l'immagine (per il modellatore viene solo mostrata, per il render invece viene salvata)
     if (modelerProperties == ENABLE_MODELER) {
-      showImage();
+      showImage(true);
     } else if (modelerProperties == START_RENDERING) {
       createImage();
+      showImage(false);
 
       Main.editPanel.setUI(true);
     }
@@ -522,7 +523,7 @@ class RenderAction implements Properties, ModelerProperties {
     globalObjects.addAll(objects);
   }
 
-  void showImage() {
+  void showImage(boolean isModeler) {
     // Interfaccia per mostrare l'immagine effettiva su schermo,
     boolean[] isRunning = {false};
 
@@ -544,156 +545,158 @@ class RenderAction implements Properties, ModelerProperties {
       }
     };
 
-    JButton changePositionButton = new JButton("Cambia posizioni");
-    changePositionButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        JDialog dialog = new JDialog(frame, "Cambia posizione", true);
-        dialog.setMinimumSize(new Dimension(400, 500));
-        dialog.setLocationRelativeTo(frame);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        JList<Obj> list = new JList<>(getEditableObjects());
-        list.setModel(new DefaultListModel<>());
+    if (isModeler) {
+      JButton changePositionButton = new JButton("Cambia posizioni");
+      changePositionButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          JDialog dialog = new JDialog(frame, "Cambia posizione", true);
+          dialog.setMinimumSize(new Dimension(400, 500));
+          dialog.setLocationRelativeTo(frame);
+          dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+          JList<Obj> list = new JList<>(getEditableObjects());
+          list.setModel(new DefaultListModel<>());
 
-        Obj[] o = getEditableObjects();
-        for (int i = 0; i < o.length; i++) {
-          ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
-        }
+          Obj[] o = getEditableObjects();
+          for (int i = 0; i < o.length; i++) {
+            ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
+          }
 
-        list.addMouseListener(new MouseAdapter() {
-          @Override
-          public void mouseClicked(MouseEvent e) {
-            super.mouseClicked(e);
+          list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+              super.mouseClicked(e);
 
-            if (e.getClickCount() == 2) {
-              JDialog properties = new JDialog(dialog, list.getSelectedValue().toString(), true);
-              properties.setLayout(new GridLayout(0, 1));
-              JPanel panel = new JPanel();
-              JSlider xSlider = new JSlider(-100, 100);
-              xSlider.createStandardLabels(1);
-              JSlider ySlider = new JSlider(-100, 100);
-              ySlider.createStandardLabels(1);
-              JSlider zSlider = new JSlider(-100, 100);
-              JSlider rotatePhiSlider = new JSlider(0, 100, 0);
-              JCheckBox[] checkBoxes = new JCheckBox[3];
-              JButton abortButton = new JButton("Annulla");
-              JButton doneButton = new JButton("Accetta modifiche");
+              if (e.getClickCount() == 2) {
+                JDialog properties = new JDialog(dialog, list.getSelectedValue().toString(), true);
+                properties.setLayout(new GridLayout(0, 1));
+                JPanel panel = new JPanel();
+                JSlider xSlider = new JSlider(-100, 100);
+                xSlider.createStandardLabels(1);
+                JSlider ySlider = new JSlider(-100, 100);
+                ySlider.createStandardLabels(1);
+                JSlider zSlider = new JSlider(-100, 100);
+                JSlider rotatePhiSlider = new JSlider(0, 100, 0);
+                JCheckBox[] checkBoxes = new JCheckBox[3];
+                JButton abortButton = new JButton("Annulla");
+                JButton doneButton = new JButton("Accetta modifiche");
 
-              doneButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                  Point3D direction = new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10);
+                doneButton.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    Point3D direction = new Point3D(xSlider.getValue()/ (double) 10, ySlider.getValue()/ (double) 10, zSlider.getValue()/ (double) 10);
 
-                  for (Obj globalObject : globalObjects) {
-                    if (globalObject.equals(list.getSelectedValue())) {
-                      globalObject.setNewPosition(direction);
+                    for (Obj globalObject : globalObjects) {
+                      if (globalObject.equals(list.getSelectedValue())) {
+                        globalObject.setNewPosition(direction);
 
-                      if (globalObject.t != null) {
-                        Point3D axis = (new Point3D(checkBoxes[0].isSelected() ? 1 : 0, checkBoxes[1].isSelected() ? 1 : 0, checkBoxes[2].isSelected() ? 1 : 0)).getNormalizedPoint();
-                        globalObject.rotateTriangleOnly(axis, (rotatePhiSlider.getValue()*(2*Utilities.MATH_PI))/ (double) 100);
+                        if (globalObject.t != null) {
+                          Point3D axis = (new Point3D(checkBoxes[0].isSelected() ? 1 : 0, checkBoxes[1].isSelected() ? 1 : 0, checkBoxes[2].isSelected() ? 1 : 0)).getNormalizedPoint();
+                          globalObject.rotateTriangleOnly(axis, (rotatePhiSlider.getValue()*(2*Utilities.MATH_PI))/ (double) 100);
+                        }
                       }
                     }
+
+                    initialiseMeshes(PREVIEW_ONLY);
+                    renderer.jacobiStoc(objects.size());
+                    renderer.calculateThreadedRadiance(cam);
+
+                    frame.repaint();
+                    properties.dispose();
+
+                    ((DefaultListModel<Obj>) list.getModel()).removeAllElements();
+
+                    Obj[] o = getEditableObjects();
+
+                    for (int i = 0; i < o.length; i++) {
+                      ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
+                    }
                   }
+                });
 
-                  initialiseMeshes(PREVIEW_ONLY);
-                  renderer.jacobiStoc(objects.size());
-                  renderer.calculateThreadedRadiance(cam);
-
-                  frame.repaint();
-                  properties.dispose();
-
-                  ((DefaultListModel<Obj>) list.getModel()).removeAllElements();
-
-                  Obj[] o = getEditableObjects();
-
-                  for (int i = 0; i < o.length; i++) {
-                    ((DefaultListModel<Obj>) list.getModel()).add(i, o[i]);
-                  }
-                }
-              });
-
-              panel.add(new JLabel("Posizione su X: "));
-              panel.add(xSlider);
-              properties.add(panel);
-
-              panel = new JPanel();
-              panel.add(new JLabel("Posizione su Y"));
-              panel.add(ySlider);
-              properties.add(panel);
-
-              panel = new JPanel();
-              panel.add(new JLabel("Posizione su Z"));
-              panel.add(zSlider);
-              properties.add(panel);
-
-              if (list.getSelectedValue().t != null) {
-                panel = new JPanel();
-
-                for (int i = 0; i < checkBoxes.length; i++) {
-                  String axis = i == 0 ? "X" : i == 1 ? "Y" : "Z";
-                  checkBoxes[i] = new JCheckBox("Asse " + axis);
-                  panel.add(checkBoxes[i]);
-                }
+                panel.add(new JLabel("Posizione su X: "));
+                panel.add(xSlider);
                 properties.add(panel);
 
                 panel = new JPanel();
-                panel.add(new JLabel("Rotazione sulla latitudine"));
-                panel.add(rotatePhiSlider);
-
+                panel.add(new JLabel("Posizione su Y"));
+                panel.add(ySlider);
                 properties.add(panel);
+
+                panel = new JPanel();
+                panel.add(new JLabel("Posizione su Z"));
+                panel.add(zSlider);
+                properties.add(panel);
+
+                if (list.getSelectedValue().t != null) {
+                  panel = new JPanel();
+
+                  for (int i = 0; i < checkBoxes.length; i++) {
+                    String axis = i == 0 ? "X" : i == 1 ? "Y" : "Z";
+                    checkBoxes[i] = new JCheckBox("Asse " + axis);
+                    panel.add(checkBoxes[i]);
+                  }
+                  properties.add(panel);
+
+                  panel = new JPanel();
+                  panel.add(new JLabel("Rotazione sulla latitudine"));
+                  panel.add(rotatePhiSlider);
+
+                  properties.add(panel);
+                }
+
+                panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                panel.add(abortButton);
+                panel.add(doneButton);
+                properties.add(panel);
+
+                properties.setMinimumSize(new Dimension(300, 400));
+                properties.setLocationRelativeTo(dialog);
+                properties.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                properties.setVisible(true);
               }
-
-              panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-              panel.add(abortButton);
-              panel.add(doneButton);
-              properties.add(panel);
-
-              properties.setMinimumSize(new Dimension(300, 400));
-              properties.setLocationRelativeTo(dialog);
-              properties.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-              properties.setVisible(true);
             }
-          }
-        });
+          });
 
-        dialog.add(list);
+          dialog.add(list);
 
-        dialog.setVisible(true);
-      }
-    });
+          dialog.setVisible(true);
+        }
+      });
 
-    JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    JButton insert = new JButton("Aggiungi sfere");
-    insert.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        new Modeler(frame);
-      }
-    });
+      JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+      JButton insert = new JButton("Aggiungi sfere");
+      insert.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          new Modeler(frame);
+        }
+      });
 
-    JButton button = new JButton("Avvia render");
-    button.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        isRunning[0] = true;
+      JButton button = new JButton("Avvia render");
+      button.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          isRunning[0] = true;
 
-        frame.dispose();
+          frame.dispose();
 
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            new RenderAction(START_RENDERING);
-          }
-        }).start();
-      }
-    });
+          new Thread(new Runnable() {
+            @Override
+            public void run() {
+              new RenderAction(START_RENDERING);
+            }
+          }).start();
+        }
+      });
 
-    bottomPanel.add(changePositionButton);
-    bottomPanel.add(insert);
-    bottomPanel.add(button);
+      bottomPanel.add(changePositionButton);
+      bottomPanel.add(insert);
+      bottomPanel.add(button);
+      frame.add(bottomPanel, BorderLayout.PAGE_END);
+    }
 
     frame.add(imagePanel);
-    frame.add(bottomPanel, BorderLayout.PAGE_END);
 
     frame.setVisible(true);
 
