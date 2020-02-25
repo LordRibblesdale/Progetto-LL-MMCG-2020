@@ -43,6 +43,14 @@ public class Main implements StandardMaterial {
     //inizialmente imposto la finestra con le varie
     //scelte per l'utente
 
+    try {
+      // Set System L&F
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    }
+    catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      // handle exception
+    }
+
     editPanel = new EditPanel();
     mainFrame.add(editPanel);
     mainFrame.add(label, BorderLayout.PAGE_END);
