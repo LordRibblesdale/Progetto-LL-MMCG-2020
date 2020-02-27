@@ -16,6 +16,16 @@ public class JacobiStocClass {
   //si usa la variabile globale GlobalObject in modo da
   //conservare i valori aggiornati delle potenze dei vari
   //oggetti
+
+  /* Ci sono diversi problemi presenti nel metodo:
+   *  -> la scelta del numero di sample da inviare per
+   *      Jacobi stocastico (da variare in base alla potenza
+   *      della scena)
+   *  -> la suddivisione in varie patches della scena
+   *      (al momento formata da sole semplici patches, rendendo
+   *       l'intero render troppo approssimativo)
+   */
+
   public static void jacobiStoc(int nObj) {
     Utilities utilities = new Utilities();
 
