@@ -1,7 +1,3 @@
-import javax.swing.*;
-
-import java.awt.*;
-
 //questo codice calcola la radiosita' di una scena in
 //base al metodo iterativo di Jacobi stocastico.
 //Indicazioni per l'utente:
@@ -25,44 +21,10 @@ import java.awt.*;
 //comunque apportare le volute modifiche sui 
 //materiali, sulla posizione delle sfere, etc.
 
-public class Main implements StandardMaterial {
-  static JFrame mainFrame;
-	static final JLabel label = new JLabel();
-	static EditPanel editPanel;
+import ui.InterfaceInitialiser;
 
-  //la classe main costruisce una stanza rettangolare con
-	//dentro 3 sfere e opportune luci, e un osservatore che
-	//guarda in una direzione appropriata: il generico raggio
-	//di visuale attraversa un appropriato pixel del
-	//viewplane. Su quel pixel vengono calcolati, mediante
-	//metodi di radiosita' stocastica, colore e luminosita'
-	//di cio' che l'osservatore vede.
-
-  Main() {
-    mainFrame = new JFrame("Renderer");
-    //inizialmente imposto la finestra con le varie
-    //scelte per l'utente
-
-    try {
-      // Set System L&F
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    }
-    catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-      // handle exception
-    }
-
-    editPanel = new EditPanel();
-    mainFrame.add(editPanel);
-    mainFrame.add(label, BorderLayout.PAGE_END);
-
-    mainFrame.pack();
-    mainFrame.setResizable(false);
-    mainFrame.setLocationRelativeTo(null);
-    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    mainFrame.setVisible(true);
-  }
-
+public class Main {
   public static void main(String[] args) {
-    new Main();
+    new InterfaceInitialiser();
   }
 }
