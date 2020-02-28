@@ -7,6 +7,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/* Classe di inizializzazione della UI.
+ * Ci sono diversi problemi durante l'utilizzo dei pannelli,
+ *  i quali, con un certo numero di utilizzi, rendono il
+ *  programma instabile.
+ *
+ */
+
 public class EditPanel extends JPanel {
   private JButton renderButton;
 
