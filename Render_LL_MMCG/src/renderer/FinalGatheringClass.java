@@ -9,14 +9,18 @@ import static renderer.EmittedObjRadianceClass.emittedObjRadiance;
 import static renderer.FinalIndirectClass.finalIndirect;
 
 public class FinalGatheringClass {
-  //metodo per il Final Gathering, che si serve di una sola
-  //iterazione del raytracing stocastico, nella quale si
-  //raccolgono (gathering) le informazioni ottenute dalla
-  //soluzione precalcolata di radiosita', attraverso il
-  //metodo jacobi stocastico)
-  //il valore restituito tiene conto dell'illuminazione
-  //generata dall'oggetto, del contributo dell'illuminazione
-  //diretta e di quello dell'illuminazione indiretta
+  // metodo per il Final Gathering, che si serve di una sola
+  // iterazione del raytracing stocastico, nella quale si
+  // raccolgono (gathering) le informazioni ottenute dalla
+  // soluzione precalcolata di radiosita', che viene considerata
+  // come se fosse la luce emessa da un emettitore diffusivo al punto osservato,
+  // tipo Warn, e quindi dà una illuminazione proporzionale al coseno dell'angolo
+  // di deviazione della normale a quel punto rispetto alla direzione dell'osservatore.
+  // Viene poi emesso da tale punto un certo numero di raggi e si sommano i contributi
+  // che questi raggi vedono colpendo il resto della scena.
+  // Questo aggiunge alla soluzione diffusiva della radiosità
+  // precalcolata un effetto di illuminazione riflessa
+  // Possiamo calcolare questi contributi come illuminazione diretta e indiretta
 
   static Point3D finalGathering(Ray viewRay, int x, int y, Obj o) {
     // Variabile per la radianza
