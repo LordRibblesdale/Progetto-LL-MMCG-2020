@@ -8,6 +8,7 @@ import renderer.Renderer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Hashtable;
 
 import static primitive.ModelerProperties.PREVIEW_ONLY;
 import static primitive.ModelerProperties.START_RENDERING;
@@ -140,6 +141,16 @@ public class Preview {
 
                   panel = new JPanel();
                   panel.add(new JLabel("Rotazione sulla latitudine"));
+
+                  Hashtable<Integer, JLabel> table = new Hashtable<>();
+                  table.put(0, new JLabel("0"));
+                  table.put(25, new JLabel("PI/2"));
+                  table.put(50, new JLabel("PI"));
+                  table.put(75, new JLabel("3PI/2"));
+                  table.put(100, new JLabel("2PI"));
+                  rotatePhiSlider.setLabelTable(table);
+                  rotatePhiSlider.setPaintLabels(true);
+
                   panel.add(rotatePhiSlider);
 
                   properties.add(panel);

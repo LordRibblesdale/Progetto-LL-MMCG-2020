@@ -8,6 +8,13 @@ import renderer.Utilities;
 //La classe ha la funzione che calcola l'intersezione 
 //del triangolo con un raggio, e la funzione che 
 //restituisce la normale al triangolo
+
+/* Un problema presente è l'aggiunta di colori sui
+ *  punti del triangolo (oppure associati alla patch o
+ *  mesh della scena) per permettere l'interpolazione di
+ *  Gouraud (per Jacobi stocastico)
+ */
+
 public class Triangle {
   //array dei vertici
   public Point3D[] vertices;
