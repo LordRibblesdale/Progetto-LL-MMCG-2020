@@ -144,10 +144,10 @@ public class Preview {
 
                   Hashtable<Integer, JLabel> table = new Hashtable<>();
                   table.put(0, new JLabel("0"));
-                  table.put(25, new JLabel("PI/2"));
-                  table.put(50, new JLabel("PI"));
-                  table.put(75, new JLabel("3PI/2"));
-                  table.put(100, new JLabel("2PI"));
+                  table.put(25, new JLabel("\u03C0/2"));
+                  table.put(50, new JLabel("\u03C0"));
+                  table.put(75, new JLabel("3\u03C0/2"));
+                  table.put(100, new JLabel("2\u03C0"));
                   rotatePhiSlider.setLabelTable(table);
                   rotatePhiSlider.setPaintLabels(true);
 

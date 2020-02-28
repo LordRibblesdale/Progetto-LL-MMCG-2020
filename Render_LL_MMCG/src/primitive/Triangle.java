@@ -15,6 +15,17 @@ import renderer.Utilities;
  *  Gouraud (per Jacobi stocastico)
  */
 
+/* Come in altre classi, qui si accede al materiale
+ *  dell'oggetto tramite un indice che si interfaccia
+ *  alla classe statica RenderAction. Sarebbe necessario
+ *  associare a ogni oggetto creato il suo materiale,
+ *  senza doversi ricollegare a una classe statica.
+ * Il secondo rilevante problema è la necessità di
+ *  aggiungere una mesh dinamica per gli oggetti,
+ *  cosicchè sia più efficiente la traslazione e la
+ *  rotazione per oggetti generici.
+ */
+
 public class Triangle {
   //array dei vertici
   public Point3D[] vertices;
