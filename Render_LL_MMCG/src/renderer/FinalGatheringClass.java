@@ -17,6 +17,15 @@ public class FinalGatheringClass {
   //il valore restituito tiene conto dell'illuminazione
   //generata dall'oggetto, del contributo dell'illuminazione
   //diretta e di quello dell'illuminazione indiretta
+
+  /* Il programma ha un problema durante il calcolo della
+   *  illuminazione indiretta: essendo assente durante il
+   *  processo il calcolo della radiosità (attivabile dalla
+   *  spunta sperimentale), il calcolo effettivo del
+   *  contributo indiretto sarà nullo (nessun calcolo della
+   *  potenza))
+   */
+
   static Point3D finalGathering(Ray viewRay, int x, int y, Obj o) {
     // Variabile per la radianza
     Point3D radianceOutput = new Point3D();

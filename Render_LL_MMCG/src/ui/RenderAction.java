@@ -409,7 +409,7 @@ public class RenderAction implements Properties, ModelerProperties {
       showImage(true);
     } else if (modelerProperties == START_RENDERING) {
       createImage();
-      showImage(false);
+      //showImage(false);
 
       InterfaceInitialiser.editPanel.setUI(true);
     }
